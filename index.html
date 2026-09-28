@@ -191,6 +191,16 @@ table.grid-t td small{display:block;color:var(--muted);font-size:11px;line-heigh
 .chiplist{display:flex;flex-wrap:wrap;gap:4px}
 .chiplist span{background:var(--surface2);border-radius:6px;padding:1px 7px;font-size:12.5px;white-space:nowrap}
 .chiplist span.hot{background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--ink)}
+.sortbar{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-bottom:8px;font-size:13px}
+.sortbar .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.sortbar select{min-height:28px;padding:2px 8px;font-size:13px}
+.sortbar .hint{color:var(--faint);font-size:12px;margin-left:auto}
+.schip{display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);color:var(--ink);border-radius:99px;padding:2px 4px 2px 4px;font-weight:600}
+.schip b{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:11px}
+.schip button{border:0;background:none;cursor:pointer;color:var(--accent);font-size:12px;padding:1px 4px;border-radius:4px;font-weight:600}
+.schip button:hover{background:var(--surface)}
+sup.slv{font-size:9px;color:var(--accent);margin-left:2px}
+@media (max-width:760px){.sortbar .hint{display:none}}
 /* misc */
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .muted{color:var(--muted)}
@@ -596,21 +606,56 @@ let _tt; function toast(msg, ms=3200){ let t=$('#toast'); if(!t){ t=document.cre
 
 /* ---------- tabela com ordenação e paginação ---------- */
 class DataTable {
-  constructor(el, cols, rows, opt={}){ this.el=typeof el==='string'?document.getElementById(el):el; this.cols=cols; this.rows=rows; this.opt=opt; this.sort=opt.sort||null; this.page=opt.page||100; this.shown=this.page; this.render(); }
-  sorted(){ if(!this.sort) return this.rows; const c=this.cols.find(c=>c.k===this.sort.k); if(!c) return this.rows; const f=c.sv||(r=>r[c.k]); const d=this.sort.dir==='asc'?1:-1; return [...this.rows].sort((a,b)=>{ const x=f(a), y=f(b); if(x==null||x!==x) return 1; if(y==null||y!==y) return -1; return (typeof x==='string'? x.localeCompare(y,'pt') : x-y)*d; }); }
+  constructor(el, cols, rows, opt={}){ this.el=typeof el==='string'?document.getElementById(el):el; this.cols=cols; this.rows=rows; this.opt=opt; this.sorts = opt.sorts ? [...opt.sorts] : opt.sort ? [opt.sort] : []; this.page=opt.page||100; this.shown=this.page; this.render(); }
+  get sort(){ return this.sorts[0]||null; }
+  sortVal(c){ if(c.sv) return c.sv; return r=>{ let v=r[c.k]; if(v!==undefined && (typeof v!=='object' || v===null)) return v; if(c.x){ v=c.x(r); } else if(c.f){ v=stripTags(c.f(r)); } if(typeof v==='string'){ let t=v.trim().split(/[\s\/(]/)[0].replace(/[º°ª%+]/g,'').replace(/\.$/,'').replace('−','-'); const tm=t.match(/^(\d+):(\d+(?:\.\d+)?)$/); if(tm) return +tm[1]*60 + +tm[2]; t=t.replace(',','.'); if(/^-?\d+(\.\d+)?$/.test(t)) return parseFloat(t); } return v; }; }
+  sorted(){
+    if(!this.sorts.length) return this.rows;
+    const lv=this.sorts.map(s=>{ const c=this.cols.find(c=>c.k===s.k); return c? {f:this.sortVal(c), d:s.dir==='asc'?1:-1} : null; }).filter(Boolean);
+    const empty=v=> v==null || v!==v || v==='' || v==='—';
+    return [...this.rows].sort((a,b)=>{ for(const {f,d} of lv){ const x=f(a), y=f(b); const ex=empty(x), ey=empty(y); if(ex&&ey) continue; if(ex) return 1; if(ey) return -1; const r=(typeof x==='string'||typeof y==='string')? String(x).localeCompare(String(y),'pt',{numeric:true}) : x-y; if(r) return r*d; } return 0; });
+  }
+  defDir(c){ return c.dir0||(c.num?'desc':'asc'); }
+  setSort(k, add){
+    const c=this.cols.find(c=>c.k===k); if(!c||c.nosort) return;
+    const i=this.sorts.findIndex(s=>s.k===k);
+    if(add){ if(i>=0) this.sorts[i].dir=this.sorts[i].dir==='asc'?'desc':'asc'; else this.sorts.push({k,dir:this.defDir(c)}); }
+    else { if(i===0 && this.sorts.length===1) this.sorts[0].dir=this.sorts[0].dir==='asc'?'desc':'asc'; else this.sorts=[{k,dir: i>=0? this.sorts[i].dir : this.defDir(c)}]; }
+    this.render(); this.opt.onSort&&this.opt.onSort(this.sorts);
+  }
+  sortBar(){
+    if(this.opt.nosortbar || this.rows.length<3) return '';
+    const sc=this.cols.filter(c=>!c.nosort);
+    const lab=k=>{ const c=this.cols.find(c=>c.k===k); return c? c.l : k; };
+    const chips=this.sorts.map((s,i)=>`<span class="schip"><b>${i+1}</b>${esc(lab(s.k))}<button type="button" data-sd="${i}" title="Inverter sentido">${s.dir==='asc'?'▲ cresc.':'▼ decresc.'}</button>${i>0?`<button type="button" data-su="${i}" title="Subir prioridade">↑</button>`:''}<button type="button" data-sx="${i}" title="Remover critério" aria-label="Remover critério">×</button></span>`).join('<span class="muted small">depois</span>');
+    const opts=sc.filter(c=>!this.sorts.some(s=>s.k===c.k)).map(c=>`<option value="${esc(c.k)}">${esc(c.l)}</option>`).join('');
+    return `<div class="sortbar"><span class="lbl">Ordenar por</span>${chips||'<span class="muted small">ordem original</span>'}${opts?`<select data-sadd aria-label="Acrescentar critério de ordenação"><option value="">${this.sorts.length?'+ depois por…':'+ escolher critério…'}</option>${opts}</select>`:''}${this.sorts.length?'<button type="button" class="btn ghost small" data-sclr>Limpar</button>':''}<span class="hint">Clique num cabeçalho para ordenar; Shift+clique acrescenta um critério.</span></div>`;
+  }
   render(){
-    const rows=this.sorted(), vis=rows.slice(0,this.shown);
-    const th=this.cols.map(c=>`<th class="${c.num?'num ':''}${c.nosort?'':'sortable'}" data-k="${c.k}" ${this.sort&&this.sort.k===c.k?`data-dir="${this.sort.dir}"`:''} ${c.title?`title="${esc(c.title)}"`:''}>${esc(c.l)}</th>`).join('');
+    const rows=this.sorted(), vis=rows.slice(0,this.shown), multi=this.sorts.length>1;
+    const th=this.cols.map(c=>{ const i=this.sorts.findIndex(s=>s.k===c.k); return `<th class="${c.num?'num ':''}${c.nosort?'':'sortable'}" data-k="${c.k}" ${i>=0?`data-dir="${this.sorts[i].dir}"`:''} ${c.title?`title="${esc(c.title)}"`:''}>${esc(c.l)}${i>=0&&multi?`<sup class="slv">${i+1}</sup>`:''}</th>`; }).join('');
     const body = vis.length ? vis.map((r,ix)=>`<tr data-i="${ix}">${this.cols.map(c=>`<td class="${c.num?'num ':''}${c.cls||''}">${c.f? c.f(r,ix) : esc(r[c.k]??'—')}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${this.cols.length}" class="empty">${esc(this.opt.empty||'Sem resultados para os filtros escolhidos.')}</td></tr>`;
     const more = rows.length>this.shown ? `<div class="more">A mostrar ${fN(vis.length)} de ${fN(rows.length)} <button class="btn" data-more>Mostrar mais ${fN(Math.min(this.page, rows.length-this.shown))}</button><button class="btn ghost" data-all>Mostrar todos</button></div>` : (rows.length>20?`<div class="more">${fN(rows.length)} linhas</div>`:'');
-    this.el.innerHTML = `<div class="tbl-wrap ${this.opt.scroll?'scroll':''}"><table class="t"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>${more}`;
+    this.el.innerHTML = `${this.sortBar()}<div class="tbl-wrap ${this.opt.scroll?'scroll':''}"><table class="t"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>${more}`;
     this._vis = vis;
-    $$('th.sortable', this.el).forEach(h=>h.addEventListener('click',()=>{ const k=h.dataset.k; const c=this.cols.find(c=>c.k===k); if(this.sort&&this.sort.k===k) this.sort.dir=this.sort.dir==='asc'?'desc':'asc'; else this.sort={k,dir:c.dir0||(c.num?'desc':'asc')}; this.render(); this.opt.onSort&&this.opt.onSort(this.sort); }));
+    $$('th.sortable', this.el).forEach(h=>h.addEventListener('click',e=>this.setSort(h.dataset.k, e.shiftKey||e.metaKey||e.ctrlKey)));
+    const sb=$('.sortbar',this.el);
+    if(sb){
+      sb.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+        if(b.dataset.sd!=null){ const s=this.sorts[+b.dataset.sd]; s.dir=s.dir==='asc'?'desc':'asc'; }
+        else if(b.dataset.sx!=null){ this.sorts.splice(+b.dataset.sx,1); }
+        else if(b.dataset.su!=null){ const i=+b.dataset.su; [this.sorts[i-1],this.sorts[i]]=[this.sorts[i],this.sorts[i-1]]; }
+        else if(b.hasAttribute('data-sclr')){ this.sorts=[]; }
+        else return;
+        this.render(); });
+      const ad=$('[data-sadd]',sb); if(ad) ad.onchange=()=>{ const k=ad.value; if(!k) return; const c=this.cols.find(c=>c.k===k); this.sorts.push({k,dir:this.defDir(c)}); this.render(); };
+    }
     const m=$('[data-more]',this.el); if(m) m.onclick=()=>{ this.shown+=this.page; this.render(); };
     const a=$('[data-all]',this.el); if(a) a.onclick=()=>{ this.shown=Infinity; this.render(); };
     this.el.querySelector('tbody').addEventListener('click', e=>{ const b=e.target.closest('[data-sw]'); if(b){ go('n'+b.dataset.sw); } });
   }
-  exportRows(){ const rows=this.sorted(); return {head:this.cols.filter(c=>!c.noexp).map(c=>c.l), rows: rows.map((r,ix)=>this.cols.filter(c=>!c.noexp).map(c=> c.x? c.x(r,ix) : (c.f? stripTags(c.f(r,ix)) : (r[c.k]??'')))), align:this.cols.filter(c=>!c.noexp).map(c=>c.num?'r':'l')}; }
+  sortDesc(){ if(!this.sorts.length) return ''; return 'Ordenado por '+this.sorts.map(s=>{ const c=this.cols.find(c=>c.k===s.k); return (c?c.l:s.k)+' ('+(s.dir==='asc'?'crescente':'decrescente')+')'; }).join(', depois ')+'.'; }
+  exportRows(){ const rows=this.sorted(); return {head:this.cols.filter(c=>!c.noexp).map(c=>c.l), rows: rows.map((r,ix)=>this.cols.filter(c=>!c.noexp).map(c=> c.x? c.x(r,ix) : (c.f? stripTags(c.f(r,ix)) : (r[c.k]??'')))), align:this.cols.filter(c=>!c.noexp).map(c=>c.num?'r':'l'), note:this.sortDesc()}; }
 }
 function stripTags(s){ const d=document.createElement('div'); d.innerHTML=String(s); return d.textContent; }
 const swLink = (id, label) => `<button class="lnk" data-sw="${id}">${esc(label ?? niceName(S.sw[id].name))}</button>`;
@@ -2051,6 +2096,7 @@ async function buildPDF(m, stamp){
         columnStyles:Object.fromEntries((b.align||[]).map((a,k)=>[k,{halign:a==='r'?'right':'left'}])),
       });
       y=doc.lastAutoTable.finalY+5;
+      if(b.note && !m.decl){ doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(110,120,135); doc.text(b.note, M, y-1.5); doc.setTextColor(20,27,43); y+=3; }
     } else if(b.t==='chart'){
       const img=await chartPNG(b.spec, 1500, 620, 'jpeg'); const h=CW*img.h/img.w * (m.orientation==='l'?0.62:1), w=h*img.w/img.h;
       need(h+9); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(20,27,43); if(b.title) doc.text(b.title, M, y+3);
@@ -2106,7 +2152,7 @@ async function buildDOCX(m, stamp){
     else if(b.t==='h') body.push(wPara([wRun(b.text,{b:1,color:'042C53',sz:26})],{before:240,after:100,keep:1,border:'BA7517'}));
     else if(b.t==='p') body.push(wPara([wRun(b.text,{sz:m.decl?22:19})],{jc:b.justify?'both':'left',after:m.decl?160:100,before:b.space?240:0,line:m.decl?340:276}));
     else if(b.t==='kpis') body.push(wTable(b.items.map(i=>i[0]), [b.items.map(i=>i[1]+(i[2]?' — '+i[2]:''))], null, cwTw, 18));
-    else if(b.t==='table') body.push(wTable(b.head, b.rows, b.align, cwTw, b.small?(b.head.length>11?13:15):17));
+    else if(b.t==='table'){ body.push(wTable(b.head, b.rows, b.align, cwTw, b.small?(b.head.length>11?13:15):17)); if(b.note && !m.decl) body.push(wPara([wRun(b.note,{i:1,sz:15,color:'6E7887'})],{after:160})); }
     else if(b.t==='chart'){
       const img=await chartPNG(b.spec,1500,620); const id='rId'+(rid++), name='media/grafico'+pic+'.png';
       imgs.push([name, img.url.split(',')[1]]); rels.push(`<Relationship Id="${id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="${name}"/>`);
