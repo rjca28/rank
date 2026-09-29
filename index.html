@@ -522,7 +522,7 @@ function chartCfg(spec){
     const type = spec.type || 'line';
     const datasets = spec.series.map(s => {
       const c = col(th, s.color);
-      const base = {label:s.label, data:s.data, borderColor:c, backgroundColor: type==='bar' ? c : (s.fill? alpha(c,.12) : c), spanGaps: s.spanGaps ?? true, hidden:s.hidden};
+      const base = {label:s.label, data:s.data, borderColor:c, backgroundColor: s.colors ? s.colors.map(x=>col(th,x)) : type==='bar' ? c : (s.fill? alpha(c,.12) : c), spanGaps: s.spanGaps ?? true, hidden:s.hidden};
       if(type==='bar' || s.type==='bar') return Object.assign(base,{type:'bar', borderWidth:0, borderRadius:4, borderSkipped:'start', maxBarThickness: spec.barMax||26, categoryPercentage:.72, barPercentage:.9});
       return Object.assign(base,{type:'line', borderWidth: s.width||2, borderDash: s.dash? [6,4] : [], pointRadius: s.points===false?0:(s.r??3), pointHoverRadius:5, pointBackgroundColor:c, pointBorderColor:th.surface, pointBorderWidth:1.5, tension:.25, fill: s.fill? 'origin' : false});
     });
@@ -748,7 +748,7 @@ function dynTable(per){
 }
 
 /* =================== PAINEL NACIONAL =================== */
-const P = {y0:null, y1:null, g:'', co:'', esc:'', nat:'', reg:'', ev:'', metric:'top50', minp:''};
+const P = {y0:null, y1:null, g:'', co:'', esc:'', nat:'', reg:'', ev:'', metric:'top50', minp:'', dk:'1'};
 function vPainel(root){
   perNorm(P);
   root.innerHTML = `
@@ -836,6 +836,7 @@ function pnContent(){
     <div class="card"><h3>Por associação · ${esc(pl)}</h3><p class="note">Associação territorial do clube.</p><div class="chart short" id="pnCh5"></div></div>
   </div>
   <div class="card"><div class="card-h"><div><h3>Dinâmica anual do ranking</h3><p class="note">Entradas, permanências e saídas de nadadores no universo filtrado. “Saíram” = presentes na época mas ausentes na seguinte.</p></div></div><div id="pnT1"></div></div>
+  <div id="pnExtra" class="view"></div>
   <div class="grid g2">
     <div class="card"><div class="card-h"><div><h3>Clubes · ${esc(pl)}</h3><p class="note">Nadadores ranqueados e pontuação média por clube.</p></div></div><div id="pnT2"></div></div>
     <div class="card"><div class="card-h"><div><h3>Melhores nadadores · ${esc(pl)}</h3><p class="note">Ordenados pela melhor pontuação.</p></div></div><div id="pnT3"></div></div>
@@ -853,6 +854,7 @@ function pnContent(){
     {k:'cont',l:'Mantiveram-se',num:1,f:r=>fN(r.cont)}, {k:'ret',l:'Retenção',num:1,f:r=>r.ret==null?'—':f1(r.ret)+'%'}, {k:'sai',l:'Saíram',num:1,f:r=>fN(r.sai)},
     {k:'imp',l:'Melhoraram',num:1,f:r=>r.imp==null?'—':f1(r.imp)+'%',title:'Percentagem dos que se mantiveram e subiram a melhor pontuação'}, {k:'dmed',l:'Δ pts mediana',num:1,f:r=>r.dmed==null?'—':fSgn(r.dmed)}, {k:'pts',l:'Pts médios',num:1,f:r=>f1(r.pts)}
   ], [...dynRows].reverse(), {page:40});
+  PN.x = renderPnExtra($("#pnExtra"));
   PN.t2 = new DataTable('pnT2',[
     {k:'club',l:'Clube',cls:'wrap'}, {k:'code',l:'Cód.'}, {k:'reg',l:'Assoc.'}, {k:'n',l:'Nad.',num:1}, {k:'m',l:'M',num:1}, {k:'f',l:'F',num:1},
     {k:'pts',l:'Pts méd.',num:1,f:r=>f1(r.pts)}, {k:'bsw',l:'Melhor nadador',f:r=>swLink(r.bsw),x:r=>niceName(S.sw[r.bsw].name),sv:r=>r.bpts}, {k:'bpts',l:'Pts',num:1}
@@ -879,6 +881,7 @@ async function pnModel(){
     {t:'chart', title:'Nadadores por escalão', spec:{type:'bar', labels:ESC_G.map(e=>e.n), series:gser(c.escs)}},
     {t:'chart', title:'Nadadores por associação', spec:{type:'bar', labels:c.regs.map(r=>r[0]), series:[{label:'Nadadores', data:c.regs.map(r=>r[1]), color:'s1'}], legend:false}},
     {t:'h', text:'Dinâmica anual do ranking'}, Object.assign({t:'table', sheet:'Dinâmica anual'}, t1),
+    ...(c.x?c.x.blocks:[]),
     {t:'h', text:'Clubes — '+pl}, Object.assign({t:'table', sheet:'Clubes'}, t2),
     {t:'h', text:'Melhores nadadores — '+pl}, Object.assign({t:'table', sheet:'Top nadadores'}, {head:t3.head, rows:t3.rows.slice(0,100), align:t3.align}),
   ]};
@@ -1103,6 +1106,7 @@ function ndContent(){
     {k:'first',l:'1.ª época',num:1}, {k:'last',l:'Última',num:1}, {k:'ny',l:'Épocas',num:1},
     {k:'evs',l:'Provas',num:1,title:'Provas/piscinas diferentes com marca ranqueada'}, {k:'n',l:'Marcas',num:1},
     {k:'bestPt',l:'Melhor pts',num:1},
+    {k:'sit',l:'Situação',f:r=>{ const d=dropInfo(S.sw[r.id],1); return d.active?'<span class="pill good">Ativo</span>':`<span class="pill">Saiu ${d.y} · ${d.age} anos</span>`; },x:r=>{ const d=dropInfo(S.sw[r.id],1); return d.active?'Ativo':'Saiu '+d.y+' ('+d.age+' anos)'; },sv:r=>{ const d=dropInfo(S.sw[r.id],1); return d.active?9999:d.y; }},
     {k:'bev',l:'Melhor prova',f:r=>evLabel(R.ev[r.best])+' '+CO_S[R.co[r.best]]+' · '+fT(R.tm[r.best])+' ('+R.yr[r.best]+')', sv:r=>R.ev[r.best]},
   ];
   NDX={t:new DataTable('ndT', cols, rows, {sort:{k:'bestPt',dir:'desc'}, page:100})};
@@ -1180,7 +1184,7 @@ function vFicha(root, id){
     <div class="sw-hd">
       <div class="avatar" aria-hidden="true">${esc(initials(s.name))}</div>
       <div><div class="sw-name">${esc(niceName(s.name))}</div>
-        <div class="meta"><span><b>${s.g==='F'?'Feminino':'Masculino'}</b></span><span>Nascimento <b>${fBD(s.bd)}</b></span><span>Idade em ${lastYear()} <b>${ageNow}</b> · ${esc(ESC_F[escF(ageNow)].n)}</span><span>Nacionalidade <b>${esc(s.nat)}</b></span><span>Clube <b>${esc(cl?cl.name:'—')}</b></span><span>Associação <b>${esc(cl&&cl.reg?regLabel(cl.reg):'—')}</b></span><span>No ranking <b>${s.first}–${s.last}</b></span></div>
+        <div class="meta"><span><b>${s.g==='F'?'Feminino':'Masculino'}</b></span><span>Nascimento <b>${fBD(s.bd)}</b></span><span>Idade em ${lastYear()} <b>${ageNow}</b> · ${esc(ESC_F[escF(ageNow)].n)}</span><span>Nacionalidade <b>${esc(s.nat)}</b></span><span>Clube <b>${esc(cl?cl.name:'—')}</b></span><span>Associação <b>${esc(cl&&cl.reg?regLabel(cl.reg):'—')}</b></span><span>No ranking <b>${s.first}–${s.last}</b></span>${(()=>{ const d=dropInfo(s,1); return d.active?'<span class="pill good">Ativo</span>':`<span class="pill">Saiu do ranking após ${d.y}, aos ${d.age} anos</span>`; })()}</div>
         ${al?`<div style="margin-top:8px"><button class="alert-badge" id="fiAl" title="Ver alertas ${al.year}">⚑ Alerta de evolução ${al.year} · ${al.evs.length} prova${al.evs.length>1?'s':''}: ${esc(al.evs.map(e=>evShort(e.ev)+' '+CO_S[e.co]).join(', '))}</button></div>`:''}
       </div>
       <div class="row" style="justify-content:flex-end">${expHTML('fi')}<button class="btn primary" id="fiDecl">Emitir declaração</button></div>
@@ -1231,6 +1235,7 @@ function vFicha(root, id){
     <div class="card"><div class="card-h"><div><h3>Percentil nacional por época</h3><p class="note">Posição relativa da melhor pontuação entre os nadadores ranqueados da mesma idade e género (100 = o melhor).</p></div></div><div class="chart" id="fiChP"></div></div>
   </div>
   <div class="card"><div class="card-h"><div><h3>Resumo por época</h3><p class="note">Clube, número de provas, melhor pontuação, posições e presença internacional em cada época.</p></div></div><div id="fiT0"></div></div>
+  <div class="card" id="fiPk"></div>
   <div class="grid g3">
     <div class="card"><h3>Perfil por prova</h3><p class="note">Melhor pontuação em cada prova.</p><div class="chart" id="fiCh2"></div></div>
     <div class="card"><h3>Perfil por estilo</h3><p class="note">Melhor pontuação por estilo.</p><div class="chart" id="fiChS"></div></div>
@@ -1279,6 +1284,7 @@ function vFicha(root, id){
   ], allRows, {sort:{k:'y',dir:'desc'}, page:30});
   if(FS.key==null || !pb.has(FS.key)) FS.key = R.ev[bestRow]*2+R.co[bestRow];
   FX = {id, ch1, chP, ch2, chS, chDg, t0, t1, t2, t4, grid:gridRows, bestRow, rows};
+  FX.pk = renderFichaPeaks(id);
   fiEvo(id);
   swPicker('fiCmpPick',{placeholder:'Comparar com…', value:FS.cmp, onPick:b=>{ FS.cmp=b; FS.cev=null; vFicha(root,id); setTimeout(()=>$('#fiCmpCard').scrollIntoView({behavior:'smooth'}),60); }});
   const x=$('#fiCmpX'); if(x) x.onclick=()=>{ FS.cmp=null; vFicha(root,id); };
@@ -1351,6 +1357,7 @@ async function fiModel(){
     {t:'chart', title:'Pontuação por época vs média e P90 nacionais (mesmo género e idade)', spec:FX.ch1},
     {t:'chart', title:'Percentil nacional por época', spec:FX.chP},
     {t:'h', text:'Resumo por época'}, Object.assign({t:'table',sheet:'Resumo por época',small:true}, FX.t0.exportRows()),
+    ...(FX.pk?FX.pk.blocks:[]),
     {t:'chart', title:'Perfil por prova', spec:FX.ch2}, {t:'chart', title:'Perfil por estilo', spec:FX.chS},
     {t:'h', text:'Melhores marcas pessoais'}, Object.assign({t:'table',sheet:'Melhores marcas',small:true}, FX.t1.exportRows()),
     ...(FX.grid.rows.length?[{t:'h', text:'Grelha de marcas por época — '+CO_L[+FS.gco]}, Object.assign({t:'table',sheet:'Grelha '+CO_S[+FS.gco],small:true}, FX.grid)]:[]),
@@ -2022,6 +2029,147 @@ async function restoreBackup(file, root){
   }
   const keep=msg.innerHTML+`<div><b>Restauro concluído:</b> ${saved} lista${saved!==1?'s':''} restaurada${saved!==1?'s':''}${fail?`, ${fail} com erro`:''}.</div>`;
   afterDataChange(root,'daBkMsg',keep); toast('Restauro concluído.');
+}
+
+</script>
+<script>
+'use strict';
+/* ============================================================
+   Abandono do ranking · Picos de evolução
+   ============================================================ */
+const PEAK_P = 90;        // pico = índice (média das 3 provas com maior salto) ≥ percentil 90 da idade
+const PEAK_P1 = 95;       // com uma só prova comparada, exige-se ≥ P95
+const PEAK_MIN_REF = 10;  // mínimo de pares nacionais na idade/prova para servir de referência
+function upperBound(arr, t){ let lo=0, hi=arr.length; while(lo<hi){ const m=(lo+hi)>>1; if(arr[m]<=t) lo=m+1; else hi=m; } return lo; }
+
+/* todos os pares de épocas consecutivas (mesmo nadador, prova e piscina), com percentil face à mesma idade */
+function pairsAll(){
+  const ck='pairsAll'; if(D.cache.has(ck)) return D.cache.get(ck);
+  const R=S.R, out=[];
+  for(let ev=0;ev<S.ev.length;ev++) for(let co=0;co<2;co++) for(let g=0;g<2;g++){
+    const pm=pairMap(ev,co,g,''); if(!pm.size) continue; const ref=progRates(ev,co,g,'');
+    for(const [sw,a] of pm) for(const [y,i] of a){ const p=a.get(y-1); if(p===undefined) continue; const age=D.AGE[i], arr=ref.get(age); if(!arr||arr.length<PEAK_MIN_REF) continue;
+      const d=(R.tm[p]-R.tm[i])/R.tm[p]*100; const pc=(lowerBound(arr,d)+upperBound(arr,d))/2/arr.length*100;
+      out.push({sw, g, age, y, co, ev, d, p:pc, i}); }
+  }
+  D.cache.set(ck,out); return out;
+}
+function pairsBySw(){ const ck='pairsSw'; if(D.cache.has(ck)) return D.cache.get(ck); const m=new Map(); for(const p of pairsAll()){ if(!m.has(p.sw)) m.set(p.sw,[]); m.get(p.sw).push(p); } D.cache.set(ck,m); return m; }
+function groupAges(list){
+  const m=new Map(); for(const p of list){ let o=m.get(p.age); if(!o){ o={age:p.age, y:p.y, sp:0, sd:0, n:0, evs:[]}; m.set(p.age,o);} o.sp+=p.p; o.sd+=p.d; o.n++; o.evs.push(p); }
+  return [...m.values()].map(o=>{ const evs=o.evs.sort((a,b)=>b.p-a.p), top=evs.slice(0,3), p=top.reduce((s,e)=>s+e.p,0)/top.length; return {age:o.age, y:o.y, n:o.n, p, d:o.sd/o.n, evs, peak: o.n>=2 ? p>=PEAK_P : p>=PEAK_P1}; }).sort((a,b)=>a.age-b.age);
+}
+function swimmerPeaks(id, y0=null, y1=null){
+  const list=(pairsBySw().get(id)||[]).filter(p=>y0==null||(p.y>=y0&&p.y<=y1));
+  const ages=groupAges(list), peaks=ages.filter(a=>a.peak).sort((a,b)=>b.p-a.p), top=[...ages].sort((a,b)=>b.p-a.p).slice(0,2);
+  return {ages, peaks, top};
+}
+function swFilter(f){ const rg=f.reg||''; return s=> (f.g===''||f.g==null||(s.g==='F'?'1':'0')===String(f.g)) && (!f.nat||(f.nat==='POR')===(s.nat==='POR')) && (!rg||(s.club>=0&&S.cl[s.club].reg===rg)); }
+/* resumo nacional dos picos */
+function peakSummary(f){
+  const ck='pks'+JSON.stringify([f.g,f.co,f.nat,f.reg,f.y0,f.y1]); if(D.cache.has(ck)) return D.cache.get(ck);
+  const okSw=swFilter(f), bySw=new Map();
+  for(const p of pairsAll()){ if(f.co!==''&&f.co!=null&&p.co!==+f.co) continue; if(f.y0!=null&&(p.y<f.y0||p.y>f.y1)) continue; if(!okSw(S.sw[p.sw])) continue; if(!bySw.has(p.sw)) bySw.set(p.sw,[]); bySw.get(p.sw).push(p); }
+  const G=[0,1].map(()=>({hist:new Map(), expo:new Map(), peakAges:[], maxAges:[], sw:0, sw2:0, sw1:0, d:new Map()}));
+  for(const [sw,list] of bySw){ const g=S.sw[sw].g==='F'?1:0, o=G[g];
+    for(const p of list){ if(!o.d.has(p.age)) o.d.set(p.age,[]); o.d.get(p.age).push(p.d); }
+    const ages=groupAges(list); if(ages.length<3) continue;
+    o.sw++; ages.forEach(a=>o.expo.set(a.age,(o.expo.get(a.age)||0)+1)); const pk=ages.filter(a=>a.peak); if(pk.length>=1) o.sw1++; if(pk.length>=2) o.sw2++;
+    pk.forEach(a=>{ o.peakAges.push(a.age); o.hist.set(a.age,(o.hist.get(a.age)||0)+1); });
+    o.maxAges.push(ages.reduce((m,a)=>a.p>m.p?a:m, ages[0]).age);
+  }
+  for(const o of G){ for(const [a,v] of o.d) v.sort((x,y)=>x-y); }
+  D.cache.set(ck,G); return G;
+}
+/* abandono: última época no ranking anterior à última época carregada (menos a tolerância) */
+function dropInfo(s, k=1){ if(!s||!s.n) return null; const L=lastYear(); if(s.last > L-k) return {active:true, last:s.last}; return {active:false, y:s.last, age:s.last-s.by}; }
+function swYears(){ const ck='swYears'; if(D.cache.has(ck)) return D.cache.get(ck); const m=new Map(), R=S.R; for(let i=0;i<R.n;i++){ let x=m.get(R.sw[i]); if(!x){ x=new Set(); m.set(R.sw[i],x);} x.add(R.yr[i]); } D.cache.set(ck,m); return m; }
+function dropSummary(f, k){
+  const ck='drop'+JSON.stringify([f.g,f.nat,f.reg,f.y0,f.y1,k]); if(D.cache.has(ck)) return D.cache.get(ck);
+  const Lk=lastYear()-k, okSw=swFilter(f), sy=swYears();
+  const G=[0,1].map(()=>({ages:[], expo:new Map(), drop:new Map(), bySeason:new Map()}));
+  for(const s of S.sw){ if(!s.n||!okSw(s)) continue; const o=G[s.g==='F'?1:0], ys=sy.get(s.id); if(!ys) continue;
+    for(const y of ys){ if(y>Lk) continue; if(f.y0!=null&&(y<f.y0||y>f.y1)) continue; const a=y-s.by; o.expo.set(a,(o.expo.get(a)||0)+1);
+      if(y===s.last){ o.drop.set(a,(o.drop.get(a)||0)+1); o.ages.push(a); if(!o.bySeason.has(y)) o.bySeason.set(y,[]); o.bySeason.get(y).push(a); } } }
+  D.cache.set(ck,G); return G;
+}
+
+/* ---------- painel nacional: secções de abandono e picos ---------- */
+function renderPnExtra(el){
+  const single=P.y0===P.y1, y0=single?null:P.y0, y1=single?null:P.y1, k=+(P.dk||1);
+  const f={g:P.g, co:P.co, nat:P.nat, reg:P.reg, y0, y1}, scope= single? 'todas as épocas carregadas' : `épocas ${P.y0}–${P.y1}`;
+  const gs=P.g===''?[0,1]:[+P.g], Lk=lastYear()-k;
+  const DR=dropSummary(f,k), PK=peakSummary(f);
+  const ageL=[]; for(let a=10;a<=30;a++) ageL.push(a);
+  const gl=g=>G_L[g];
+  // abandono
+  const drHist={type:'bar', labels:ageL.map(a=>a===30?'30+':String(a)), series:gs.map(g=>({label:gl(g), data:ageL.map(a=>{ if(a<30) return DR[g].drop.get(a)||0; let c=0; for(const [x,v] of DR[g].drop) if(x>=30) c+=v; return c; }), color:g?'s2':'s1'})), zero:true, barMax:14, xTitle:'Idade na última época no ranking'};
+  const drRate={labels:ageL.slice(0,-1).map(String), series:gs.map(g=>({label:gl(g), data:ageL.slice(0,-1).map(a=>{ const e=DR[g].expo.get(a)||0, d=DR[g].drop.get(a)||0; return e>=20? +(d/e*100).toFixed(1) : null; }), color:g?'s2':'s1'})), yFmt:v=>fN(v)+'%', tipFmt:v=>f1(v)+'%', zero:true, xTitle:'Idade'};
+  const seasons=[...new Set([...DR[0].bySeason.keys(),...DR[1].bySeason.keys()])].sort((a,b)=>b-a);
+  const drRows=seasons.map(y=>{ const m=DR[0].bySeason.get(y)||[], w=DR[1].bySeason.get(y)||[]; return {y, m:m.length, f:w.length, am:mean(m), af:mean(w), t:m.length+w.length}; });
+  // picos
+  const pkHist={type:'bar', labels:ageL.map(String), series:gs.map(g=>{ const tot=PK[g].peakAges.length||1; return {label:gl(g), data:ageL.map(a=>+(((PK[g].hist.get(a)||0)/tot)*100).toFixed(1)), color:g?'s2':'s1'}; }), yFmt:v=>fN(v)+'%', tipFmt:v=>f1(v)+'% dos picos', zero:true, barMax:14, xTitle:'Idade do pico'};
+  const pkRate={labels:ageL.map(String), series:gs.map(g=>({label:gl(g), data:ageL.map(a=>{ const e=PK[g].expo.get(a)||0; return e>=30? +(((PK[g].hist.get(a)||0)/e)*100).toFixed(1) : null; }), color:g?'s2':'s1'})), yFmt:v=>fN(v)+'%', tipFmt:v=>f1(v)+'% das transições nessa idade', zero:true, xTitle:'Idade'};
+  const imp={labels:ageL.map(String), series:gs.map(g=>({label:gl(g), data:ageL.map(a=>{ const v=PK[g].d.get(a); return v&&v.length>=30? +quantile(v,.5).toFixed(2) : null; }), color:g?'s2':'s1'})), yFmt:v=>f1(v)+'%', tipFmt:v=>fPct(v), zero:true, xTitle:'Idade na época'};
+  const pkRows=ageL.map(a=>{ const r={a}; gs.forEach(g=>{ const v=PK[g].d.get(a)||[]; r['n'+g]=v.length; r['m'+g]=v.length? quantile(v,.5):null; r['i'+g]=v.length? v.filter(x=>x>0).length/v.length*100:null; r['p'+g]=PK[g].hist.get(a)||0; r['r'+g]=(PK[g].expo.get(a)||0)>=30? (PK[g].hist.get(a)||0)/PK[g].expo.get(a)*100 : null; }); return r; }).filter(r=>gs.some(g=>r['n'+g]>0));
+  const kpi=(l,v,d)=>`<div class="kpi"><div class="k">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  el.innerHTML = `
+  <div class="card"><div class="card-h"><div><h3>Abandono do ranking</h3><p class="note">Considera-se que um nadador saiu quando a sua última época no ranking é anterior a ${Lk+1} (a última época carregada é ${lastYear()}${k>1?`, com tolerância de ${k} épocas`:''}). Pode tratar-se de abandono ou de descida abaixo do corte do ranking.${isPartial(lastYear())?` Como a época ${lastYear()} ainda está em curso, as saídas de ${lastYear()-1} podem estar sobrestimadas; para maior rigor escolha “Ausente nas 2 últimas épocas”.`:''} Âmbito: ${esc(scope)}. Os filtros de escalão, idade e pontuação não se aplicam a esta secção.</p></div>${selHTML('pnDk',[['1','Ausente na última época'],['2','Ausente nas 2 últimas épocas'],['3','Ausente nas 3 últimas épocas']],String(k),'Critério de saída')}</div>
+    <div class="kpis">${gs.map(g=>kpi('Saídas · '+gl(g), fN(DR[g].ages.length), `idade média ${f1(mean(DR[g].ages))} · mediana ${fN(median(DR[g].ages))}`)).join('')}
+      ${gs.map(g=>{ let mx=null; for(const [a,e] of DR[g].expo){ if(e<30) continue; const r=(DR[g].drop.get(a)||0)/e; if(!mx||r>mx.r) mx={a,r}; } return kpi('Idade de maior abandono · '+gl(g), mx?mx.a+' anos':'—', mx? f1(mx.r*100)+'% dos presentes nessa idade saíram':''); }).join('')}</div>
+    <div class="grid g2" style="margin-top:14px"><div><h3 style="font-size:17px">Idade de saída</h3><p class="note">Número de nadadores por idade na última época em que apareceram.</p><div class="chart short" id="pnDr1"></div></div>
+      <div><h3 style="font-size:17px">Taxa de abandono por idade</h3><p class="note">Percentagem dos nadadores presentes em cada idade que não voltaram a aparecer.</p><div class="chart short" id="pnDr2"></div></div></div>
+    <h3 style="font-size:17px;margin-top:14px">Saídas por época</h3><div id="pnDrT" style="margin-top:8px"></div></div>
+  <div class="card"><div class="card-h"><div><h3>Picos de evolução</h3><p class="note">Para cada nadador e idade, compara-se a melhoria de uma época para a seguinte em cada prova com a de todos os nadadores da mesma idade, prova e piscina (percentil). O índice da idade é a média dos percentis das 3 provas com maior salto (ou de todas, se forem menos). É pico quando o índice é ≥ P${PEAK_P} (com duas ou mais provas comparadas) ou ≥ P${PEAK_P1} (com uma só prova), ou seja, uma evolução claramente acima da habitual para a idade. Resumo com nadadores com pelo menos 3 transições de época (${esc(scope)}).</p></div></div>
+    <div class="kpis">${gs.map(g=>kpi('Idade média dos picos · '+gl(g), f1(mean(PK[g].peakAges)), `mediana ${fN(median(PK[g].peakAges))} · ${fN(PK[g].peakAges.length)} picos`)).join('')}
+      ${gs.map(g=>kpi('Idade do maior salto · '+gl(g), f1(mean(PK[g].maxAges)), `média da idade do maior pico de cada nadador (${fN(PK[g].sw)})`)).join('')}
+      ${gs.map(g=>kpi('Com 2 ou mais picos · '+gl(g), PK[g].sw? f1(PK[g].sw2/PK[g].sw*100)+'%' : '—', `${fN(PK[g].sw1)} nadadores com pelo menos 1 pico`)).join('')}</div>
+    <div class="grid g3" style="margin-top:14px"><div><h3 style="font-size:17px">Em que idades ocorrem os picos</h3><p class="note">Distribuição das idades de pico (percentagem do total de picos).</p><div class="chart short" id="pnPk1"></div></div>
+      <div><h3 style="font-size:17px">Frequência de picos por idade</h3><p class="note">Percentagem das transições de época nessa idade classificadas como pico.</p><div class="chart short" id="pnPk3"></div></div>
+      <div><h3 style="font-size:17px">Melhoria mediana por idade</h3><p class="note">Todas as provas: variação mediana do tempo de uma época para a seguinte.</p><div class="chart short" id="pnPk2"></div></div></div>
+    <h3 style="font-size:17px;margin-top:14px">Referência nacional por idade</h3><div id="pnPkT" style="margin-top:8px"></div></div>`;
+  draw('pnDr1',drHist); draw('pnDr2',drRate); draw('pnPk1',pkHist); draw('pnPk2',imp); draw('pnPk3',pkRate);
+  $('#pnDk').onchange=e=>{ P.dk=e.target.value; PN.x=renderPnExtra(el); };
+  const tD=new DataTable('pnDrT',[{k:'y',l:'Última época',num:1},{k:'t',l:'Saídas',num:1},...(gs.includes(0)?[{k:'m',l:'Masc.',num:1},{k:'am',l:'Idade méd. M',num:1,f:r=>f1(r.am)}]:[]),...(gs.includes(1)?[{k:'f',l:'Fem.',num:1},{k:'af',l:'Idade méd. F',num:1,f:r=>f1(r.af)}]:[])], drRows, {page:15});
+  const tP=new DataTable('pnPkT',[{k:'a',l:'Idade',num:1,dir0:'asc'},...gs.flatMap(g=>{ const s=g?'F':'M'; return [{k:'n'+g,l:'Pares '+s,num:1},{k:'m'+g,l:'Melhoria med. '+s,num:1,f:r=>fPct(r['m'+g]),x:r=>r['m'+g]==null?'':+r['m'+g].toFixed(2)},{k:'i'+g,l:'% melhoraram '+s,num:1,f:r=>r['i'+g]==null?'—':f1(r['i'+g])+'%'},{k:'p'+g,l:'Picos '+s,num:1},{k:'r'+g,l:'Freq. picos '+s,num:1,f:r=>r['r'+g]==null?'—':f1(r['r'+g])+'%',x:r=>r['r'+g]==null?'':+r['r'+g].toFixed(1)}]; })], pkRows, {page:25});
+  return {blocks:[
+    {t:'h', text:'Abandono do ranking ('+scope+')'}, {t:'p', text:`Saída = última época no ranking anterior a ${Lk+1}. `+gs.map(g=>`${gl(g)}: ${DR[g].ages.length} saídas, idade média ${f1(mean(DR[g].ages))} anos.`).join(' ')},
+    {t:'chart', title:'Idade de saída', spec:drHist}, {t:'chart', title:'Taxa de abandono por idade', spec:drRate},
+    Object.assign({t:'table', sheet:'Saídas por época'}, tD.exportRows()),
+    {t:'h', text:'Picos de evolução ('+scope+')'}, {t:'p', text:`Pico = índice de evolução da idade ≥ P${PEAK_P} (2+ provas) ou ≥ P${PEAK_P1} (1 prova). `+gs.map(g=>`${gl(g)}: idade média dos picos ${f1(mean(PK[g].peakAges))} anos; idade média do maior salto ${f1(mean(PK[g].maxAges))} anos; ${PK[g].sw?f1(PK[g].sw2/PK[g].sw*100):'—'}% com 2 ou mais picos.`).join(' ')},
+    {t:'chart', title:'Em que idades ocorrem os picos', spec:pkHist}, {t:'chart', title:'Frequência de picos por idade', spec:pkRate}, {t:'chart', title:'Melhoria mediana por idade', spec:imp},
+    Object.assign({t:'table', sheet:'Picos por idade'}, tP.exportRows()),
+  ]};
+}
+
+/* ---------- ficha individual: picos e percurso ---------- */
+function renderFichaPeaks(id){
+  const el=$('#fiPk'); if(!el) return {blocks:[]};
+  const s=S.sw[id], g=s.g==='F'?1:0, pk=swimmerPeaks(id, FS.y0, FS.y1), di=dropInfo(s,1), nat=peakSummary({g:String(g),co:'',nat:'',reg:'',y0:null,y1:null})[g];
+  const chips = a => `<div class="chiplist">${a.evs.slice(0,4).map(e=>`<span class="${e.p>=PEAK_P?'hot':''}" title="${esc(evLabel(e.ev))} ${CO_S[e.co]}: ${fPct(e.d)} · P${fN(e.p)} da idade">${esc(evShort(e.ev))} ${CO_S[e.co]} <b>${fPct(e.d,1)}</b> · P${fN(e.p)}</span>`).join('')}</div>`;
+  const statusTxt = di.active ? `Ativo · última época ${di.last}` : `Saiu do ranking após ${di.y}, aos ${di.age} anos`;
+  if(!pk.ages.length){ el.innerHTML=`<div class="card-h"><div><h3>Picos de evolução e percurso</h3><p class="note">${esc(statusTxt)}. Sem épocas consecutivas na mesma prova suficientes para calcular a evolução por idade${FS.y0!==s.first||FS.y1!==s.last?' no período escolhido':''}.</p></div></div>`; return {blocks:[{t:'p',text:statusTxt+'.'}]}; }
+  const spec={type:'bar', labels:pk.ages.map(a=>String(a.age)), series:[{label:'Índice de evolução (percentil na idade; dourado = pico)', data:pk.ages.map(a=>+a.p.toFixed(1)), color:'seq2', colors:pk.ages.map(a=>a.peak?'s2':'seq2')}], yFmt:v=>'P'+fN(v), tipFmt:(v,ctx)=>{ const a=pk.ages[ctx.dataIndex]; return 'P'+f1(v)+' · melhoria média '+fPct(a.d)+' em '+a.n+' prova'+(a.n>1?'s':''); }, yMin:0, yMax:100, zero:true, barMax:34, xTitle:'Idade (época de chegada)'};
+  const pkTxt = pk.peaks.length ? pk.peaks.map(a=>a.age).sort((x,y)=>x-y).join(' · ')+' anos' : 'nenhum';
+  const top = pk.top.map(a=>a.age+' anos (P'+fN(a.p)+')').join(' e ');
+  el.innerHTML = `<div class="card-h"><div><h3>Picos de evolução e percurso</h3><p class="note">Índice de evolução por idade: média dos percentis das 3 provas com maior melhoria, face aos nadadores da mesma idade, prova e piscina. Pico = índice ≥ P${PEAK_P} com duas ou mais provas, ou ≥ P${PEAK_P1} com uma só prova.</p></div></div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Idades de pico</div><div class="v">${esc(pkTxt)}</div><div class="d">${pk.peaks.length} pico${pk.peaks.length!==1?'s':''} em ${pk.ages.length} transições de época</div></div>
+      <div class="kpi"><div class="k">Maiores saltos</div><div class="v" style="font-size:22px">${esc(top)}</div><div class="d">as duas idades com maior índice</div></div>
+      <div class="kpi"><div class="k">Referência nacional</div><div class="v">${f1(mean(nat.peakAges))}</div><div class="d">idade média dos picos (${G_L[g].toLowerCase()}) · maior salto aos ${f1(mean(nat.maxAges))}</div></div>
+      <div class="kpi"><div class="k">Situação</div><div class="v" style="font-size:22px">${di.active?'Ativo':'Saiu aos '+di.age}</div><div class="d">${esc(statusTxt)}</div></div>
+    </div>
+    <div class="chart short" id="fiPkCh" style="margin-top:14px"></div>
+    <div id="fiPkT" style="margin-top:12px"></div>`;
+  draw('fiPkCh', spec);
+  const t=new DataTable('fiPkT',[
+    {k:'age',l:'Idade',num:1,dir0:'asc'}, {k:'y',l:'Época',num:1}, {k:'n',l:'Provas comparadas',num:1},
+    {k:'d',l:'Melhoria média (todas)',num:1,f:a=>fPct(a.d),x:a=>+a.d.toFixed(2)},
+    {k:'p',l:'Índice',num:1,f:a=>`<span class="pill ${a.peak?'gold':''}">P${fN(a.p)}</span>`,x:a=>Math.round(a.p)},
+    {k:'peak',l:'Classificação',f:a=>a.peak?'<b>Pico de evolução</b>':(pk.top.includes(a)?'Maior salto (abaixo do limiar)':'—'),x:a=>a.peak?'Pico':(pk.top.includes(a)?'Maior salto':''),sv:a=>a.p},
+    {k:'evs',l:'Provas com maior salto',f:chips,x:a=>a.evs.slice(0,4).map(e=>evShort(e.ev)+' '+CO_S[e.co]+' '+fPct(e.d)+' P'+Math.round(e.p)).join('; '),nosort:1,cls:'wrap'},
+  ], pk.ages, {sort:{k:'age',dir:'asc'}, page:30});
+  return {blocks:[{t:'h', text:'Picos de evolução e percurso'}, {t:'p', text:`${statusTxt}. Idades de pico (índice ≥ P${PEAK_P}, ou ≥ P${PEAK_P1} com uma só prova): ${pkTxt}. Maiores saltos: ${top}. Referência nacional (${G_L[g].toLowerCase()}): idade média dos picos ${f1(mean(nat.peakAges))} anos.`}, {t:'chart', title:'Índice de evolução por idade', spec}, Object.assign({t:'table', sheet:'Picos de evolução', small:true}, t.exportRows())]};
 }
 
 </script>
