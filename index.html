@@ -258,6 +258,19 @@ details.method ul{margin:8px 0 0;padding-left:20px;color:var(--muted)}
 .mt-t tr.sel td{background:var(--surface2)}
 .mt-in{width:90px;text-align:right;padding:3px 6px}
 @media (min-width:761px){.tabs{flex-wrap:wrap;overflow:visible;margin-left:0;flex-basis:100%;row-gap:0}.tab{padding:8px 11px 10px;font-size:15.5px}}
+.trt td.trc{line-height:1.15;padding-top:6px;padding-bottom:6px}
+.trt td.trc .tv{display:block;font-weight:600}
+.trt td.trc .td{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.trt td.trc i{font-style:normal;margin-right:3px;font-size:10px}
+.trt td.t-up{background:color-mix(in srgb,var(--good) 12%,transparent)}
+.trt td.t-up2{background:color-mix(in srgb,var(--good) 26%,transparent)}
+.trt td.t-dn{background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.trt td.t-dn2{background:color-mix(in srgb,var(--bad) 26%,transparent)}
+.trt td.t-up .td,.trt td.t-up2 .td,.trt td.t-up i,.trt td.t-up2 i{color:var(--good)}
+.trt td.t-dn .td,.trt td.t-dn2 .td,.trt td.t-dn i,.trt td.t-dn2 i{color:var(--bad)}
+.trt td.t-eq .td,.trt td.t-eq i{color:var(--muted)}
+.trt td.prov{background-image:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--ink) 6%,transparent) 6px 8px)}
+.trk{white-space:nowrap;font-weight:600}.trk.up{color:var(--good)}.trk.dn{color:var(--bad)}.trk.eq{color:var(--muted)}
 </style>
 
 <header class="hdr">
@@ -2506,12 +2519,12 @@ function f5Similar(id){
 }
 
 /* ======================= ANÁLISES: novas secções ======================= */
-const AN5 = {esc:'', from:'1', to:'4', topN:'24', pesc:''};
+const AN5 = {esc:'', from:'1', to:'4', topN:'24', pesc:'', thr:'5'};
 const AN5_SECS = [['perfil','Perfil sectorial'],['funil','Funil de talento'],['plpc','Diferencial PL/PC'],['estag','Estagnação']];
 function an5(sec, el, out){
   const R=S.R, sy=yearsRange(AN.y0,AN.y1), yl=sy.map(String), gsel=AN.g;
   if(sec==='perfil'){
-    anExtra(selHTML('an5Esc',[['','Todos os escalões'],...ESC_G.map((e,k)=>[String(k),e.n])],AN5.esc,'Escalão'), x=>{ $('#an5Esc',x).onchange=e=>{AN5.esc=e.target.value; anContent();}; });
+    anExtra(selHTML('an5Esc',[['','Todos os escalões'],...ESC_G.map((e,k)=>[String(k),e.n])],AN5.esc,'Escalão')+selHTML('an5Thr',[['2','± 2 pts'],['5','± 5 pts'],['10','± 10 pts'],['15','± 15 pts']],AN5.thr,'Estagnação'), x=>{ $('#an5Esc',x).onchange=e=>{AN5.esc=e.target.value; anContent();}; $('#an5Thr',x).onchange=e=>{AN5.thr=e.target.value; anContent();}; });
     const ek=AN5.esc===''?-1:+AN5.esc;
     const perStk=STK5.map(()=>({all:[],t8:[],t24:[]})), evo=STK5.map(()=>[]);
     for(const y of sy){ const m=strokeTable(y,gsel,AN.co); const vals=STK5.map(()=>[]); for(const [sw,o] of m){ if(ek>=0&&o.esc!==ek) continue; if(AN.nat&&((AN.nat==='POR')!==(S.sw[sw].nat==='POR'))) continue; o.v.forEach((x,k)=>{ if(x!=null) vals[k].push(x); }); }
@@ -2523,11 +2536,13 @@ function an5(sec, el, out){
     const evMean=new Map(); for(const [k,a] of acc){ a.sort((x,y)=>y-x); const e=k%100; if(!evMean.has(e)) evMean.set(e,[]); evMean.get(e).push(mean(a.slice(0,24))); }
     const dists=[50,100,200,400,800,1500].filter(d=>S.ev.some((c,e)=>evDist(e)===d&&evMean.has(e)));
     const dmap=STK5.map(k=>dists.map(d=>{ const e=S.ev.findIndex(c=>c===d+k); return e>=0&&evMean.has(e)? mean(evMean.get(e)) : null; }));
+    const TR=trendTable(STK5.map(k=>STK5_L[k]), sy, evo, +AN5.thr, 'Estilo');
     el.innerHTML=`<div class="grid g2"><div class="card"><h3>Perfil nacional por estilo</h3><p class="note">Melhor pontuação de cada nadador em cada estilo, por época, e média no período (${esc(perLabel(AN))}). Top‑8 e top‑24 calculados em cada estilo.</p><div class="chart tall" id="an5R"></div></div>
       <div class="card"><h3>Estilo × distância</h3><p class="note">Média dos pontos do top‑24 de cada prova, no período. Mostra em que provas o nível nacional é mais alto.</p><div style="margin-top:8px">${heatHTML(STK5.map(k=>STK5_L[k]), dists.map(d=>d+' m'), dmap, null, fN, 'Estilo')}</div></div></div>
-      <div class="card"><div class="card-h"><div><h3>Evolução por estilo (média do top‑24)</h3><p class="note">Pontos médios dos 24 melhores de cada estilo, por época. Mostra os estilos em que Portugal está a ganhar ou a perder nível.</p></div></div>${heatHTML(STK5.map(k=>STK5_L[k]), yl, evo, null, fN, 'Estilo')}</div>`;
-    draw('an5R', spec);
-    out.blocks=[{t:'chart',title:'Perfil nacional por estilo',spec},{t:'table',sheet:'Estilo x distância',head:['Estilo',...dists.map(d=>d+' m')],rows:dmap.map((r,k)=>[STK5_L[STK5[k]],...r.map(v=>v==null?'':Math.round(v))]),align:['l',...dists.map(()=>'r')]},{t:'table',sheet:'Evolução por estilo',small:true,head:['Estilo',...yl],rows:evo.map((r,k)=>[STK5_L[STK5[k]],...r.map(v=>v==null?'':Math.round(v))]),align:['l',...yl.map(()=>'r')]}];
+      <div class="card"><div class="card-h"><div><h3>Evolução por estilo (média do top‑24)</h3><p class="note">Pontos médios dos 24 melhores de cada estilo, por época, e variação face à época anterior: <span class="trk up">▲ evolução</span> subida superior a ${TR.thr} pts, <span class="trk eq">▬ estagnação</span> variação até ± ${TR.thr} pts, <span class="trk dn">▼ regressão</span> descida superior a ${TR.thr} pts (tom mais forte acima de ${TR.thr*2} pts). Tendência = declive da reta de regressão nas épocas fechadas${TR.partial?'; a época em curso é mostrada mas não entra na tendência':''}.</p></div></div>${TR.html}</div>
+      <div class="card"><h3>Evolução por estilo · gráfico</h3><div class="chart" id="an5Ev"></div></div>`;
+    draw('an5R', spec); draw('an5Ev', TR.spec);
+    out.blocks=[{t:'chart',title:'Perfil nacional por estilo',spec},{t:'table',sheet:'Estilo x distância',head:['Estilo',...dists.map(d=>d+' m')],rows:dmap.map((r,k)=>[STK5_L[STK5[k]],...r.map(v=>v==null?'':Math.round(v))]),align:['l',...dists.map(()=>'r')]},{t:'h',text:'Evolução por estilo (média do top‑24)'},{t:'p',text:`Variação face à época anterior entre parênteses. Evolução: subida superior a ${TR.thr} pts; estagnação: variação até ± ${TR.thr} pts; regressão: descida superior a ${TR.thr} pts. Tendência: declive da reta de regressão nas épocas fechadas (pts por época).`},Object.assign({t:'table',sheet:'Evolução por estilo',small:true},TR.exp),{t:'chart',title:'Evolução por estilo (média do top‑24)',spec:TR.spec}];
     return;
   }
   if(sec==='funil'){
@@ -2689,6 +2704,30 @@ async function mnModel(){
   if(MNX){ out.push({t:'h',text:'Nadadores com índice por época'}, {t:'table',sheet:'Índices por época',small:true,head:['Tabela',...MNX.ys.map(String)],rows:MNX.vals.map((r,k)=>[MNX.tabs[k].name,...r.map(v=>v??'')]),align:['l',...MNX.ys.map(()=>'r')]}); out.push({t:'h',text:'Nadadores com mínimo — '+stdById(MN.sel).name+' · '+MN.y}, Object.assign({t:'table',sheet:'Cumprimento',small:true},MNX.t.exportRows())); }
   const tb=blocks.flatMap(b=>[{t:'h',text:b.title+' · '+stdAgeLabel(S.std.find(s=>s.name===b.title)||{})},b]);
   return {title:'Mínimos e índices', subtitle:'Índices PAR 2025–2028 · Plano de Atividades 2027 · Mínimos Mundial Budapeste 2027', filename:'Minimos_indices', orientation:'p', blocks:[...out, ...tb]};
+}
+
+/* ---------- tabela de tendência: evolução / estagnação / regressão ---------- */
+function trendClass(d, thr){ if(d==null||!isFinite(d)) return ''; return d>thr ? (d>2*thr?'up2':'up') : d<-thr ? (d<-2*thr?'dn2':'dn') : 'eq'; }
+const TR_SYM={up:'▲',up2:'▲',dn:'▼',dn2:'▼',eq:'▬'}, TR_L={up:'Evolução',up2:'Evolução',dn:'Regressão',dn2:'Regressão',eq:'Estagnação'};
+function trendTable(rowsLab, years, vals, thr, head){
+  const partial=years.map(y=>isPartial(y)), closed=years.map((y,j)=>!partial[j]);
+  const sgn=v=>(v>0?'+':v<0?'−':'±')+fN(Math.abs(Math.round(v)));
+  const rows=vals.map((r,k)=>{ const cells=r.map((v,j)=>{ let p=null; for(let q=j-1;q>=0;q--) if(r[q]!=null){ p=r[q]; break; } const d= v!=null&&p!=null ? v-p : null; return {v, d, c:trendClass(d,thr)}; });
+    const pts=r.map((v,j)=>[years[j],v]).filter(([y,v],j)=>v!=null&&closed[years.indexOf(y)]);
+    let slope=null; if(pts.length>=3){ const mx=mean(pts.map(p=>p[0])), my=mean(pts.map(p=>p[1])); let a=0,b=0; pts.forEach(([x,y])=>{ a+=(x-mx)*(y-my); b+=(x-mx)*(x-mx); }); slope=b? a/b : null; }
+    const tot= pts.length>=2 ? pts[pts.length-1][1]-pts[0][1] : null;
+    const cnt={up:0,eq:0,dn:0}; cells.forEach((c,j)=>{ if(!c.c||partial[j]) return; cnt[c.c.replace('2','')]++; });
+    return {lab:rowsLab[k], cells, slope, tc:trendClass(slope, thr/2), tot, cnt, n0:pts.length?pts[0][0]:null, n1:pts.length?pts[pts.length-1][0]:null}; });
+  const th=`<th>${esc(head)}</th>`+years.map((y,j)=>`<th class="num">${y}${partial[j]?'<br><span class="small muted">parcial</span>':''}</th>`).join('')+`<th class="num" title="Declive da reta de regressão (pontos por época), épocas fechadas">Tendência</th><th class="num" title="Épocas com evolução / estagnação / regressão">▲ / ▬ / ▼</th>`;
+  const body=rows.map(r=>`<tr><td><b>${esc(r.lab)}</b></td>${r.cells.map((c,j)=> c.v==null? '<td class="num muted">·</td>' : `<td class="num trc t-${c.c}${partial[j]?' prov':''}" title="${esc(r.lab)} · ${years[j]}: ${fN(Math.round(c.v))} pts${c.d!=null?` · ${sgn(c.d)} face à época anterior · ${TR_L[c.c]}`:''}${partial[j]?' · época em curso (provisório)':''}"><span class="tv">${fN(Math.round(c.v))}</span>${c.d!=null?`<span class="td"><i>${TR_SYM[c.c]}</i>${sgn(c.d)}</span>`:''}</td>`).join('')}<td class="num trc t-${r.tc}" title="${r.slope==null?'':f1(r.slope)+' pts por época · '+TR_L[r.tc]+(r.tot!=null?` · ${sgn(r.tot)} pts entre ${r.n0} e ${r.n1}`:'')}">${r.slope==null?'—':`<span class="tv"><i>${TR_SYM[r.tc]}</i> ${(r.slope>0?'+':r.slope<0?'−':'')+f1(Math.abs(r.slope))}</span><span class="td">pts/época</span>`}</td><td class="num small">${r.cnt.up} / ${r.cnt.eq} / ${r.cnt.dn}</td></tr>`).join('');
+  const html=`<div class="tbl-wrap"><table class="t trt"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>`;
+  const cols=['s1','s2','s3','seq0','bad'];
+  const spec={labels:years.map(String), series:rows.map((r,k)=>({label:r.lab, data:r.cells.map(c=>c.v==null?null:Math.round(c.v)), color:cols[k%cols.length]})), zero:false, yFmt:fN, tipFmt:v=>fN(v)+' pts'};
+  const asc=v=>(v>0?'+':v<0?'-':'')+Math.abs(Math.round(v));
+  const exp={head:[head,...years.map(y=>String(y)+(isPartial(y)?' (parcial)':'')),'Tendência (pts/época)','Classificação','Evolução / estagnação / regressão'], rows:rows.map(r=>[r.lab,...r.cells.map(c=>c.v==null?'':Math.round(c.v)+(c.d!=null?' ('+(Math.abs(c.d)<0.5?'=':asc(c.d))+')':'')), r.slope==null?'':(r.slope>0?'+':'')+r.slope.toFixed(1), r.slope==null?'':TR_L[r.tc], `${r.cnt.up} / ${r.cnt.eq} / ${r.cnt.dn}`]), align:['l',...years.map(()=>'r'),'r','l','r']};
+  const FILL={up:'#DCEFE4',up2:'#B3DDC4',dn:'#F7DEDB',dn2:'#EDB6B0',eq:null};
+  exp.fills=rows.map(r=>[null,...r.cells.map(c=>FILL[c.c]||null),FILL[r.tc]||null,FILL[r.tc]||null,null]);
+  return {html, spec, exp, rows, thr, partial:partial.some(Boolean)};
 }
 
 </script>
@@ -3827,6 +3866,7 @@ async function buildPDF(m, stamp){
         headStyles:{fillColor:NAVY, textColor:255, fontStyle:'bold', fontSize:fs},
         alternateRowStyles:{fillColor:[244,247,251]},
         columnStyles:Object.fromEntries((b.align||[]).map((a,k)=>[k,{halign:a==='r'?'right':'left'}])),
+        didParseCell: b.fills ? (d=>{ if(d.section!=='body') return; const f=b.fills[d.row.index]&&b.fills[d.row.index][d.column.index]; if(f){ const n=parseInt(f.slice(1),16); d.cell.styles.fillColor=[n>>16&255,n>>8&255,n&255]; } }) : undefined,
       });
       y=doc.lastAutoTable.finalY+5;
       if(b.note && !m.decl){ doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(110,120,135); doc.text(b.note, M, y-1.5); doc.setTextColor(20,27,43); y+=3; }
@@ -3859,14 +3899,14 @@ async function buildPDF(m, stamp){
 const xe = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'');
 function wRun(t,o={}){ const p=[]; if(o.b) p.push('<w:b/>'); if(o.i) p.push('<w:i/>'); if(o.color) p.push(`<w:color w:val="${o.color}"/>`); if(o.sz) p.push(`<w:sz w:val="${o.sz}"/><w:szCs w:val="${o.sz}"/>`); if(o.sp) p.push(`<w:spacing w:val="${o.sp}"/>`); return `<w:r>${p.length?`<w:rPr>${p.join('')}</w:rPr>`:''}<w:t xml:space="preserve">${xe(t)}</w:t></w:r>`; }
 function wPara(runs,o={}){ const p=[]; if(o.style) p.push(`<w:pStyle w:val="${o.style}"/>`); if(o.keep) p.push('<w:keepNext/>'); if(o.border) p.push(`<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="4" w:color="${o.border}"/></w:pBdr>`); if(o.tabs) p.push(`<w:tabs><w:tab w:val="right" w:pos="${o.tabs}"/></w:tabs>`); p.push(`<w:spacing w:before="${o.before||0}" w:after="${o.after??120}"${o.line?` w:line="${o.line}" w:lineRule="auto"`:''}/>`); if(o.jc) p.push(`<w:jc w:val="${o.jc}"/>`); return `<w:p><w:pPr>${p.join('')}</w:pPr>${Array.isArray(runs)?runs.join(''):runs}</w:p>`; }
-function wTable(head, rows, align, widthTw, fs){
+function wTable(head, rows, align, widthTw, fs, fills){
   const n=head.length;
   const wt=head.map((h,k)=>{ let m=Math.min(14,String(h).length); for(const r of rows.slice(0,200)){ const l=String(r[k]??'').length; if(l>m) m=l; } return Math.max(4,Math.min(38,m)); });
   const tw=wt.reduce((a,b)=>a+b,0), cws=wt.map(w=>Math.floor(widthTw*w/tw));
   const cell=(t,o={})=>`<w:tc><w:tcPr><w:tcW w:w="${cws[o.k||0]}" w:type="dxa"/>${o.fill?`<w:shd w:val="clear" w:color="auto" w:fill="${o.fill}"/>`:''}</w:tcPr>${wPara(wRun(t,{b:o.b,color:o.color,sz:fs}),{after:0,jc:o.jc})}</w:tc>`;
   const bd=`<w:tblBorders>${['top','left','bottom','right','insideH','insideV'].map(s=>`<w:${s} w:val="single" w:sz="4" w:space="0" w:color="D7DDE5"/>`).join('')}</w:tblBorders>`;
   const hr=`<w:tr><w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>${head.map((h,k)=>cell(h,{k,b:1,color:'FFFFFF',fill:'042C53',jc:align&&align[k]==='r'?'right':'left'})).join('')}</w:tr>`;
-  const br=rows.map((r,ri)=>`<w:tr><w:trPr><w:cantSplit/></w:trPr>${r.map((v,k)=>cell(v==null?'':String(v),{k,fill:ri%2?'F4F7FB':null,jc:align&&align[k]==='r'?'right':'left'})).join('')}</w:tr>`).join('');
+  const br=rows.map((r,ri)=>`<w:tr><w:trPr><w:cantSplit/></w:trPr>${r.map((v,k)=>cell(v==null?'':String(v),{k,fill:(fills&&fills[ri]&&fills[ri][k])?fills[ri][k].slice(1).toUpperCase():ri%2?'F4F7FB':null,jc:align&&align[k]==='r'?'right':'left'})).join('')}</w:tr>`).join('');
   return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${bd}<w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="28" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="28" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${cws.map(w=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>${hr}${br}</w:tbl>`+wPara('',{after:120});
 }
 function wImage(rid, n, cx, cy){ return `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${n}" name="Grafico ${n}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${n}" name="grafico${n}.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`; }
@@ -3885,7 +3925,7 @@ async function buildDOCX(m, stamp){
     else if(b.t==='h') body.push(wPara([wRun(b.text,{b:1,color:'042C53',sz:26})],{before:240,after:100,keep:1,border:'BA7517'}));
     else if(b.t==='p') body.push(wPara([wRun(b.text,{sz:m.decl?22:19})],{jc:b.justify?'both':'left',after:m.decl?160:100,before:b.space?240:0,line:m.decl?340:276}));
     else if(b.t==='kpis') body.push(wTable(b.items.map(i=>i[0]), [b.items.map(i=>i[1]+(i[2]?' — '+i[2]:''))], null, cwTw, 18));
-    else if(b.t==='table'){ body.push(wTable(b.head, b.rows, b.align, cwTw, b.small?(b.head.length>11?13:15):17)); if(b.note && !m.decl) body.push(wPara([wRun(b.note,{i:1,sz:15,color:'6E7887'})],{after:160})); }
+    else if(b.t==='table'){ body.push(wTable(b.head, b.rows, b.align, cwTw, b.small?(b.head.length>11?13:15):17, b.fills)); if(b.note && !m.decl) body.push(wPara([wRun(b.note,{i:1,sz:15,color:'6E7887'})],{after:160})); }
     else if(b.t==='chart'){
       const img=await chartPNG(b.spec,1500,620); const id='rId'+(rid++), name='media/grafico'+pic+'.png';
       imgs.push([name, img.url.split(',')[1]]); rels.push(`<Relationship Id="${id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="${name}"/>`);
