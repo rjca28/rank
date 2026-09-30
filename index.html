@@ -271,6 +271,23 @@ details.method ul{margin:8px 0 0;padding-left:20px;color:var(--muted)}
 .trt td.t-eq .td,.trt td.t-eq i{color:var(--muted)}
 .trt td.prov{background-image:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--ink) 6%,transparent) 6px 8px)}
 .trk{white-space:nowrap;font-weight:600}.trk.up{color:var(--good)}.trk.dn{color:var(--bad)}.trk.eq{color:var(--muted)}
+.hlp{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:8px;border-radius:50%;border:1.5px solid var(--line-strong,var(--muted));background:var(--surface);color:var(--muted);font:700 12px/1 var(--fb,inherit);cursor:pointer;vertical-align:2px;padding:0}
+.hlp:hover,.hlp[aria-expanded="true"]{background:var(--accent,var(--s1));border-color:var(--accent,var(--s1));color:#fff}
+.hlp-box{margin:8px 0 10px;padding:10px 12px;border-left:3px solid var(--gold);background:var(--surface2);border-radius:6px;font-size:13.5px;display:grid;gap:4px;line-height:1.45}
+.hlp-box b{display:inline-block;min-width:112px;color:var(--ink)}
+.hlp-box .lnk{justify-self:start;margin-top:2px;font-size:13px}
+th.gl{text-decoration:underline dotted color-mix(in srgb,var(--muted) 70%,transparent);text-underline-offset:3px;cursor:help}
+.heat-leg{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted)}
+.heat-leg i{display:block;width:160px;height:10px;border-radius:5px;background:linear-gradient(90deg,rgba(var(--heat),.08),rgba(var(--heat),.7))}
+.heat-leg em{font-style:normal;margin-left:6px}
+.ins{border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));background:color-mix(in srgb,var(--gold) 7%,var(--surface));border-radius:12px;padding:12px 16px}
+.ins-h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.ins ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px;line-height:1.45}
+.spark{display:block}.spark.sp-up{color:var(--good)}.spark.sp-dn{color:var(--bad)}
+.svg-chart svg{display:block;max-width:100%;height:auto}
+.map-w svg{max-width:760px;margin:0 auto}
+.gsws{display:grid;gap:10px;margin-top:10px}.gsw{display:flex;gap:12px;align-items:flex-start}.gsw i{flex:none;width:34px;height:18px;border-radius:5px}.gsw b{display:block;font-size:14px}.gsw span{font-size:13px;color:var(--muted)}
+.gsym{display:grid;gap:10px;margin-top:10px;font-size:13.5px}.gsym>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.gsym>div>span:last-child{color:var(--muted);flex:1;min-width:200px}
 </style>
 
 <header class="hdr">
@@ -296,6 +313,7 @@ details.method ul{margin:8px 0 0;padding-left:20px;color:var(--muted)}
       <button class="tab" role="tab" data-v="metas">Metas PAR</button>
       <button class="tab" role="tab" data-v="declaracoes">Declarações</button>
       <button class="tab" role="tab" data-v="dados">Dados</button>
+      <button class="tab" role="tab" data-v="guia">Guia</button>
     </nav>
   </div>
 </header>
@@ -1163,6 +1181,7 @@ function ndContent(){
     {k:'first',l:'1.ª época',num:1}, {k:'last',l:'Última',num:1}, {k:'ny',l:'Épocas',num:1},
     {k:'evs',l:'Provas',num:1,title:'Provas/piscinas diferentes com marca ranqueada'}, {k:'n',l:'Marcas',num:1},
     {k:'bestPt',l:'Melhor pts',num:1},
+    {k:'sp',l:'Pts por época',nosort:1,noexp:1,f:r=>sparkSw(r.id),title:'Melhor pontuação nas últimas 8 épocas'},
     {k:'sit',l:'Situação',f:r=>{ const d=dropInfo(S.sw[r.id],1); return d.active?'<span class="pill good">Ativo</span>':`<span class="pill">Saiu ${d.y} · ${d.age} anos</span>`; },x:r=>{ const d=dropInfo(S.sw[r.id],1); return d.active?'Ativo':'Saiu '+d.y+' ('+d.age+' anos)'; },sv:r=>{ const d=dropInfo(S.sw[r.id],1); return d.active?9999:d.y; }},
     {k:'bev',l:'Melhor prova',f:r=>evLabel(R.ev[r.best])+' '+CO_S[R.co[r.best]]+' · '+fT(R.tm[r.best])+' ('+R.yr[r.best]+')', sv:r=>R.ev[r.best]},
   ];
@@ -1777,6 +1796,7 @@ function anContent(){
       $$('#anC table.t tbody tr').forEach((tr,k)=>{ const td=tr.lastElementChild; const v=dcol[k]; td.className='num'; td.innerHTML= v==null?'—':`<span class="${v>=0?'up':'down'}">${fSgn(v)}</span>`; td.style.background=''; });
       const sp={type:'bar', horizontal:true, labels:lab, series:[{label:'Δ pontos', data:dcol.map(v=>v==null?null:Math.round(v)), color:'s1'}], legend:false, zero:true, barMax:14};
       draw('anCh1', sp);
+      out.ins=insProvas(lab,dcol,N);
       out.blocks=[{t:'table',sheet:'Nível por prova',small:true,head:['Prova',...yl,'Δ período'],rows:vals.map((r,k)=>[lab[k],...r.map(v=>v==null?'':Math.round(v*10)/10), dcol[k]==null?'':Math.round(dcol[k])]),align:['l',...yl.map(()=>'r'),'r']},{t:'chart',title:'Variação do nível no período por prova',spec:sp}];
     } else {
       const vals=keys.map(k=>sy.map(y=>val(k,y,o=>o.a/o.c)));
@@ -1786,6 +1806,7 @@ function anContent(){
       el.innerHTML=`<div class="card"><div class="card-h"><div><h3>Idade média do top‑${N} por época</h3><p class="note">Todas as provas${AN.co===''?'':' em '+CO_L[+AN.co].toLowerCase()}. Mostra se o alto nível nacional está a ficar mais jovem ou mais velho.</p></div></div><div class="chart" id="anCh1"></div></div>
       <div class="card"><div class="card-h"><div><h3>Idade média do top‑${N} por prova</h3><p class="note">Tom mais escuro = grupo mais velho.</p></div></div>${heatHTML(lab, yl, vals, null, f1, 'Prova')}</div>`;
       draw('anCh1', sp);
+      out.ins=insIdade(sp,N);
       out.blocks=[{t:'chart',title:'Idade média do top-'+N+' por época',spec:sp},{t:'table',sheet:'Idade top-'+N,small:true,head:['Prova',...yl],rows:vals.map((r,k)=>[lab[k],...r.map(v=>v==null?'':Math.round(v*10)/10)]),align:['l',...yl.map(()=>'r')]}];
     }
     return;
@@ -1803,6 +1824,7 @@ function anContent(){
     const t=new DataTable('anT1',[{k:'reg',l:'Assoc.'},{k:'name',l:'Nome'},{k:'n',l:'Nadadores',num:1},{k:'share',l:'Peso',num:1,f:r=>f1(r.share)+'%'},{k:'first',l:sy[0],num:1,f:r=>AN.am==='n'?fN(r.first):f1(r.first)},{k:'last',l:sy[sy.length-1],num:1,f:r=>AN.am==='n'?fN(r.last):f1(r.last)},{k:'d',l:AN.am==='n'?'Δ %':'Δ pts',num:1,f:r=>r.d==null?'—':AN.am==='n'?fPct(r.d,1):fSgn(r.d)}], rows, {sort:{k:'n',dir:'desc'},page:30});
     const sp={type:'bar',horizontal:true,labels:regs,series:[{label:'Peso (%)',data:rows.map(r=>+r.share.toFixed(1)),color:'s1'}],legend:false,yFmt:v=>f1(v)+'%',tipTitle:it=>regLabel(it[0].label),barMax:16};
     draw('anCh1', sp);
+    out.ins=insAssoc(rows,AN.am);
     out.blocks=[{t:'table',sheet:'Associações por época',small:true,head:['Associação',...yl],rows:vals.map((r,k)=>[regs[k],...r.map(v=>v==null?'':Math.round(v*10)/10)]),align:['l',...yl.map(()=>'r')]},Object.assign({t:'table',sheet:'Resumo período'},t.exportRows()),{t:'chart',title:'Peso de cada associação',spec:sp}];
     return;
   }
@@ -1817,6 +1839,7 @@ function anContent(){
     const top=[...rows].sort((a,b)=>b.t24-a.t24).slice(0,20);
     const sp={type:'bar',horizontal:true,labels:top.map(r=>r.code),series:[{label:'Top‑24',data:top.map(r=>r.t24),color:'s1'},{label:'Top‑10',data:top.map(r=>r.t10),color:'seq2'}],tipTitle:it=>{ const r=top[it[0].dataIndex]; return r.club; },barMax:12};
     draw('anCh1', sp);
+    out.ins=insClubes(rows);
     out.blocks=[Object.assign({t:'table',sheet:'Clubes',small:true},t.exportRows()),{t:'chart',title:'Clubes com mais marcas no top-24 nacional',spec:sp}];
     return;
   }
@@ -1836,6 +1859,7 @@ function anContent(){
     <div class="card"><h3>Por escalão</h3><p class="note">Percentagem de nadadores por trimestre de nascimento, em cada escalão em que tiveram marcas no período.</p><div id="anT1" style="margin-top:10px"></div></div>`;
     draw('anCh1', sp);
     const t=new DataTable('anT1',[{k:'esc',l:'Escalão'},{k:'na',l:'Nadadores',num:1},...[0,1,2,3].map(j=>({k:'a'+j,l:'Q'+(j+1),num:1,f:r=>f1(r.a[j])+'%',x:r=>+r.a[j].toFixed(1),sv:r=>r.a[j]})),{k:'nb',l:'Top‑10',num:1},...[0,1,2,3].map(j=>({k:'b'+j,l:'Q'+(j+1)+' top‑10',num:1,f:r=>isFinite(r.b[j])?f1(r.b[j])+'%':'—',x:r=>isFinite(r.b[j])?+r.b[j].toFixed(1):'',sv:r=>r.b[j]}))], tab, {page:10});
+    out.ins=insRae(A,Bq,nA,nB);
     out.blocks=[{t:'chart',title:'Distribuição por trimestre de nascimento',spec:sp},Object.assign({t:'table',sheet:'Idade relativa'},t.exportRows())];
     return;
   }
@@ -1850,6 +1874,7 @@ function anContent(){
     el.innerHTML=`<div class="card"><div class="card-h"><div><h3>Nadadores ranqueados por ano de nascimento e idade</h3><p class="note">Cada linha é uma geração. A leitura na horizontal mostra quantos nadadores dessa geração estão no ranking em cada idade (dentro do período), o que evidencia o abandono.</p></div></div>${heatHTML(bys.map(String), ages.map(String), vals, null, fN, 'Nascidos em')}</div>
     <div class="card"><h3>Retenção por geração</h3><p class="note">Percentagem dos nadadores ranqueados aos 15 anos que continuam ranqueados aos 18, e dos de 18 que continuam aos 21.</p><div id="anT1" style="margin-top:10px"></div></div>`;
     const t=new DataTable('anT1',[{k:'by',l:'Nascidos em',num:1},{k:'n',l:'Nadadores',num:1},{k:'a15',l:'Aos 15',num:1,f:r=>fN(r.a15)},{k:'a18',l:'Aos 18',num:1,f:r=>fN(r.a18)},{k:'a21',l:'Aos 21',num:1,f:r=>fN(r.a21)},{k:'r1518',l:'Retenção 15→18',num:1,f:r=>r.r1518==null?'—':f1(r.r1518)+'%'},{k:'r1821',l:'Retenção 18→21',num:1,f:r=>r.r1821==null?'—':f1(r.r1821)+'%'}], ret, {page:40});
+    out.ins=insCoortes(ret);
     out.blocks=[{t:'table',sheet:'Coortes',small:true,head:['Nascidos em',...ages.map(String)],rows:vals.map((r,k)=>[bys[k],...r.map(v=>v??'')]),align:['l',...ages.map(()=>'r')]},Object.assign({t:'table',sheet:'Retenção'},t.exportRows())];
     return;
   }
@@ -1864,6 +1889,7 @@ function anContent(){
     <div class="card"><h3>Distribuição por escalão</h3><p class="note">Percentagem de nadadores-época por número de provas ranqueadas.</p><div id="anT1" style="margin-top:10px"></div></div>`;
     draw('anCh1', sp);
     const t=new DataTable('anT1',[{k:'esc',l:'Escalão'},{k:'n',l:'Nadadores‑época',num:1},...B.map(([l],j)=>({k:'b'+j,l:l+' provas',num:1,f:r=>isFinite(r.b[j])?f1(r.b[j])+'%':'—',x:r=>isFinite(r.b[j])?+r.b[j].toFixed(1):'',sv:r=>r.b[j]})),{k:'mean',l:'Média provas',num:1,f:r=>f2(r.mean)},{k:'st',l:'Média estilos',num:1,f:r=>f2(r.st)}], tab, {page:10});
+    out.ins=insEspec(tab);
     out.blocks=[{t:'chart',title:'Provas ranqueadas por nadador e época',spec:sp},Object.assign({t:'table',sheet:'Especialização'},t.exportRows())];
     return;
   }
@@ -2542,6 +2568,7 @@ function an5(sec, el, out){
       <div class="card"><div class="card-h"><div><h3>Evolução por estilo (média do top‑24)</h3><p class="note">Pontos médios dos 24 melhores de cada estilo, por época, e variação face à época anterior: <span class="trk up">▲ evolução</span> subida superior a ${TR.thr} pts, <span class="trk eq">▬ estagnação</span> variação até ± ${TR.thr} pts, <span class="trk dn">▼ regressão</span> descida superior a ${TR.thr} pts (tom mais forte acima de ${TR.thr*2} pts). Tendência = declive da reta de regressão nas épocas fechadas${TR.partial?'; a época em curso é mostrada mas não entra na tendência':''}.</p></div></div>${TR.html}</div>
       <div class="card"><h3>Evolução por estilo · gráfico</h3><div class="chart" id="an5Ev"></div></div>`;
     draw('an5R', spec); draw('an5Ev', TR.spec);
+    out.ins=insPerfil(TR);
     out.blocks=[{t:'chart',title:'Perfil nacional por estilo',spec},{t:'table',sheet:'Estilo x distância',head:['Estilo',...dists.map(d=>d+' m')],rows:dmap.map((r,k)=>[STK5_L[STK5[k]],...r.map(v=>v==null?'':Math.round(v))]),align:['l',...dists.map(()=>'r')]},{t:'h',text:'Evolução por estilo (média do top‑24)'},{t:'p',text:`Variação face à época anterior entre parênteses. Evolução: subida superior a ${TR.thr} pts; estagnação: variação até ± ${TR.thr} pts; regressão: descida superior a ${TR.thr} pts. Tendência: declive da reta de regressão nas épocas fechadas (pts por época).`},Object.assign({t:'table',sheet:'Evolução por estilo',small:true},TR.exp),{t:'chart',title:'Evolução por estilo (média do top‑24)',spec:TR.spec}];
     return;
   }
@@ -2579,6 +2606,7 @@ function an5(sec, el, out){
     if(N===16){ const hit=[0,0,0,0], tot=[0,0,0,0]; for(const [sw,o] of st){ const by=S.sw[sw].by; if(o.rk[A]<1e9 && by+ESC_G[B].a<=L){ const b=band(o.rk[A]); tot[b]++; if(o.rk[B]<=16) hit[b]++; } } spec.series[0].data=hit.map((h,k)=>tot[k]?+(h/tot[k]*100).toFixed(1):null); }
     draw('an5C', spec);
     const t=new DataTable('an5T1',[{k:'band',l:'Em '+An},{k:'t',l:'Nadadores',num:1},...BL.map((b,j)=>({k:'c'+j,l:b,num:1,f:r=>r.t?`${fN(r.c[j])} <span class="muted small">${f1(r.p[j])}%</span>`:'—',x:r=>r.c[j]+(r.t?' ('+r.p[j].toFixed(1)+'%)':''),sv:r=>r.p[j]}))], rowsM, {page:10, nosortbar:true});
+    out.ins=insFunil(An,Bn,N,topAT,reachN,inRank,revTot,revHit,rho);
     out.blocks=[{t:'kpis',items:[[`Top-${N} ${An} → top-${N} ${Bn}`, topAT?f1(reachN/topAT*100)+'%':'—'],[`Top-${N} ${Bn} já top-${N} ${An}`, revTot?f1(revHit/revTot*100)+'%':'—'],['Spearman ρ', rho==null?'—':f2(rho)]]}, Object.assign({t:'table',sheet:'Matriz de transição'}, t.exportRows()), {t:'chart',title:'Chegada ao alto nível por ponto de partida',spec}];
     return;
   }
@@ -2595,6 +2623,7 @@ function an5(sec, el, out){
       <div class="card"><h3>Referência por prova</h3><p class="note">Mediana e intervalo interquartil (P25–P75) do ganho de PC face a PL.</p><div id="an5PT" style="margin-top:8px"></div></div></div>`;
     draw('an5P', spec);
     const t=new DataTable('an5PT',[{k:'e',l:'Prova',f:r=>evLabel(r.e),sv:r=>r.e,dir0:'asc'},...gs.flatMap(g=>{ const s=g?'F':'M'; return [{k:'n'+g,l:'Pares '+s,num:1},{k:'m'+g,l:'Mediana '+s,num:1,f:r=>fPct(r['m'+g]),x:r=>r['m'+g]==null?'':+r['m'+g].toFixed(2)},{k:'q'+g,l:'P25–P75 '+s,num:1,f:r=>r['q1'+g]==null?'—':f2(r['q1'+g])+' – '+f2(r['q3'+g])+'%',sv:r=>r['m'+g]}]; })], rows, {page:30});
+    out.ins=insPlpc(rows,gs,P.length);
     out.blocks=[{t:'chart',title:'Ganho mediano da piscina curta face à piscina longa',spec},Object.assign({t:'table',sheet:'Diferencial PL-PC'},t.exportRows())];
     return;
   }
@@ -2615,6 +2644,7 @@ function an5(sec, el, out){
       <div class="card"><h3>Estagnação por idade</h3><div id="an5ST" style="margin-top:8px"></div></div>`;
     draw('an5SA',specA); draw('an5SS',specS);
     const t=new DataTable('an5ST',[{k:'a',l:'Idade',num:1,dir0:'asc'},...gs.flatMap(g=>{ const s=g?'F':'M'; return [{k:'n'+g,l:'Nadadores '+s,num:1},{k:'p'+g,l:'Estagnados '+s,num:1,f:r=>r['p'+g]==null?'—':f1(r['p'+g])+'%',x:r=>r['p'+g]==null?'':+r['p'+g].toFixed(1)}]; })], rows, {page:30});
+    out.ins=insEstag(G,gs,ages);
     out.blocks=[{t:'chart',title:'Taxa de estagnação por idade',spec:specA},{t:'chart',title:'Taxa de estagnação por época',spec:specS},Object.assign({t:'table',sheet:'Estagnação'},t.exportRows())];
     return;
   }
@@ -2727,7 +2757,7 @@ function trendTable(rowsLab, years, vals, thr, head){
   const exp={head:[head,...years.map(y=>String(y)+(isPartial(y)?' (parcial)':'')),'Tendência (pts/época)','Classificação','Evolução / estagnação / regressão'], rows:rows.map(r=>[r.lab,...r.cells.map(c=>c.v==null?'':Math.round(c.v)+(c.d!=null?' ('+(Math.abs(c.d)<0.5?'=':asc(c.d))+')':'')), r.slope==null?'':(r.slope>0?'+':'')+r.slope.toFixed(1), r.slope==null?'':TR_L[r.tc], `${r.cnt.up} / ${r.cnt.eq} / ${r.cnt.dn}`]), align:['l',...years.map(()=>'r'),'r','l','r']};
   const FILL={up:'#DCEFE4',up2:'#B3DDC4',dn:'#F7DEDB',dn2:'#EDB6B0',eq:null};
   exp.fills=rows.map(r=>[null,...r.cells.map(c=>FILL[c.c]||null),FILL[r.tc]||null,FILL[r.tc]||null,null]);
-  return {html, spec, exp, rows, thr, partial:partial.some(Boolean)};
+  return {html, spec, exp, rows, thr, partial:partial.some(Boolean), pmask:partial};
 }
 
 </script>
@@ -2787,6 +2817,7 @@ function an6(sec, el, out){
       el.innerHTML=`<div class="card"><div class="card-h"><div><h3>Melhores marcas de sempre por idade · ${esc(evLabel(e))}</h3><p class="note">${note}</p></div></div><div class="chart" id="an6Ch"></div></div><div class="card"><h3>Top‑3 de sempre em cada idade</h3><div id="an6T" style="margin-top:8px"></div></div>`;
       draw('an6Ch',spec);
       const t=new DataTable('an6T',[{k:'a',l:'Idade',num:1,dir0:'asc'},{k:'t1',l:'1.º',f:r=>cellF(r.t[0]),x:r=>cellX(r.t[0]),sv:r=>R.tm[r.t[0]]},{k:'t2',l:'2.º',f:r=>cellF(r.t[1]),x:r=>cellX(r.t[1]),nosort:1},{k:'t3',l:'3.º',f:r=>cellF(r.t[2]),x:r=>cellX(r.t[2]),nosort:1},{k:'n',l:'Nadadores',num:1}], rows, {page:40});
+      out.ins=insRec(rows);
       out.blocks=[{t:'chart',title:'Melhores marcas de sempre por idade · '+evLabel(e),spec},Object.assign({t:'table',sheet:'Recordes por idade'},t.exportRows())];
     } else {
       const grp=AN6.recAge; const keyOf = i => grp===''? D.AGE[i] : D.ESC[i];
@@ -2815,6 +2846,7 @@ function an6(sec, el, out){
       <div class="card"><h3>Densidade por prova</h3><div id="an6DT" style="margin-top:8px"></div></div>`;
     draw('an6D1',specB); if(specE) draw('an6D2',specE);
     const t=new DataTable('an6DT',[{k:'e',l:'Prova',f:r=>evLabel(r.e),sv:r=>r.e,dir0:'asc'},{k:'g',l:'Género',f:r=>G_L[r.g],sv:r=>r.g},{k:'g18',l:'1.º → 8.º',num:1,f:r=>f2(r.g18)+'%',x:r=>+r.g18.toFixed(2)},{k:'g824',l:'8.º → 24.º',num:1,f:r=>isFinite(r.g824)?f2(r.g824)+'%':'—',x:r=>isFinite(r.g824)?+r.g824.toFixed(2):''},{k:'g124',l:'1.º → 24.º',num:1,f:r=>isFinite(r.g124)?f2(r.g124)+'%':'—',x:r=>isFinite(r.g124)?+r.g124.toFixed(2):''},{k:'n',l:'Épocas',num:1}], rows, {sorts:[{k:'g18',dir:'asc'}], page:40});
+    out.ins=insDens(rows);
     out.blocks=[{t:'chart',title:'Diferença entre o 1.º e o 8.º por prova',spec:specB},...(specE?[{t:'chart',title:'Evolução da densidade · '+evLabel(ev),spec:specE}]:[]),Object.assign({t:'table',sheet:'Densidade'},t.exportRows())];
     return;
   }
@@ -2832,6 +2864,7 @@ function an6(sec, el, out){
     draw('an6G1',spec);
     const ts=new DataTable('an6GS',[{k:'s',l:'Estilo'},{k:'gap',l:'Diferença F vs M',num:1,f:r=>f2(r.gap)+'%',x:r=>+r.gap.toFixed(2)},{k:'rel',l:'Face à média',num:1,f:r=>`<span class="pill ${r.rel<-0.2?'good':r.rel>0.2?'bad':''}">${fPct(r.rel)}</span>`,x:r=>+r.rel.toFixed(2)}], byStroke, {page:10, nosortbar:true});
     const t=new DataTable('an6GT',[{k:'e',l:'Prova',f:r=>evLabel(r.e),sv:r=>r.e,dir0:'asc'},{k:'stroke',l:'Estilo'},{k:'gap',l:'Diferença F vs M',num:1,f:r=>f2(r.gap)+'%',x:r=>+r.gap.toFixed(2)},{k:'rel',l:'Face à média',num:1,f:r=>fPct(r.rel),x:r=>+r.rel.toFixed(2)},{k:'n',l:'Épocas',num:1}], rows, {page:40});
+    out.ins=insGen(rows,byStroke,avg);
     out.blocks=[{t:'chart',title:'Diferença entre femininos e masculinos por prova',spec},Object.assign({t:'table',sheet:'Géneros por estilo'},ts.exportRows()),Object.assign({t:'table',sheet:'Géneros por prova'},t.exportRows())];
     return;
   }
@@ -2845,6 +2878,7 @@ function an6(sec, el, out){
       <div class="card"><h3>Idade de melhor rendimento por prova</h3><p class="note">Média, mediana e intervalo interquartil (P25–P75).</p><div id="an6PT" style="margin-top:8px"></div></div></div>`;
     draw('an6P1',spec);
     const t=new DataTable('an6PT',[{k:'e',l:'Prova',f:r=>evLabel(r.e),sv:r=>r.e,dir0:'asc'},...gs.flatMap(g=>{ const s=g?'F':'M'; return [{k:'n'+g,l:'Nadadores '+s,num:1},{k:'a'+g,l:'Média '+s,num:1,f:r=>f1(r['a'+g]),x:r=>r['a'+g]==null?'':+r['a'+g].toFixed(1)},{k:'m'+g,l:'Mediana '+s,num:1,f:r=>fN(r['m'+g])},{k:'q'+g,l:'P25–P75 '+s,num:1,f:r=>r['q'+g]?fN(r['q'+g][0])+'–'+fN(r['q'+g][1]):'—',sv:r=>r['m'+g]}]; })], rows, {page:40});
+    out.ins=insPico(rows,gs);
     out.blocks=[{t:'chart',title:'Idade da melhor marca da carreira',spec},Object.assign({t:'table',sheet:'Idade de melhor rendimento'},t.exportRows())];
     return;
   }
@@ -2875,6 +2909,7 @@ function an6(sec, el, out){
     draw('an6F1',spec);
     const t=new DataTable('an6FT',[{k:'club',l:'Clube',cls:'wrap'},{k:'code',l:'Cód.'},{k:'reg',l:'Assoc.'},{k:'form',l:'Formados',num:1},{k:'cheg',l:'Chegada',num:1},{k:'ret',l:'Retidos',num:1},{k:'pret',l:'Retenção',num:1,f:r=>r.pret==null?'—':f1(r.pret)+'%',x:r=>r.pret==null?'':+r.pret.toFixed(1)},{k:'bal',l:'Saldo',num:1,f:r=>fSgn(r.bal)}], clubs, {sorts:[{k:'form',dir:'desc'}], page:20});
     const tf=new DataTable('an6FF',[{k:'from',l:'Formador',f:r=>esc(r.fc),x:r=>r.from},{k:'rf',l:'Assoc.'},{k:'to',l:'Chegada',f:r=>esc(r.tc),x:r=>r.to},{k:'rt',l:'Assoc.'},{k:'n',l:'Nadadores',num:1}], fl, {sorts:[{k:'n',dir:'desc'}], page:15});
+    out.ins=insForm(list,sameN,clubs,N);
     out.blocks=[{t:'kpis',items:[['Chegaram ao top-'+N,fN(list.length)],['No clube formador',list.length?f1(sameN/list.length*100)+'%':'—']]},{t:'chart',title:'Clubes formadores e de chegada',spec},Object.assign({t:'table',sheet:'Clubes formadores'},t.exportRows()),Object.assign({t:'table',sheet:'Transferências'},tf.exportRows()),{t:'table',sheet:'Entre associações',small:true,head:['Formadora',...regs],rows:regs.map(a=>[a,...regs.map(b=>rflows.get(a+'>'+b)||'')]),align:['l',...regs.map(()=>'r')]}];
     return;
   }
@@ -2894,6 +2929,7 @@ function an6(sec, el, out){
     draw('an6E1',spec);
     const tr=new DataTable('an6ER',[{k:'k',l:'Associação',f:r=>esc(regLabel(r.k)),x:r=>regLabel(r.k)},{k:'n',l:'Nadadores',num:1},{k:'t24',l:'Top‑24',num:1},{k:'p24',l:'% top‑24',num:1,f:r=>f1(r.p24)+'%',x:r=>+r.p24.toFixed(1)},{k:'t8',l:'Top‑8',num:1},{k:'p8',l:'% top‑8',num:1,f:r=>f1(r.p8)+'%',x:r=>+r.p8.toFixed(1)}], regs, {sorts:[{k:'p24',dir:'desc'}], page:20});
     const tc=new DataTable('an6EC',[{k:'club',l:'Clube',cls:'wrap'},{k:'code',l:'Cód.'},{k:'reg',l:'Assoc.'},{k:'n',l:'Nadadores',num:1},{k:'t24',l:'Top‑24',num:1},{k:'p24',l:'% top‑24',num:1,f:r=>f1(r.p24)+'%',x:r=>+r.p24.toFixed(1)},{k:'t8',l:'Top‑8',num:1},{k:'p8',l:'% top‑8',num:1,f:r=>f1(r.p8)+'%',x:r=>+r.p8.toFixed(1)}], clubs, {sorts:[{k:'p24',dir:'desc'}], page:25});
+    out.ins=insEfic(regs,nat24);
     out.blocks=[{t:'chart',title:'Eficiência por associação',spec},Object.assign({t:'table',sheet:'Eficiência associações'},tr.exportRows()),Object.assign({t:'table',sheet:'Eficiência clubes'},tc.exportRows())];
     return;
   }
@@ -2912,6 +2948,7 @@ function an6(sec, el, out){
     draw('an6A1',spec);
     const t=new DataTable('an6AT',[{k:'esc',l:'Escalão'},{k:'n',l:'Marcas',num:1},...MT_L.map((l,j)=>({k:'p'+j,l,num:1,f:r=>r.p[j]==null?'—':f1(r.p[j])+'%',x:r=>r.p[j]==null?'':+r.p[j].toFixed(1),sv:r=>r.p[j]}))], typ, {page:10, nosortbar:true});
     const tm=new DataTable('an6AM',[{k:'meet',l:'Competição',cls:'wrap'},{k:'city',l:'Local'},{k:'typ',l:'Tipo'},{k:'n',l:'Melhores marcas',num:1}], top, {sorts:[{k:'n',dir:'desc'}], page:20});
+    out.ins=insAfin(mon,gs,typ);
     out.blocks=[{t:'chart',title:'Mês das melhores marcas da época',spec},Object.assign({t:'table',sheet:'Afinação por escalão'},t.exportRows()),Object.assign({t:'table',sheet:'Competições'},tm.exportRows())];
     return;
   }
@@ -2994,7 +3031,7 @@ function grContent(root){
     {k:'name',l:'Nadador',f:r=>r.found?swLink(r.id,r.name):`${esc(r.name)} <span class="pill bad">não encontrado</span>`,x:r=>r.name},
     {k:'age',l:'Id.',num:1,f:r=>r.found?r.age:'—'}, {k:'club',l:'Clube',f:r=>r.club||'—'},
     {k:'pts',l:'Pts '+L,num:1,f:r=>r.pts??'—'}, {k:'d',l:'Δ vs '+(L-1),num:1,f:r=>r.d==null?'—':`<span class="${r.d>=0?'up':'down'}">${fSgn(r.d)}</span>`,x:r=>r.d??''},
-    {k:'bev',l:'Melhor prova'}, {k:'rk',l:'Rk nac.',num:1,f:r=>r.rk?ord(r.rk):'—',x:r=>r.rk??'',dir0:'asc'},
+    {k:'sp',l:'Pts por época',nosort:1,noexp:1,f:r=>r.found?sparkSw(r.id):''}, {k:'bev',l:'Melhor prova'}, {k:'rk',l:'Rk nac.',num:1,f:r=>r.rk?ord(r.rk):'—',x:r=>r.rk??'',dir0:'asc'},
     {k:'gap',l:'Mín. A Mundial',num:1,f:r=>r.gap?`<span class="pill ${r.gap.g<=0?'good':r.gap.g<=1?'gold':''}">${r.gap.g<=0?'✓ ':''}${fPct(r.gap.g)}</span> <span class="muted small">${esc(evShort(r.gap.e))}</span>`:'—',x:r=>r.gap?r.gap.g.toFixed(2)+'% ('+evLabel(r.gap.e)+')':'',sv:r=>r.gap?r.gap.g:null,dir0:'asc'},
     {k:'alert',l:'Alerta',f:r=>r.alert?`<span class="pill gold">⚑ ${r.alert.evs.length}</span>`:'—',x:r=>r.alert?'Sim ('+r.alert.evs.length+')':'',sv:r=>r.alert?r.alert.evs.length:0},
     {k:'since',l:'Épocas sem MP',num:1,f:r=>r.found?(r.since>=2?`<span class="pill bad">${r.since}</span>`:r.since):'—',x:r=>r.found?r.since:'',title:'Épocas desde a última melhor marca pessoal (qualquer prova)'},
@@ -3656,7 +3693,7 @@ function tlContent(){
       <div class="card"><div class="card-h"><div><h3>Modelo · probabilidade de chegar ao top‑8 absoluto</h3><p class="note">${G_L[g]}: frequência histórica por idade e nível de índice (épocas com pelo menos 3 épocas seguintes e acompanhamento até aos 20 anos).</p></div></div><div class="chart tall" id="tlCh"></div></div>`;
     const t=new DataTable('tlT',[
       {k:'name',l:'Nadador',f:r=>swLink(r.id,r.name)+(r.grp?` <span class="pill acc">${esc(r.grp)}</span>`:'')+(r.al?' <span class="pill gold" title="Alerta de evolução">⚑</span>':''),x:r=>r.name+(r.grp?' ('+r.grp+')':'')},
-      {k:'age',l:'Id.',num:1},{k:'q',l:'Trim.',title:'Trimestre de nascimento'},{k:'club',l:'Clube'},{k:'ev',l:'Melhor prova'},
+      {k:'sp',l:'Pts por época',nosort:1,noexp:1,f:r=>sparkSw(r.id)},{k:'age',l:'Id.',num:1},{k:'q',l:'Trim.',title:'Trimestre de nascimento'},{k:'club',l:'Clube'},{k:'ev',l:'Melhor prova'},
       {k:'p1',l:'Percentil',num:1,f:r=>f1(r.p1),x:r=>+r.p1.toFixed(1)},{k:'nev',l:'Provas',num:1},
       {k:'adj',l:'Índice',num:1,f:r=>`<b>${fN(Math.round(r.adj))}</b>`,x:r=>Math.round(r.adj)},
       {k:'p8',l:'Prob. top‑8',num:1,f:r=>r.p8==null?'—':`<span class="pill ${r.p8>=50?'good':r.p8>=25?'gold':''}">${fN(r.p8)}%</span>`,x:r=>r.p8==null?'':+r.p8.toFixed(1),sv:r=>r.p8},
@@ -3748,7 +3785,7 @@ function ceContent(){
     ${!isC?'<div class="card"><h3>Clubes da associação · '+y1+'</h3><div id="ceT4" style="margin-top:8px"></div></div>':''}`;
   draw('ceCh1',specN); draw('ceCh2',specL); draw('ceCh3',specE); draw('ceCh4',specS);
   const t0=new DataTable('ceT0',[{k:'y',l:'Época',f:r=>yearLabel(r.y),x:r=>r.y},{k:'n',l:'Nadadores',num:1},{k:'nM',l:'M',num:1},{k:'nF',l:'F',num:1},{k:'novos',l:'Novos',num:1},{k:'ret',l:'Retenção',num:1,f:r=>r.ret==null?'—':f1(r.ret)+'%',x:r=>r.ret==null?'':+r.ret.toFixed(1)},{k:'lvl',l:'Nível top‑10',num:1,f:r=>r.lvl==null?'—':f1(r.lvl),x:r=>r.lvl==null?'':+r.lvl.toFixed(1)},{k:'t24',l:'Top‑24 esc.',num:1},{k:'t8',l:'Top‑8 esc.',num:1},{k:'mins',l:'Mín./índices',num:1},{k:'wa',l:'Mín. intern.',num:1}], [...evo].reverse(), {page:30});
-  const t1=new DataTable('ceT1',[{k:'name',l:'Nadador',f:r=>swLink(r.id,r.name)+(r.grp?` <span class="pill acc">${esc(r.grp)}</span>`:'')+(r.al?' <span class="pill gold" title="Alerta de evolução">⚑</span>':'')+(r.min?' <span class="pill good" title="Mínimo ou índice na época">Mín.</span>':''),x:r=>r.name+(r.grp?' ('+r.grp+')':'')+(r.min?' [mínimo]':'')},{k:'g',l:'G'},{k:'age',l:'Id.',num:1},{k:'esc',l:'Escalão',sv:r=>r.age},...(isC?[]:[{k:'club',l:'Clube'}]),{k:'ev',l:'Melhor prova'},{k:'pts',l:'Pts',num:1},{k:'rk',l:'Rk nac.',num:1,f:r=>r.rk?ord(r.rk):'—',x:r=>r.rk??'',dir0:'asc'},{k:'rke',l:'Rk esc.',num:1,f:r=>r.rke?ord(r.rke):'—',x:r=>r.rke??'',dir0:'asc'}], swRowsC, {sorts:[{k:'pts',dir:'desc'}], page:25});
+  const t1=new DataTable('ceT1',[{k:'name',l:'Nadador',f:r=>swLink(r.id,r.name)+(r.grp?` <span class="pill acc">${esc(r.grp)}</span>`:'')+(r.al?' <span class="pill gold" title="Alerta de evolução">⚑</span>':'')+(r.min?' <span class="pill good" title="Mínimo ou índice na época">Mín.</span>':''),x:r=>r.name+(r.grp?' ('+r.grp+')':'')+(r.min?' [mínimo]':'')},{k:'g',l:'G'},{k:'age',l:'Id.',num:1},{k:'esc',l:'Escalão',sv:r=>r.age},{k:'sp',l:'Pts por época',nosort:1,noexp:1,f:r=>sparkSw(r.id)},...(isC?[]:[{k:'club',l:'Clube'}]),{k:'ev',l:'Melhor prova'},{k:'pts',l:'Pts',num:1},{k:'rk',l:'Rk nac.',num:1,f:r=>r.rk?ord(r.rk):'—',x:r=>r.rk??'',dir0:'asc'},{k:'rke',l:'Rk esc.',num:1,f:r=>r.rke?ord(r.rke):'—',x:r=>r.rke??'',dir0:'asc'}], swRowsC, {sorts:[{k:'pts',dir:'desc'}], page:25});
   const t2=new DataTable('ceT2',[{k:'t',l:'Tipo',f:r=>`<span class="pill ${r.t==='Entrada'?'good':r.t==='Saída'?'bad':''}">${r.t}</span>`,x:r=>r.t},{k:'name',l:'Nadador',f:r=>swLink(r.id,r.name),x:r=>r.name},{k:'from',l:'De'},{k:'to',l:'Para'},{k:'pts',l:'Pts',num:1}], moves, {sorts:[{k:'pts',dir:'desc'}], page:15});
   const t3=new DataTable('ceT3',[{k:'name',l:'Nadador',f:r=>swLink(r.id,r.name),x:r=>r.name},{k:'g',l:'G'},{k:'fy',l:'1.ª marca',num:1},{k:'ty',l:'Top‑8',num:1},{k:'age',l:'Idade',num:1},{k:'ev',l:'Prova'},{k:'at',l:'Clube no top‑8'},{k:'now',l:'Clube atual'}], form, {sorts:[{k:'ty',dir:'desc'}], page:15});
   let t4=null; if(!isC){ const cm=new Map(); for(const [sw,i] of m1){ const c=R.cl[i]; let o=cm.get(c); if(!o){ o={c,n:0,pts:[],t24:0}; cm.set(c,o);} o.n++; o.pts.push(R.pt[i]); if(t24.get(y1)&&t24.get(y1).has(sw)) o.t24++; }
@@ -3767,6 +3804,505 @@ async function ceModel(){
     {t:'h',text:'Formados que chegaram ao top‑8 nacional'},Object.assign({t:'table',sheet:'Formados',small:true},x.t3.exportRows()),
     {t:'src',text:'Fonte: rankings nacionais absolutos da FPN. Um nadador conta num clube ou associação na época se tiver pelo menos uma marca no ranking por esse clube. Top‑24/top‑8 do escalão: ranking nacional do escalão da prova. Mínimos e índices: tabelas do separador Mínimos, com as idades de acesso, nacionalidade portuguesa.'}]};
 }
+
+</script>
+<script>
+'use strict';
+/* ============================================================
+   Interpretação: "Como ler", escala de cor, código de cores,
+   guia e glossário, leitura rápida automática, referência por
+   idade, distância aos mínimos, fluxos, mapa esquemático,
+   anotações nos gráficos e mini-gráficos nas tabelas
+   ============================================================ */
+
+/* ---------------- anotações nos gráficos + preenchimento entre séries ---------------- */
+const obsAnnot = {
+  id:'obsAnnot',
+  afterDatasetsDraw(chart, args, o){
+    if(!o || !o.on) return; const {ctx, chartArea:a, scales} = chart; const x=scales.x, y=scales.y; if(!x||!y||!a) return;
+    const big = chart.width>1100, fs = big ? 19 : 11; ctx.save(); ctx.font = `600 ${fs}px ${LIGHT.font}`;
+    if(o.partial!=null){ const px=x.getPixelForValue(o.partial), prev = o.partial>0 ? x.getPixelForValue(o.partial-1) : a.left; const l=(px+prev)/2;
+      ctx.fillStyle=o.shade; ctx.fillRect(l, a.top, a.right-l, a.bottom-a.top);
+      ctx.fillStyle=o.muted; ctx.textAlign='right'; ctx.fillText('em curso', a.right-3, a.bottom-5); }
+    for(const m of (o.marks||[])){ const px=x.getPixelForValue(m.i); if(px<a.left||px>a.right) continue;
+      ctx.strokeStyle=o.muted; ctx.setLineDash([4,4]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px,a.top); ctx.lineTo(px,a.bottom); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=o.muted; ctx.textAlign= px>a.right-90 ? 'right' : 'left'; ctx.fillText(m.label, px+(ctx.textAlign==='left'?4:-4), a.top+fs); }
+    (o.hlines||[]).forEach((h,hk)=>{ const py=y.getPixelForValue(h.v); if(py<a.top-1||py>a.bottom+1) return;
+      ctx.strokeStyle=h.color||o.muted; ctx.setLineDash([6,4]); ctx.lineWidth=big?2.5:1.3; ctx.beginPath(); ctx.moveTo(a.left,py); ctx.lineTo(a.right,py); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=h.color||o.muted; ctx.textAlign='right'; const off=hk*(big?340:190); ctx.fillText(h.label, a.right-4-off, hk%2? py+fs+3 : py-4); });
+    ctx.restore();
+  }
+};
+if(window.Chart) Chart.register(obsAnnot);
+const _chartCfg0 = chartCfg;
+chartCfg = function(spec){
+  const f=_chartCfg0(spec);
+  return th => {
+    const cfg=f(th);
+    (spec.series||[]).forEach((s,k)=>{ const d=cfg.data.datasets[k]; if(!d) return; if(s.fillTo){ d.fill=s.fillTo; d.backgroundColor=alpha(col(th,s.color),s.fillAlpha||.16); } });
+    if(spec.type!=='radar'){
+      const lab=(spec.labels||[]).map(String), years = !spec.horizontal && lab.length>=3 && lab.every(l=>/^\d{4}$/.test(l));
+      const o={on:false, marks:[], hlines:spec.hlines||[], partial:null, shade:alpha(th.muted||'#56667A',.10), muted:th.muted||'#56667A'};
+      if(years && !spec.noAnnot){ const i=lab.indexOf('2020'); if(i>0&&i<lab.length) o.marks.push({i, label:'2020 · pandemia'}); const last=lab.length-1; if(isPartial(+lab[last])) o.partial=last; }
+      if(spec.vmarks) spec.vmarks.forEach(m=>o.marks.push(m));
+      o.on = o.marks.length>0 || o.partial!=null || o.hlines.length>0;
+      cfg.options.plugins.obsAnnot=o;
+    }
+    return cfg;
+  };
+};
+
+/* ---------------- escala de cor nos mapas de calor ---------------- */
+const _heat0 = heatHTML;
+heatHTML = function(rowsLab, cols, vals, ns, fmt=f1, head='Escalão', rowFmt){
+  const html=_heat0(rowsLab, cols, vals, ns, fmt, head, rowFmt);
+  let mn=Infinity, mx=-Infinity; vals.forEach(r=>r.forEach(v=>{ if(v!=null&&isFinite(v)){ mn=Math.min(mn,v); mx=Math.max(mx,v); } }));
+  if(!isFinite(mn)) return html;
+  return html+`<div class="heat-leg" aria-label="Escala de cor"><span>${esc(fmt(mn))}</span><i></i><span>${esc(fmt(mx))}</span><em>tom mais escuro = valor mais alto</em></div>`;
+};
+
+/* ---------------- mini-gráficos (sparklines) ---------------- */
+function sparkSVG(vals, o={}){
+  const v=vals.map(x=>x==null||!isFinite(x)?null:+x), ok=v.filter(x=>x!=null); if(ok.length<2) return '<span class="muted small">—</span>';
+  const W=o.w||86, H=o.h||22, p=3, mn=Math.min(...ok), mx=Math.max(...ok), rg=mx-mn||1, n=v.length;
+  const X=k=>p+(W-2*p)*k/(n-1), Y=x=>H-p-(H-2*p)*(x-mn)/rg;
+  let d='', pen=false; v.forEach((x,k)=>{ if(x==null){ pen=false; return; } d+=(pen?'L':'M')+X(k).toFixed(1)+' '+Y(x).toFixed(1)+' '; pen=true; });
+  const li=v.map((x,k)=>x==null?-1:k).filter(k=>k>=0).pop(), up=ok[ok.length-1]>=ok[0];
+  const tip=o.tip||'';
+  return `<svg class="spark ${up?'sp-up':'sp-dn'}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(tip)}"><title>${esc(tip)}</title><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${X(li).toFixed(1)}" cy="${Y(v[li]).toFixed(1)}" r="2.4" fill="currentColor"/></svg>`;
+}
+function sparkSw(id, n=8){
+  const ck='spk'+id; let r=D.cache.get(ck);
+  if(!r){ const L=lastYear(), ys=[]; for(let y=L-n+1;y<=L;y++) ys.push(y); const m=swByYearBestPts(id); const vals=ys.map(y=>{ const i=m.get(y); return i==null?null:S.R.pt[i]; });
+    const tip=ys.map((y,k)=>vals[k]==null?null:y+': '+vals[k]).filter(Boolean).join(' · '); r=sparkSVG(vals,{tip:'Melhor pontuação por época — '+tip}); D.cache.set(ck,r); }
+  return r;
+}
+
+/* ---------------- gráficos SVG exportáveis (fluxos, mapa, barras de distância) ---------------- */
+const _draw0 = draw;
+draw = function(el, spec){
+  if(spec && spec.kind==='svg'){ if(typeof el==='string') el=document.getElementById(el); if(!el) return; if(el.__chart){ el.__chart.destroy(); el.__chart=null; } el.__spec=spec; el.classList.add('svg-chart'); el.innerHTML=spec.svg(theme(), false); return; }
+  return _draw0(el, spec);
+};
+const _chartPNG0 = chartPNG;
+chartPNG = async function(spec, w, h, fmt='png'){
+  if(!spec || spec.kind!=='svg') return _chartPNG0(spec, w, h, fmt);
+  const W=spec.w||1400, H=spec.h||600, svg=spec.svg(LIGHT, true).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" ');
+  const img=new Image(); const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=url; });
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); ctx.drawImage(img,0,0,W,H);
+  return {url: fmt==='jpeg'? c.toDataURL('image/jpeg',.92) : c.toDataURL('image/png'), w:W, h:H};
+};
+const xs = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function hexMix(a, b, t){ const p=h=>{ const n=parseInt(h.replace('#',''),16); return [n>>16&255,n>>8&255,n&255]; }; const x=p(a), y=p(b); return '#'+x.map((v,k)=>Math.round(v+(y[k]-v)*t).toString(16).padStart(2,'0')).join(''); }
+const thc = (th, c) => { const v=col(th,c); return v && v.startsWith('#') ? v : (LIGHT[c]||'#185FA5'); };
+
+/* Diagrama de fluxos (Sankey) */
+function sankeySpec(d){
+  return {kind:'svg', w:1400, h:d.h||620, title:d.title, svg:(th, exp)=>{
+    const W=1400, H=d.h||620, pt=34, pb=14, gap=14, nw=16, cols=d.cols, nc=cols.length;
+    const outV=new Map(), inV=new Map(); d.links.forEach(l=>{ outV.set(l.s,(outV.get(l.s)||0)+l.v); inV.set(l.t,(inV.get(l.t)||0)+l.v); });
+    const nv=id=>Math.max(outV.get(id)||0, inV.get(id)||0);
+    const colTot=cols.map(c=>c.reduce((s,n)=>s+nv(n.id),0)), maxN=Math.max(...cols.map(c=>c.length));
+    const k=(H-pt-pb-gap*(maxN-1))/Math.max(1,...colTot);
+    const lw = d.labelW||210, x0=lw, x1=W-lw;
+    const pos=new Map(); cols.forEach((c,ci)=>{ const x = nc===1? x0 : x0+(x1-x0-nw)*ci/(nc-1); const tot=colTot[ci]*k+gap*(c.length-1); let y=pt+(H-pt-pb-tot)/2; c.forEach(n=>{ const h=Math.max(1.5,nv(n.id)*k); pos.set(n.id,{x,y,h,n,oy:y,iy:y,ci}); y+=h+gap; }); });
+    const ink=th.ink||'#0E1B2B', mut=th.muted||'#56667A';
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${xs(d.title||'Diagrama de fluxos')}" style="font-family:${xs(LIGHT.font)}">`;
+    if(exp) s+=`<rect width="${W}" height="${H}" fill="#fff"/>`;
+    (d.heads||[]).forEach((hd,ci)=>{ const p=[...pos.values()].find(q=>q.ci===ci); if(!p) return; s+=`<text x="${p.x+nw/2}" y="18" text-anchor="middle" font-size="17" font-weight="700" fill="${ink}">${xs(hd)}</text>`; });
+    const links=[...d.links].filter(l=>pos.get(l.s)&&pos.get(l.t)).sort((a,b)=>pos.get(a.s).y-pos.get(b.s).y || pos.get(a.t).y-pos.get(b.t).y);
+    links.forEach(l=>{ const a=pos.get(l.s), b=pos.get(l.t); if(!l.v) return; const h=l.v*k; const ya=a.oy+h/2, yb=b.iy+h/2; a.oy+=h; b.iy+=h; const xa=a.x+nw, xb=b.x, mx=(xa+xb)/2;
+      const c=thc(th, l.color||a.n.color||'faint'); s+=`<path d="M${xa},${ya} C${mx},${ya} ${mx},${yb} ${xb},${yb}" fill="none" stroke="${c}" stroke-opacity="${l.op||.28}" stroke-width="${Math.max(1,h)}"><title>${xs(a.n.label+' → '+b.n.label+': '+fN(l.v))}</title></path>`; });
+    pos.forEach(p=>{ const c=thc(th,p.n.color||'s1'); s+=`<rect x="${p.x}" y="${p.y}" width="${nw}" height="${p.h}" rx="3" fill="${c}"><title>${xs(p.n.label+': '+fN(nv(p.n.id)))}</title></rect>`;
+      const left = p.ci===0, right = p.ci===nc-1;
+      const tx = left? p.x-8 : p.x+nw+8, anc = left? 'end' : 'start';
+      if(p.h>=10 || left || right) s+=`<text x="${tx}" y="${p.y+p.h/2+5}" text-anchor="${anc}" font-size="15" fill="${ink}"><tspan font-weight="600">${xs(p.n.label)}</tspan><tspan fill="${mut}"> ${fN(nv(p.n.id))}</tspan></text>`; });
+    return s+'</svg>';
+  }};
+}
+
+/* Mapa esquemático das associações (não à escala) */
+const TILE_POS = {ANMIN:[1.0,0], ARNN:[2.1,0], ANNP:[0.9,1.05], ANCNP:[2.0,1.05], ANC:[1.0,2.1], ANIC:[2.1,2.1], ANDL:[0.8,3.15], ANL:[0.6,4.2], ANALEN:[1.8,4.4], ANDS:[0.8,5.25], ANALG:[1.5,6.35], ANRA:[-1.9,1.2], ANMAD:[-1.9,4.3]};
+function tileMapSpec(o){
+  return {kind:'svg', w:900, h:760, title:o.title, svg:(th, exp)=>{
+    const W=900, H=760, U=92, ox=300, oy=40, t=84;
+    const vals=[...o.vals.values()].filter(v=>v!=null&&isFinite(v)), mn=Math.min(...vals), mx=Math.max(...vals);
+    const lo='#E3ECF7', hi='#062A52', ink=th.ink||'#0E1B2B', mut=th.muted||'#56667A';
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${xs(o.title||'Mapa das associações')}" style="font-family:${xs(LIGHT.font)}">`;
+    if(exp) s+=`<rect width="${W}" height="${H}" fill="#fff"/>`;
+    s+=`<rect x="${ox-1.9*U-20}" y="${oy+1.2*U-22}" width="${t+40}" height="${t+50}" rx="10" fill="none" stroke="${mut}" stroke-dasharray="5 5" opacity=".6"/><rect x="${ox-1.9*U-20}" y="${oy+4.3*U-22}" width="${t+40}" height="${t+50}" rx="10" fill="none" stroke="${mut}" stroke-dasharray="5 5" opacity=".6"/>`;
+    const other=[];
+    for(const [reg,v] of o.vals){ const p=TILE_POS[reg]; if(!p){ if(v!=null) other.push([reg,v]); continue; } const x=ox+p[0]*U, y=oy+p[1]*U; const r= v==null||!isFinite(v)||!(mx>mn)? .5 : (v-mn)/(mx-mn); const f= v==null||!isFinite(v)? '#EEF2F7' : hexMix(lo,hi,r); const dark = v!=null && r>.5;
+      const sel=o.sel===reg; s+=`<g><title>${xs(regLabel(reg)+': '+(v==null?'—':o.fmt(v))+(o.sub&&o.sub.get(reg)!=null?' · '+o.sub.get(reg):''))}</title><rect x="${x}" y="${y}" width="${t}" height="${t}" rx="12" fill="${f}" stroke="${sel?'#BA7517':'none'}" stroke-width="${sel?5:0}"/>
+        <text x="${x+t/2}" y="${y+24}" text-anchor="middle" font-size="14" font-weight="700" fill="${dark?'#fff':'#0E1B2B'}">${xs(reg)}</text>
+        <text x="${x+t/2}" y="${y+50}" text-anchor="middle" font-size="20" font-weight="700" fill="${dark?'#fff':'#0E1B2B'}">${xs(v==null?'—':o.fmt(v))}</text>
+        ${o.sub&&o.sub.get(reg)!=null?`<text x="${x+t/2}" y="${y+71}" text-anchor="middle" font-size="12.5" fill="${dark?'#E3ECF7':'#56667A'}">${xs(o.sub.get(reg))}</text>`:''}</g>`; }
+    s+=`<text x="${ox-1.9*U+t/2}" y="${oy+1.2*U+t+20}" text-anchor="middle" font-size="13" fill="${mut}">Açores</text><text x="${ox-1.9*U+t/2}" y="${oy+4.3*U+t+20}" text-anchor="middle" font-size="13" fill="${mut}">Madeira</text>`;
+    const gid='tmg'+(o.id||''), lx=W-250, ly=H-70; s+=`<defs><linearGradient id="${gid}" x1="0" x2="1"><stop offset="0" stop-color="${lo}"/><stop offset="1" stop-color="${hi}"/></linearGradient></defs><text x="${lx}" y="${ly-10}" font-size="13" fill="${mut}">${xs(o.legend||'')}</text><rect x="${lx}" y="${ly}" width="220" height="14" rx="4" fill="url(#${gid})"/><text x="${lx}" y="${ly+32}" font-size="13" fill="${ink}">${xs(isFinite(mn)?o.fmt(mn):'')}</text><text x="${lx+220}" y="${ly+32}" font-size="13" text-anchor="end" fill="${ink}">${xs(isFinite(mx)?o.fmt(mx):'')}</text>`;
+    s+=`<text x="20" y="${H-14}" font-size="12.5" fill="${mut}">Esquema territorial (não à escala).${other.length?' Outras: '+xs(other.map(([r,v])=>r+' '+o.fmt(v)).join(' · ')):''}</text>`;
+    return s+'</svg>';
+  }};
+}
+
+/* Barras de distância aos mínimos (uma linha por prova) */
+function bulletSpec(rows, title){
+  const H=Math.max(170, 80+rows.length*62);
+  return {kind:'svg', w:1400, h:H, title, svg:(th, exp)=>{
+    const W=1400, lw=230, rw=190, x0=lw, x1=W-rw, A=12, B=-4; const X=g=>x0+(x1-x0)*(A-Math.max(B,Math.min(A,g)))/(A-B);
+    const ink=th.ink||'#0E1B2B', mut=th.muted||'#56667A', good=th.good||'#1D7A4E', gold='#BA7517', line=th.grid||'#E3E8EF';
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${xs(title)}" style="font-family:${xs(LIGHT.font)}">`;
+    if(exp) s+=`<rect width="${W}" height="${H}" fill="#fff"/>`;
+    [12,8,4,0,-4].forEach(g=>{ s+=`<line x1="${X(g)}" x2="${X(g)}" y1="30" y2="${H-26}" stroke="${g===0?ink:line}" stroke-width="${g===0?2:1}" ${g===0?'':'stroke-dasharray="3 4"'}/><text x="${X(g)}" y="${H-8}" text-anchor="middle" font-size="13" fill="${mut}">${g>0?'falta '+g+'%':g<0?'folga '+(-g)+'%':'melhor marca'}</text>`; });
+    s+=`<text x="${x0}" y="18" font-size="13" fill="${mut}">← quanto falta melhorar para cada referência</text><text x="${x1}" y="18" text-anchor="end" font-size="13" fill="${good}">referências já cumpridas →</text>`;
+    rows.forEach((r,k)=>{ const y=50+k*62, cy=y+14;
+      s+=`<text x="${lw-14}" y="${cy-2}" text-anchor="end" font-size="16" font-weight="700" fill="${ink}">${xs(r.ev)}</text><text x="${lw-14}" y="${cy+16}" text-anchor="end" font-size="13" fill="${mut}">${xs(r.pb)}</text>`;
+      s+=`<rect x="${x0}" y="${cy-5}" width="${x1-x0}" height="10" rx="5" fill="${line}"/>`;
+      if(r.next) s+=`<rect x="${X(r.next.g)}" y="${cy-5}" width="${Math.max(0,X(0)-X(r.next.g))}" height="10" rx="5" fill="${gold}" opacity=".55"/>`;
+      const ms=[...r.marks].sort((a,b)=>X(a.g)-X(b.g)); const lastX={up:-1e9, dn:-1e9}; let side='up';
+      ms.forEach(m=>{ const x=X(m.g), ok=m.g<=0, c = m.nat? '#185FA5' : ok? good : mut; const tip=xs(m.label+': '+m.t+' ('+(m.g>0?'falta '+f2(m.g)+'%':'cumprido, folga '+f2(-m.g)+'%')+')');
+        s+= m.nat? `<path d="M${x},${cy-9} L${x+7},${cy} L${x},${cy+9} L${x-7},${cy} Z" fill="${c}"><title>${tip}</title></path>` : `<rect x="${x-2}" y="${cy-11}" width="4" height="22" rx="1.5" fill="${c}"><title>${tip}</title></rect>`;
+        if(x-lastX[side]<70) side = side==='up'?'dn':'up';
+        if(x-lastX[side]>=70){ s+=`<text x="${x}" y="${side==='up'?cy-15:cy+27}" text-anchor="middle" font-size="12.5" fill="${c}" font-weight="${ok||m.nat?700:500}">${xs(m.label)}${m.g>A?' ◂':m.g<B?' ▸':''}</text>`; lastX[side]=x; }
+        side = side==='up'?'dn':'up'; });
+      s+=`<text x="${x1+14}" y="${cy+5}" font-size="14" fill="${r.next?gold:good}" font-weight="600">${xs(r.next? 'próx.: '+r.next.label+' a '+f2(r.next.g)+'%' : 'todas cumpridas')}</text>`; });
+    return s+'</svg>';
+  }};
+}
+
+/* ---------------- "Como ler" ---------------- */
+const HELP = [
+  [/^Nadadores no ranking por época|^Nadadores por época/, 'Número de nadadores diferentes com pelo menos uma marca no ranking em cada época.', 'Cada ponto/barra é uma época. Compare a forma da curva, não só o último valor.', 'Subidas indicam maior base de praticantes ranqueados; quebras bruscas (ex.: 2020) têm causas externas.'],
+  [/^Nível por época/, 'Nível médio da elite nacional (média dos melhores) em cada época.', 'Pontos: mais pontos = mais rápido. Uma linha por género.', 'Tendência sustentada de subida = elite mais forte; compare masculinos e femininos.'],
+  [/^Nível por escalão ao longo/, 'Nível de cada escalão ao longo das épocas.', 'Linhas = escalões; colunas = épocas. Tom mais escuro = nível mais alto (escala por baixo).', 'Escalões que clareiam ao longo do tempo estão a perder nível.'],
+  [/^Distribuição de pontuação/, 'Quantos nadadores há em cada intervalo de pontos.', 'Barras mais à direita = nadadores de nível mais alto.', 'Uma "cauda" à direita mais grossa indica mais qualidade de topo.'],
+  [/^Distribuição etária/, 'Idade dos nadadores ranqueados.', 'Cada barra é uma idade.', 'Queda forte depois dos 17–18 anos indica abandono precoce.'],
+  [/^Por escalão/, 'Distribuição por escalão FPN.', 'Barras por escalão.', 'Compare o peso dos escalões de formação com o dos seniores.'],
+  [/^Por associação/, 'Distribuição por associação territorial do clube.', 'Barras ordenadas por número de nadadores.', 'Mostra onde está concentrada a base da natação nacional.'],
+  [/^Dinâmica anual do ranking/, 'Entradas, permanências e saídas de nadadores em cada época.', '"Novos" = primeira vez no ranking; "Saíram" = presentes numa época e ausentes na seguinte.', 'Retenção baixa ou saídas altas nos escalões jovens = risco de abandono.'],
+  [/^Clubes ·|^Clubes no período/, 'Clubes com nadadores no universo filtrado.', 'Ordene por nadadores, pontos ou marcas no top nacional.', 'Clubes com muitos nadadores mas pontos médios baixos têm margem de qualificação.'],
+  [/^Melhores nadadores ·/, 'Os nadadores com maior pontuação no universo filtrado.', 'Uma linha por nadador, com a melhor marca.', 'Use como lista de referência do alto nível.'],
+  [/^Profundidade do ranking/, 'Tempo do 1.º, 8.º, 16.º e 50.º classificados em cada época.', 'Eixo invertido: mais acima = mais rápido.', 'Linhas que sobem = ranking mais rápido; o 8.º e o 16.º mostram a profundidade, não só o melhor.'],
+  [/^Tabela de profundidade/, 'Tempo em cada posição do ranking, por época.', 'Leia por coluna para ver a evolução de cada posição.', 'Melhorias no 24.º/50.º indicam base mais forte.'],
+  [/^Curva de progressão por idade/, 'Tempo mediano dos nadadores ranqueados em cada idade.', 'Eixo invertido: mais acima = mais rápido. Uma linha por subperíodo.', 'Linhas recentes acima das antigas = nadadores atuais mais rápidos na mesma idade.'],
+  [/^Taxa de melhoria anual por idade|^Melhoria mediana por idade/, 'Quanto melhoram, em média, os nadadores de uma época para a seguinte, por idade.', 'Positivo = mais rápido. Cada barra é uma idade.', 'É a referência para avaliar se um nadador está a evoluir acima ou abaixo do normal.'],
+  [/^Melhoria média por época/, 'Melhoria anual média de todos os nadadores em cada época.', 'Positivo = mais rápido que na época anterior.', 'É a "média global do ano" usada nos alertas.'],
+  [/^Referências por idade|^Referência nacional por idade/, 'Percentis dos tempos ranqueados em cada idade.', 'P10 = 10% mais rápidos; mediana = meio da distribuição.', 'Compare uma marca com a sua idade para situar o nadador.'],
+  [/^Pontuação por época/, 'Melhor pontuação do nadador em cada época face à média e ao percentil 90 da mesma idade.', 'Linha cheia = nadador; tracejadas = referências nacionais.', 'Estar acima do P90 = entre os 10% melhores da idade.'],
+  [/^Percentil nacional por época/, 'Posição relativa do nadador entre os da mesma idade e género.', '100 = o melhor; 50 = a meio.', 'Percentil estável ou a subir = progressão consistente.'],
+  [/^Resumo por época/, 'Síntese de cada época do nadador.', 'Uma linha por época.', 'Veja a evolução da melhor pontuação e das posições.'],
+  [/^Referência por idade na prova/, 'A carreira do nadador numa prova sobre as faixas nacionais por idade.', 'Faixa sombreada = entre os 10% mais rápidos (P10) e os 10% mais lentos (P90) de cada idade; tracejado = mediana. Eixo invertido: mais acima = mais rápido. Linhas horizontais = mínimos.', 'Linha do nadador junto ou acima do limite superior da faixa = nível de elite para a idade.'],
+  [/^Distância aos mínimos e referências/, 'Distância da melhor marca recente às referências mais relevantes: próximos mínimos por cumprir, o mais exigente já cumprido, o Mínimo A do Mundial e o 8.º nacional (◆).', 'Linha preta = melhor marca. Traços à esquerda = por cumprir (quanto falta, em %); à direita, a verde = cumpridos. Barra dourada = distância à próxima referência.', 'Referências a menos de 1% são objetivos realistas para a época.'],
+  [/^Picos de evolução/, 'Idades em que o nadador teve saltos de evolução excecionais.', 'Pico = evolução no percentil 90 ou mais da mesma idade, prova e piscina.', 'Dois ou mais picos indicam grande capacidade de resposta ao treino.'],
+  [/^Perfil sectorial|^Perfil por estilo|^Perfil nacional por estilo/, 'Pontuação por estilo numa escala de 0 a 1000.', 'Quanto mais afastado do centro (ou mais alta a barra), melhor nesse estilo.', 'Estilos "recolhidos" são pontos fracos relativos.'],
+  [/^Mínimos e projeção|^Distância ao mínimo/, 'Distância a cada mínimo e projeção para a época seguinte.', 'Percentagem negativa = já cumpre; positiva = quanto falta.', 'Projeções a menos de 1% indicam mínimos atingíveis.'],
+  [/^Estagnação/, 'Épocas desde a última melhor marca pessoal.', '2 ou mais épocas sem melhorar = estagnação.', 'Estagnação nos escalões jovens merece atenção técnica.'],
+  [/^Diferencial PL\/PC|^Ganho mediano da piscina curta|^Referência por prova/, 'Diferença entre marcas em piscina curta e longa.', 'Percentagem de ganho da PC face à PL do mesmo nadador, prova e época.', 'Ganhos muito acima da referência sugerem viragens fortes e nado em PL por melhorar.'],
+  [/^Nadadores com trajetória semelhante/, 'Nadadores anteriores com pontuação por idade parecida.', 'Linha grossa = nadador; finas = semelhantes; tracejada = mediana.', 'Mostra percursos possíveis, não uma previsão.'],
+  [/^Afinação|^Em que mês|^Onde surgem|^Competições com mais melhores/, 'Quando e onde surgem as melhores marcas da época.', 'Percentagem por tipo de competição e por mês.', 'Melhores marcas concentradas nas competições principais = boa afinação.'],
+  [/^Índice de talento/, 'Nível do nadador face aos melhores de sempre da mesma idade.', '1000 = média dos 10 melhores de sempre da idade, prova, piscina e género, corrigida pelo trimestre de nascimento.', 'Índice acima de 950 aos 14–16 anos é raro e merece acompanhamento.'],
+  [/^Nadadores por índice de talento/, 'Lista dos nadadores ordenados pelo índice de talento.', 'Probabilidades = frequência histórica de chegar ao top‑8/top‑3 absoluto; n = casos de referência.', 'Probabilidades com n baixo devem ser lidas com cautela.'],
+  [/^Modelo · probabilidade/, 'Como o índice se traduz em probabilidade histórica de chegar ao top‑8.', 'Uma linha por idade; eixo horizontal = índice.', 'Aos mesmos índices, idades mais novas costumam ter maior probabilidade.'],
+  [/^Matriz de transição/, 'De que posição partem os nadadores de um escalão e onde chegam no seguinte.', 'Percentagens por linha.', 'Diagonal forte = previsibilidade; muitos a sair = perda de talento.'],
+  [/^Fluxo do talento/, 'Percurso dos nadadores pelos escalões.', 'Largura das faixas = número de nadadores. Azul-escuro = top‑N do escalão; azul-claro = ranqueados; cinzento = fora do ranking.', 'Faixas largas para "fora do ranking" mostram onde se perde talento.'],
+  [/^Chegada ao alto nível/, 'Percentagem de cada grupo que chega ao top‑N ou fica no ranking no escalão seguinte.', 'Barras por ponto de partida.', 'Compara a eficácia de partir de posições diferentes.'],
+  [/^Evolução por estilo \(média/, 'Nível de cada estilo por época e variação face à época anterior.', '▲ verde = evolução, ▬ = estagnação, ▼ vermelho = regressão (limiar ajustável). Tendência = variação média por época.', 'Estilos com várias regressões seguidas são prioridades técnicas.'],
+  [/^Estilo × distância/, 'Nível médio do top‑24 por estilo e distância.', 'Tom mais escuro = nível mais alto.', 'Mostra onde Portugal é mais competitivo.'],
+  [/^Nível por prova/, 'Pontos do top‑N de cada prova por época.', 'Tom mais escuro = nível mais alto. Última coluna = variação no período.', 'Provas com variação negativa perderam nível.'],
+  [/^Variação do nível no período/, 'Diferença de pontos entre a primeira e a última época.', 'Barras à direita = melhoria.', 'Identifique provas em recuperação e em queda.'],
+  [/^Idade média do top/, 'Idade média do alto nível nacional.', 'Linhas por género.', 'Idades a subir = carreiras mais longas; a descer = elite mais jovem.'],
+  [/^Diferença entre o 1\.º e o 8\.º|^Densidade|^Evolução da densidade/, 'Distância entre posições do ranking.', 'Percentagem entre o tempo do 1.º e o do 8.º (ou 24.º).', 'Diferença pequena = concorrência interna forte.'],
+  [/^Diferença entre femininos|^Diferença por prova|^Por estilo$/, 'Quanto mais lentos são os femininos face aos masculinos, por prova.', 'Percentagem de diferença; verde = abaixo da média (setor feminino relativamente mais forte).', 'Provas com diferença alta indicam setor feminino a desenvolver.'],
+  [/^Idade da melhor marca|^Idade de melhor rendimento/, 'Com que idade se atinge a melhor marca da carreira.', 'Média, mediana e intervalo P25–P75 por prova.', 'Ajuda a definir horizontes de desenvolvimento por prova.'],
+  [/^Clubes formadores|^Formados que chegaram|^Transferências|^Entre associações|^Fluxo formadora/, 'De onde vêm e onde chegam os nadadores de alto nível.', 'Formador = clube (associação) da primeira marca; chegada = clube (associação) ao entrar no top‑N.', 'Formadores com muitos nadadores e pouca retenção perdem talento para outros.'],
+  [/^Eficiência/, 'Capacidade de transformar número de nadadores em qualidade.', 'Percentagem de nadadores que chegam ao top‑24 e top‑8 do escalão.', 'Associações pequenas com eficiência alta são modelos a estudar.'],
+  [/^Mapa das associações/, 'Indicador de cada associação territorial num esquema do país.', 'Tom mais escuro = valor mais alto (escala no canto). Por baixo, variação face à época anterior. Esquema, não à escala.', 'Compare regiões vizinhas e as ilhas.'],
+  [/^Distribuição por trimestre/, 'Efeito da idade relativa (mês de nascimento).', 'Sem efeito, cada trimestre teria cerca de 25%.', 'Excesso de nascidos no 1.º trimestre no top‑10 = vantagem de maturação.'],
+  [/^Nadadores ranqueados por ano de nascimento|^Retenção por geração/, 'Cada geração ao longo das idades.', 'Leitura na horizontal: quantos continuam no ranking.', 'Quedas fortes entre os 15 e os 18 anos = abandono.'],
+  [/^Provas ranqueadas por nadador/, 'Polivalência: número de provas por nadador.', 'Valores altos nos jovens = formação polivalente.', 'Especialização muito cedo pode limitar o desenvolvimento.'],
+  [/^Melhores marcas de sempre|^Top‑3 de sempre/, 'Melhores marcas de sempre por idade ou escalão.', 'Tempos; eixo invertido nos gráficos.', 'Referências máximas nacionais para cada idade.'],
+  [/^Taxa de estagnação/, 'Percentagem de nadadores sem melhor marca há 2+ épocas.', 'Por idade e por época.', 'Subidas bruscas indicam idades críticas.'],
+  [/^Membros do grupo|^Melhor pontuação ·/, 'Seguimento dos nadadores dos grupos de alto rendimento.', 'Pontuação das duas últimas épocas, mini-gráfico das últimas épocas, distância ao Mínimo A e alertas.', 'Épocas sem melhor marca pessoal a vermelho merecem atenção.'],
+  [/^Resumo · equipa A|^Equipa A|^Equipa B|^Candidatos por percurso|^Melhor equipa por clube/, 'Melhores estafetas possíveis a partir das marcas individuais.', 'Soma das marcas com partida da plataforma; A e B sem nadadores repetidos.', 'Compare com o tempo de referência gravado para cada estafeta.'],
+  [/^Nadadores ·|^Evolução por época$|^Força por estilo|^Entradas e saídas|^Clubes da associação/, 'Indicadores do clube ou associação.', 'Mini-gráficos = melhor pontuação das últimas épocas.', 'Compare com a média nacional e com a época anterior.'],
+  [/^Nadadores com índice|^Nadadores com mínimo|^Mapa estilo/, 'Nadadores que cumprem as tabelas de mínimos e índices.', 'Tempo abaixo do mínimo, na idade de acesso da tabela.', 'Compare épocas para ver a evolução da seleção.'],
+  [/^Nadadores em alerta|^Alertas por idade|^Provas com mais alertas/, 'Nadadores no top‑24 com 15+ anos com evolução acima da média nacional do ano e de sempre.', 'Uma linha por nadador; várias provas = alerta mais forte.', 'Alertas em várias provas identificam nadadores em forte progressão.'],
+  [/^Lista de candidatos|^Por prova$/, 'Candidatos à atividade segundo os critérios do PAR.', 'Ordenados pelos pontos acima da referência.', 'Documento de apoio; a convocatória oficial segue o Plano de Atividades.'],
+  [/^Unificação de nadadores/, 'Prováveis duplicados do mesmo nadador com grafias diferentes.', 'Forte = mesma data de nascimento e nomes compatíveis.', 'Fundir melhora fichas, evolução e abandono.'],
+];
+function helpFor(t){ t=String(t||'').trim(); for(const h of HELP) if(h[0].test(t)) return h; return null; }
+const GLOSS = [
+  ['Pontos (pts)', 'Pontuação World Aquatics (tabela indicada na exportação dos rankings). Mais pontos = mais rápido; permite comparar provas diferentes.', ['Pts','Melhor pts','Pts méd.','Pontos']],
+  ['Top‑N nacional', 'Posição no ranking nacional absoluto da prova, piscina, género e época (todas as idades).', ['Rk nac.','Top‑8','Top‑24','Top‑10','Top‑3']],
+  ['Top‑N do escalão', 'Posição no ranking nacional do escalão FPN (Cadetes, Infantis, Juvenis, Juniores, Seniores).', ['Rk esc.','Top‑24 esc.','Top‑8 esc.']],
+  ['Escalões', 'Cadetes ≤12, Infantis 13–14, Juvenis 15–16, Juniores 17–18, Seniores 19+ (idade = ano da época − ano de nascimento).', ['Escalão']],
+  ['Percentil', 'Percentagem de nadadores da mesma idade e género (e prova, quando indicado) com resultado pior. P90 = melhor que 90%.', ['Percentil']],
+  ['Nível (média top‑N)', 'Média da melhor pontuação dos N melhores nadadores. Mais estável que a média geral, que depende do número de marcas de cada lista.', ['Nível top‑10','Nível (top‑10)']],
+  ['Retenção', 'Percentagem de nadadores de uma época que voltam a estar no ranking (ou no mesmo clube/associação) na época seguinte.', ['Retenção']],
+  ['Abandono', 'Nadador que deixou de aparecer no ranking; idade de saída = idade na última época com marca.', ['Situação']],
+  ['Taxa de melhoria', 'Variação do tempo do mesmo nadador na mesma prova e piscina entre duas épocas. Positivo = mais rápido.', ['Melhoria']],
+  ['Alerta de evolução', 'Nadador no top‑24 nacional com 15+ anos cuja melhoria numa ou mais provas supera a média nacional do ano e de sempre. Símbolo ⚑.', ['Alerta']],
+  ['Pico de evolução', 'Idade em que a melhoria do nadador está no percentil 90 (ou 95, com uma só prova) da mesma idade, prova e piscina.', []],
+  ['Estagnação', 'Duas ou mais épocas sem melhor marca pessoal. No quadro de estilos: variação dentro do limiar escolhido.', ['Épocas sem MP']],
+  ['Mínimos e índices', 'Tabelas do separador Mínimos (índices PAR 2025–2028 e mínimos World Aquatics), cada uma com a sua idade de acesso.', ['Mín./índices','Mín. intern.','Mínimo','Mín. A Mundial']],
+  ['Índice de talento', '1000 × (média dos 10 melhores tempos de sempre na mesma idade, prova, piscina e género ÷ tempo)³; média das duas melhores provas da época, corrigida pelo trimestre de nascimento.', ['Índice']],
+  ['Probabilidade de top‑8/top‑3', 'Frequência histórica, entre nadadores do mesmo género, idade e nível de índice, de chegar depois ao top‑8/top‑3 do ranking nacional absoluto.', ['Prob. top‑8','Prob. top‑3']],
+  ['Idade relativa', 'Efeito do trimestre de nascimento: nascidos no início do ano têm vantagem de maturação na mesma idade.', ['Trim.']],
+  ['Tendência', 'Declive da reta de regressão dos valores nas épocas fechadas (variação média por época).', ['Tendência']],
+  ['Densidade', 'Diferença percentual entre o tempo do 1.º e do 8.º (ou 24.º) do ranking. Menor = mais concorrência.', ['1.º → 8.º','8.º → 24.º','1.º → 24.º']],
+  ['Diferencial PL/PC', 'Ganho percentual da piscina curta face à longa, no mesmo nadador, prova e época.', []],
+  ['Clube formador', 'Clube da primeira marca do nadador no ranking.', ['Formados']],
+  ['Eficiência', 'Percentagem de nadadores de uma associação ou clube que chegam ao top‑24/top‑8 do escalão.', ['% top‑24','% top‑8']],
+  ['Época em curso', 'Época com dados até antes de 15 de dezembro; valores provisórios, sombreados nos gráficos e tracejados nos quadros.', []],
+  ['Estafeta (tempo)', 'Soma das melhores marcas individuais com partida da plataforma, menos o ganho por passagem indicado.', []],
+  ['Mini-gráfico', 'Melhor pontuação do nadador nas últimas 8 épocas (verde = a subir, vermelho = a descer).', ['Pts por época']],
+];
+const GLOSS_TH = new Map(); GLOSS.forEach(([t,d,al])=>al.forEach(a=>GLOSS_TH.set(norm(a), norm(a)===norm(t)? d : t+': '+d)));
+let HELP_OBS=null;
+function decorateHelp(){
+  const main=$('#main'); if(!main) return;
+  $$('.card h3:not([data-h])', main).forEach(h=>{ h.dataset.h='1'; const t=h.textContent; const hp=helpFor(t); if(!hp) return;
+    const b=document.createElement('button'); b.type='button'; b.className='hlp'; b.textContent='?'; b.title='Como ler'; b.setAttribute('aria-label','Como ler: '+t); b.setAttribute('aria-expanded','false'); h.appendChild(b);
+    b.addEventListener('click',e=>{ e.stopPropagation(); const card=h.closest('.card'); let box=card.querySelector('.hlp-box'); if(box&&box.dataset.for===t){ box.remove(); b.setAttribute('aria-expanded','false'); return; } if(box) box.remove();
+      box=document.createElement('div'); box.className='hlp-box'; box.dataset.for=t; box.innerHTML=`<div><b>O que mostra</b> ${esc(hp[1])}</div><div><b>Como ler</b> ${esc(hp[2])}</div><div><b>O que procurar</b> ${esc(hp[3])}</div><button type="button" class="lnk" data-guia>Guia de leitura e glossário →</button>`;
+      box.querySelector('[data-guia]').onclick=()=>go('guia'); const anchor=h.closest('.card-h')||h; anchor.insertAdjacentElement('afterend',box); b.setAttribute('aria-expanded','true'); }); });
+  $$('th:not([data-g])', main).forEach(th=>{ th.dataset.g='1'; const txt=norm(th.childNodes[0]?th.childNodes[0].textContent:th.textContent).trim(); const g=GLOSS_TH.get(txt); if(g){ th.classList.add('gl'); if(!th.title) th.title=g; } });
+}
+function startHelp(){ if(HELP_OBS) return; let raf=0; HELP_OBS=new MutationObserver(()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; decorateHelp(); }); }); HELP_OBS.observe(document.body,{childList:true,subtree:true}); decorateHelp(); }
+
+/* ---------------- guia de leitura ---------------- */
+function vGuia(root){
+  const sw=(c,l,d,st='')=>`<div class="gsw"><i style="${st||'background:'+c}"></i><div><b>${esc(l)}</b><span>${esc(d)}</span></div></div>`;
+  root.innerHTML=`<div class="view-head"><div><h2>Guia de leitura</h2><div class="sub">Código de cores, símbolos e definições usadas em toda a plataforma. Em cada gráfico e quadro, o botão <span class="hlp" style="display:inline-grid">?</span> junto ao título explica o que mostra, como se lê e o que procurar. Os cabeçalhos de coluna sublinhados a ponteado mostram a definição ao passar o cursor.</div></div>${expHTML('gu')}</div>
+  <div class="grid g2" style="align-items:start">
+  <div class="card"><h3>Código de cores</h3><div class="gsws">
+    ${sw('var(--s1)','Azul','Masculinos · nadador em análise · série principal')}
+    ${sw('var(--s2)','Laranja','Femininos · segunda série de comparação')}
+    ${sw('var(--good)','Verde','Evolução · cumpre o mínimo · acima da referência')}
+    ${sw('var(--muted)','Cinzento','Estagnação · referência nacional · sem dados')}
+    ${sw('var(--bad)','Vermelho','Regressão · abaixo da referência · estagnação prolongada')}
+    ${sw('var(--gold)','Dourado','A menos de 1% de um objetivo · próxima referência · alterações por guardar')}
+    ${sw('','Linha tracejada','Referência nacional (média, mediana, percentil) ou mínimo','background:repeating-linear-gradient(90deg,var(--muted) 0 6px,transparent 6px 10px);height:3px;align-self:center')}
+    ${sw('','Tons de azul','Mapas de calor e mapa: mais escuro = valor mais alto (escala junto ao quadro)','background:linear-gradient(90deg,rgba(var(--heat),.08),rgba(var(--heat),.7))')}
+    ${sw('','Zona sombreada ou tracejada','Época em curso: valores provisórios','background:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in srgb,var(--ink) 18%,transparent) 5px 7px)')}
+  </div></div>
+  <div class="card"><h3>Símbolos e etiquetas</h3><div class="gsym">
+    <div><span class="pill gold">⚑</span><span>Alerta de evolução (top‑24, 15+ anos, evolução acima da média nacional do ano e de sempre)</span></div>
+    <div><span class="pill good">Mín.</span><span>Cumpre um mínimo ou índice na época</span></div>
+    <div><span class="pill acc">PO</span> <span class="pill acc">BEO</span><span>Membro de um grupo de alto rendimento</span></div>
+    <div><span class="trk up">▲</span> <span class="trk eq">▬</span> <span class="trk dn">▼</span><span>Evolução, estagnação e regressão face à época anterior</span></div>
+    <div><span class="pill good">verde</span> <span class="pill gold">dourado</span> <span class="pill bad">vermelho</span><span>Bom / perto / abaixo, no contexto de cada coluna</span></div>
+    <div><span class="muted">┊ 2020 · pandemia</span><span>Linha vertical nos gráficos por época: competições suspensas em 2020; os valores desse ano não refletem o nível real</span></div>
+    <div><span style="color:#185FA5;font-size:18px">◆</span><span>8.º nacional (portugueses) nas barras de distância aos mínimos</span></div>
+    <div>${sparkSVG([610,640,655,700,690,730],{tip:'Exemplo'})}<span>Mini-gráfico: melhor pontuação nas últimas épocas (verde = a subir, vermelho = a descer)</span></div>
+  </div></div></div>
+  <div class="card"><h3>Glossário</h3><div id="guT" style="margin-top:8px"></div></div>
+  <div class="card"><h3>Separadores</h3><div id="guS" style="margin-top:8px"></div></div>`;
+  const tg=new DataTable('guT',[{k:0,l:'Termo',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Definição',cls:'wrap',x:r=>r[1]}], GLOSS, {page:60, nosortbar:true});
+  const TABS=[['Painel nacional','Leitura coletiva: participação, nível, idades, escalões, associações, dinâmica, picos e abandono.'],['Evolução','Profundidade do ranking, curvas por idade e taxas de melhoria por prova.'],['Rankings','Ranking por prova com filtros e ordenação múltipla.'],['Nadadores','Pesquisa e lista; a ficha individual reúne toda a análise do nadador.'],['Comparar','Comparação lado a lado entre nadadores.'],['Análises','Perfil sectorial, funil de talento, densidade, géneros, clubes, território, idade relativa, entre outras.'],['Alertas','Nadadores em evolução acima da média nacional.'],['Talento','Índice de talento e probabilidade histórica de chegar ao top‑8/top‑3.'],['Mínimos','Tabelas de mínimos e índices editáveis e quem as cumpre.'],['Grupos AR','Seguimento da PO, BEO e outros grupos.'],['Pré-convocatórias','Candidatos às atividades do PAR 2027.'],['Estafetas','Melhores equipas possíveis e por clube.'],['Clubes','Fichas de clube e de associação.'],['Metas PAR','Metas por época e cumprimento.'],['Declarações','Declarações individuais.'],['Dados','Carregamento, cópia de segurança, unificação de nadadores e novidades.'],['Guia','Esta página.']];
+  const ts=new DataTable('guS',[{k:0,l:'Separador',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Para que serve',cls:'wrap',x:r=>r[1]}], TABS, {page:30, nosortbar:true});
+  bindExp(root,'gu',async()=>({title:'Guia de leitura', subtitle:'Código de cores, símbolos e glossário', filename:'Guia_de_leitura', orientation:'p', blocks:[{t:'h',text:'Código de cores'},{t:'table',sheet:'Cores',head:['Cor','Significado'],rows:[['Azul','Masculinos · nadador em análise · série principal'],['Laranja','Femininos · segunda série'],['Verde','Evolução · cumpre · acima da referência'],['Cinzento','Estagnação · referência · sem dados'],['Vermelho','Regressão · abaixo da referência'],['Dourado','Perto de um objetivo · próxima referência'],['Linha tracejada','Referência nacional ou mínimo'],['Sombreado','Época em curso (provisório)'],['Linha vertical 2020','Pandemia: competições suspensas']],align:['l','l']},{t:'h',text:'Glossário'},Object.assign({t:'table',sheet:'Glossário'},tg.exportRows()),{t:'h',text:'Separadores'},Object.assign({t:'table',sheet:'Separadores'},ts.exportRows())]}));
+}
+
+/* ---------------- leitura rápida ---------------- */
+function insightHTML(lines){ lines=(lines||[]).filter(Boolean); if(!lines.length) return ''; return `<div class="ins" role="note"><div class="ins-h">Leitura rápida</div><ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul></div>`; }
+const insTxt = lines => (lines||[]).filter(Boolean).map(l=>'• '+stripTags(l).replace(/ρ/g,'rho').replace(/→/g,'->').replace(/[‑−]/g,'-').replace(/⚑\s?/g,'').replace(/≥/g,'>=')).join('\n');
+const sg = v => (v>0?'+':v<0?'−':'±')+fN(Math.abs(Math.round(v)));
+const sg1 = v => (v>0?'+':v<0?'−':'±')+f1(Math.abs(v));
+const lst = a => a.length<=1? (a[0]||'') : a.slice(0,-1).join(', ')+' e '+a[a.length-1];
+function insPerfil(TR){ const r=TR.rows.filter(x=>x.slope!=null); if(!r.length) return []; const s=[...r].sort((a,b)=>b.slope-a.slope); const L=[];
+  L.push(`<b>${esc(s[0].lab)}</b> é o estilo com maior evolução no período (${sg1(s[0].slope)} pts/época)${s.length>1?`; <b>${esc(s[s.length-1].lab)}</b> é o de menor evolução (${sg1(s[s.length-1].slope)} pts/época)`:''}.`);
+  const lastReg=TR.rows.filter(x=>{ const cl=x.cells.filter((c,j)=>c.c&&!(TR.pmask&&TR.pmask[j])); const k=cl.length; return k>=2 && cl[k-1].c.startsWith('dn') && cl[k-2].c.startsWith('dn'); }).map(x=>x.lab);
+  if(lastReg.length) L.push(`Regressão nas duas últimas épocas fechadas em ${lst(lastReg.map(esc))}.`);
+  const most=[...TR.rows].sort((a,b)=>b.cnt.dn-a.cnt.dn)[0]; if(most&&most.cnt.dn) L.push(`${esc(most.lab)} é o estilo mais irregular: ${most.cnt.dn} épocas de regressão.`);
+  return L; }
+function insProvas(lab, dcol, N){ const v=lab.map((l,k)=>({l,d:dcol[k]})).filter(x=>x.d!=null).sort((a,b)=>b.d-a.d); if(!v.length) return []; const up=v.filter(x=>x.d>0).length;
+  return [`${up} de ${v.length} provas subiram de nível no período (${N===1?'1.º classificado':'média do top‑'+N}).`, `Maiores subidas: ${lst(v.slice(0,3).map(x=>`${esc(x.l)} (${sg(x.d)})`))}.`, v[v.length-1].d<0?`Maiores descidas: ${lst(v.slice(-3).reverse().filter(x=>x.d<0).map(x=>`${esc(x.l)} (${sg(x.d)})`))}.`:'' ]; }
+function insIdade(sp, N){ const cut=isPartial(+sp.labels[sp.labels.length-1])?1:0; return sp.series.map(s=>{ const d=s.data.slice(0,s.data.length-cut).filter(v=>v!=null); if(d.length<2) return ''; const a=d[0], b=d[d.length-1]; return `${s.label}: idade média do top‑${N} ${b>a+0.2?'subiu':b<a-0.2?'desceu':'estável'} de ${f1(a)} para ${f1(b)} anos (épocas fechadas).`; }); }
+function insAssoc(rows, am){ if(!rows.length) return []; const top=[...rows].sort((a,b)=>b.n-a.n); const g=rows.filter(r=>r.d!=null&&(am!=='n'||r.first>=20)).sort((a,b)=>b.d-a.d);
+  return [`${esc(regLabel(top[0].reg))} concentra ${f1(top[0].share)}% dos nadadores do período${top[1]?`, seguida de ${esc(regLabel(top[1].reg))} (${f1(top[1].share)}%)`:''}.`, g.length?`Maior ${am==='n'?'crescimento':'subida de nível'}: ${esc(regLabel(g[0].reg))} (${am==='n'?sg(g[0].d)+'%':sg(g[0].d)+' pts'}); ${g[g.length-1].d<0?`maior ${am==='n'?'redução':'descida'}: ${esc(regLabel(g[g.length-1].reg))} (${am==='n'?sg(g[g.length-1].d)+'%':sg(g[g.length-1].d)+' pts'})`:'nenhuma associação com descida'}.`:''].filter(Boolean); }
+function insClubes(rows){ if(!rows.length) return []; const t=[...rows].sort((a,b)=>b.t24-a.t24), tot=rows.reduce((s,r)=>s+r.t24,0), t5=t.slice(0,5).reduce((s,r)=>s+r.t24,0);
+  return [`${esc(t[0].club)} lidera em marcas no top‑24 nacional (${fN(t[0].t24)}).`, tot?`Os 5 primeiros clubes somam ${f1(t5/tot*100)}% das marcas no top‑24 — ${t5/tot>0.4?'alto nível muito concentrado':'alto nível distribuído'}.`:'']; }
+function insRae(A,Bq,nA,nB){ const r=A[3]?A[0]/A[3]:null, rb=Bq[3]?Bq[0]/Bq[3]:null; return [r?`Há ${f2(r)} nascidos no 1.º trimestre por cada nascido no 4.º (todos os nadadores)${rb?`; no top‑10 a razão é ${f2(rb)}`:''}.`:'', rb&&r? (rb>r*1.1?'O efeito da idade relativa acentua-se no alto nível — atenção à identificação de talento dos nascidos no fim do ano.':'O efeito da idade relativa não se acentua no alto nível.') : '']; }
+function insCoortes(ret){ const a=ret.filter(r=>r.r1518!=null), b=ret.filter(r=>r.r1821!=null); const ma=a.length?mean(a.map(r=>r.r1518)):null, mb=b.length?mean(b.map(r=>r.r1821)):null; return [ma!=null?`Em média, ${f1(ma)}% dos ranqueados aos 15 anos continuam aos 18.`:'', mb!=null?`Dos ranqueados aos 18, ${f1(mb)}% continuam aos 21${ma!=null&&mb<ma?' — é entre os 18 e os 21 anos que mais se perde':''}.`:'']; }
+function insEspec(tab){ const v=tab.filter(t=>isFinite(t.mean)); if(v.length<2) return []; const mx=v.reduce((m,t)=>t.mean>m.mean?t:m); return [`Número médio de provas por nadador: ${v.map(t=>`${t.esc} ${f1(t.mean)}`).join(' · ')}.`, `O máximo de polivalência está em ${esc(mx.esc)}${mx.esc!=='Seniores'?'; nos seniores o número de provas desce (especialização)':''}.`]; }
+function insFunil(An,Bn,N,topAT,reachN,inRank,revTot,revHit,rho){ return [topAT?`${f1(reachN/topAT*100)}% dos nadadores top‑${N} em ${An} chegam ao top‑${N} em ${Bn}; ${f1((topAT-inRank)/topAT*100)}% já não estão no ranking.`:'', revTot?`${f1(revHit/revTot*100)}% dos top‑${N} em ${Bn} já eram top‑${N} em ${An} — ${revHit/revTot<0.5?'a maioria da elite surge mais tarde':'o sucesso precoce é bom indicador'}.`:'', rho!=null?`Previsibilidade ${rho>=0.6?'alta':rho>=0.4?'moderada':'baixa'} entre os dois escalões (ρ = ${f2(rho)}).`:'']; }
+function insPlpc(rows,gs,n){ const v=[]; gs.forEach(g=>rows.forEach(r=>{ if(r['m'+g]!=null) v.push({e:r.e,g,m:r['m'+g]}); })); if(!v.length) return []; v.sort((a,b)=>b.m-a.m); return [`Ganho mediano da piscina curta entre ${f1(v[v.length-1].m)}% (${esc(evLabel(v[v.length-1].e))}) e ${f1(v[0].m)}% (${esc(evLabel(v[0].e))}), em ${fN(n)} pares.`]; }
+function insEstag(G,gs,ages){ return gs.map(g=>{ const v=ages.map(a=>{ const o=G[g].age.get(a); return o&&o.n>=20? {a,p:o.s/o.n*100} : null; }).filter(Boolean); if(!v.length) return ''; const t30=v.find(x=>x.p>=30), t50=v.find(x=>x.p>=50); return `${G_L[g]}: ${t30?`a estagnação passa os 30% aos ${t30.a} anos`:'a estagnação fica abaixo de 30% em todas as idades'}${t50?` e os 50% aos ${t50.a} anos`:''}.`; }); }
+function insRec(rows){ if(!rows.length) return []; const L=lastYear(); const r5=rows.filter(r=>r.t[0]!=null&&S.R.yr[r.t[0]]>=L-4).length;
+  return [`${r5} de ${rows.length} idades têm a melhor marca de sempre feita nas últimas 5 épocas.`]; }
+function insDens(rows){ if(!rows.length) return []; const s=[...rows].sort((a,b)=>a.g18-b.g18); return [`Provas mais densas (1.º→8.º): ${lst(s.slice(0,3).map(r=>`${esc(evLabel(r.e))} ${r.g?'F':'M'} (${f1(r.g18)}%)`))}.`, `Menos densas: ${lst(s.slice(-3).reverse().map(r=>`${esc(evLabel(r.e))} ${r.g?'F':'M'} (${f1(r.g18)}%)`))} — nível dependente de poucos nadadores.`]; }
+function insGen(rows, byStroke, avg){ if(!rows.length) return []; const s=[...byStroke].sort((a,b)=>a.rel-b.rel); return [`Os femininos são, em média, ${f1(avg)}% mais lentos que os masculinos.`, s.length?`Setor feminino relativamente mais forte em ${esc(s[0].s)} e mais fraco em ${esc(s[s.length-1].s)}.`:'']; }
+function insPico(rows,gs){ return gs.map(g=>{ const v=rows.filter(r=>r['a'+g]!=null); if(!v.length) return ''; const s=[...v].sort((a,b)=>a['a'+g]-b['a'+g]); return `${G_L[g]}: melhor marca da carreira mais cedo em ${esc(evLabel(s[0].e))} (${f1(s[0]['a'+g])} anos) e mais tarde em ${esc(evLabel(s[s.length-1].e))} (${f1(s[s.length-1]['a'+g])} anos).`; }); }
+function insForm(list,sameN,clubs,N){ if(!list.length) return []; const t=[...clubs].sort((a,b)=>b.form-a.form)[0]; return [`${f1(sameN/list.length*100)}% dos nadadores chegaram ao top‑${N} no clube onde começaram.`, t?`${esc(t.club)} é o maior clube formador (${t.form} nadadores; retenção ${t.pret==null?'—':f1(t.pret)+'%'}).`:'']; }
+function insEfic(regs,nat24){ if(!regs.length) return []; const s=[...regs].sort((a,b)=>b.p24-a.p24); return [`Média nacional: ${f1(nat24)}% dos nadadores chegam ao top‑24 do escalão.`, `Mais eficiente: ${esc(regLabel(s[0].k))} (${f1(s[0].p24)}%); menos eficiente: ${esc(regLabel(s[s.length-1].k))} (${f1(s[s.length-1].p24)}%).`]; }
+function insAfin(mon,gs,typ){ const L=[]; gs.forEach((g,k)=>{ const m=mon[k]; const i=m.indexOf(Math.max(...m)); L.push(`${G_L[g]}: mais melhores marcas da época em ${MONTHS[i]} (${f1(m[i])}%).`); }); const s=typ.filter(t=>t.p[1]!=null&&t.n>=50).sort((a,b)=>b.p[1]-a.p[1]); if(s.length) L.push(`Peso dos campeonatos nacionais nas melhores marcas: máximo em ${esc(s[0].esc)} (${f1(s[0].p[1])}%), mínimo em ${esc(s[s.length-1].esc)} (${f1(s[s.length-1].p[1])}%).`); return L; }
+
+/* ---------------- análises: pós-processamento (leitura rápida + esquemas) ---------------- */
+const FUN={only:true};
+const _anContent0 = anContent;
+anContent = function(){
+  _anContent0();
+  const el=$('#anC'); if(!el||!ANX) return; const sec=AN.sec, out=ANX;
+  try{
+    if(sec==='funil') anFunnelFlow(el,out);
+    if(sec==='formadores') anFormFlow(el,out);
+    if(sec==='assoc') anAssocMap(el,out);
+  }catch(e){ console.warn('esquema',e); }
+  if(out.ins && out.ins.filter(Boolean).length){ el.insertAdjacentHTML('afterbegin', insightHTML(out.ins)); out.blocks.unshift({t:'p', text:'Leitura rápida\n'+insTxt(out.ins)}); }
+};
+function anFunnelFlow(el,out){
+  const R=S.R, N=+AN5.topN, L=lastYear(), Y0=S.years[0], st=new Map();
+  for(let i=0;i<R.n;i++){ if(AN.g!==''&&D.G[i]!==+AN.g) continue; if(AN.co!==''&&R.co[i]!==+AN.co) continue; if(AN.nat==='POR'&&!D.POR[i]) continue; if(AN.nat==='EST'&&D.POR[i]) continue; let o=st.get(R.sw[i]); if(!o){ o=[1e9,1e9,1e9,1e9,1e9]; st.set(R.sw[i],o);} const e=D.ESC[i]; if(D.RKE[i]<o[e]) o[e]=D.RKE[i]; }
+  const ST=['T','R','O'], stg=[1,2,3,4], links=new Map(); let nCoh=0;
+  const lvl=r=> r<=N? 'T' : r<1e9? 'R' : 'O';
+  for(const [sw,o] of st){ const by=S.sw[sw].by; if(by+13<Y0 || by+19>L) continue; if(o[1]>=1e9) continue; if(FUN.only && o[1]>N) continue; nCoh++;
+    for(let k=0;k<3;k++){ const a=stg[k]+':'+lvl(o[stg[k]]), b=stg[k+1]+':'+lvl(o[stg[k+1]]); links.set(a+'>'+b,(links.get(a+'>'+b)||0)+1); } }
+  if(!nCoh) return;
+  const NL={T:`Top‑${N}`, R:'Ranqueado', O:'Fora do ranking'}, NC={T:'s1', R:'seq2', O:'faint'};
+  const cols=stg.map(k=>ST.filter(s=>[...links.keys()].some(x=>x.startsWith(k+':'+s+'>')||x.endsWith('>'+k+':'+s))).map(s=>({id:k+':'+s, label:NL[s], color:NC[s]})));
+  const spec=sankeySpec({title:'Fluxo do talento pelos escalões', heads:stg.map(k=>ESC_G[k].n), cols, links:[...links.entries()].map(([k,v])=>{ const [s,t]=k.split('>'); return {s,t,v,color:NC[s.split(':')[1]],op:s.endsWith(':O')?.18:.32}; }), h:640});
+  const n4T=[...links.entries()].filter(([k])=>k.endsWith('>4:T')).reduce((s,[,v])=>s+v,0);
+  const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-h"><div><h3>Fluxo do talento pelos escalões</h3><p class="note">${fN(nCoh)} nadadores ${FUN.only?`top‑${N} em Infantis`:'ranqueados em Infantis'}, de gerações já com idade de Sénior nas épocas carregadas; ${fN(n4T)} (${f1(n4T/nCoh*100)}%) chegaram ao top‑${N} Sénior. Largura das faixas = número de nadadores; em cada escalão: top‑${N} do escalão (qualquer prova), ranqueado ou fora do ranking.</p></div>${segHTML('funO',[['1','Só top‑'+N+' em Infantis'],['0','Todos os ranqueados em Infantis']],FUN.only?'1':'0')}</div><div id="funSk"></div>`;
+  el.appendChild(card); draw('funSk',spec); bindSeg(card,'funO',v=>{ FUN.only=v==='1'; anContent(); });
+  out.blocks.push({t:'chart',title:'Fluxo do talento pelos escalões',spec});
+}
+function anFormFlow(el,out){
+  const R=S.R, N=+AN6.tf, first=new Map(), arrive=new Map();
+  for(let i=0;i<R.n;i++){ const f=first.get(R.sw[i]); if(f===undefined||R.dt[i]<R.dt[f]) first.set(R.sw[i],i); }
+  for(let i=0;i<R.n;i++){ if(D.RK[i]>N) continue; if(AN.g!==''&&D.G[i]!==+AN.g) continue; if(AN.co!==''&&R.co[i]!==+AN.co) continue; if(AN.nat==='POR'&&!D.POR[i]) continue; const a=arrive.get(R.sw[i]); if(a===undefined||R.dt[i]<R.dt[a]) arrive.set(R.sw[i],i); }
+  const fl=new Map(); let n=0; for(const [sw,a] of arrive){ if(R.yr[a]<AN.y0||R.yr[a]>AN.y1) continue; const f=first.get(sw); const ra=S.cl[R.cl[f]].reg||'—', rb=S.cl[R.cl[a]].reg||'—'; fl.set(ra+'>'+rb,(fl.get(ra+'>'+rb)||0)+1); n++; }
+  if(!n) return;
+  const tot=new Map(); for(const [k,v] of fl){ const [a,b]=k.split('>'); tot.set('A'+a,(tot.get('A'+a)||0)+v); tot.set('B'+b,(tot.get('B'+b)||0)+v); }
+  const regsA=[...new Set([...fl.keys()].map(k=>k.split('>')[0]))].sort((a,b)=>(tot.get('A'+b)||0)-(tot.get('A'+a)||0));
+  const regsB=[...new Set([...fl.keys()].map(k=>k.split('>')[1]))].sort((a,b)=>(tot.get('B'+b)||0)-(tot.get('B'+a)||0));
+  const spec=sankeySpec({title:'Fluxo formadora → chegada, por associação', heads:['Associação formadora','Associação de chegada'], cols:[regsA.map(r=>({id:'A'+r,label:r,color:'s1'})), regsB.map(r=>({id:'B'+r,label:r,color:'seq1'}))], links:[...fl.entries()].map(([k,v])=>{ const [a,b]=k.split('>'); return {s:'A'+a,t:'B'+b,v,color:a===b?'faint':'s2',op:a===b?.25:.5}; }), h:Math.max(520, 40*Math.max(regsA.length,regsB.length)), labelW:170});
+  const moved=[...fl.entries()].filter(([k])=>{ const [a,b]=k.split('>'); return a!==b; }).reduce((s,[,v])=>s+v,0);
+  const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-h"><div><h3>Fluxo formadora → chegada, por associação</h3><p class="note">${fN(n)} nadadores que chegaram ao top‑${N} nacional em ${esc(perLabel(AN))}. Faixas a laranja = mudaram de associação (${fN(moved)}, ${f1(moved/n*100)}%); cinzento = ficaram na associação formadora.</p></div></div><div id="frSk"></div>`;
+  el.appendChild(card); draw('frSk',spec); out.blocks.push({t:'chart',title:'Fluxo formadora → chegada, por associação',spec});
+}
+function anAssocMap(el,out){
+  const R=S.R, y=AN.y1, per=new Map(), prev=new Map();
+  for(let i=0;i<R.n;i++){ if(R.yr[i]!==y&&R.yr[i]!==y-1) continue; if(AN.g!==''&&D.G[i]!==+AN.g) continue; if(AN.co!==''&&R.co[i]!==+AN.co) continue; if(AN.nat==='POR'&&!D.POR[i]) continue; if(AN.nat==='EST'&&D.POR[i]) continue; const r=S.cl[R.cl[i]].reg; if(!r) continue; const M=R.yr[i]===y?per:prev; let m=M.get(r); if(!m){ m=new Map(); M.set(r,m);} const c=m.get(R.sw[i]); if(c==null||R.pt[i]>c) m.set(R.sw[i],R.pt[i]); }
+  const f=m=> !m? null : AN.am==='n'? m.size : (()=>{ const v=[...m.values()].sort((a,b)=>b-a).slice(0,10); return v.length>=3? mean(v) : null; })();
+  const vals=new Map(), sub=new Map(); for(const r of new Set([...Object.keys(TILE_POS), ...per.keys()])){ const a=f(per.get(r)), b=f(prev.get(r)); vals.set(r,a); if(a!=null&&b!=null) sub.set(r, (AN.am==='n'? sg((a-b)/b*100)+'%' : sg(a-b)+' pts')+' vs '+(y-1)); }
+  const lbl = (AN.am==='n'? 'Nadadores ranqueados ' : 'Média top‑10 (pts) ')+yearLabel(y);
+  const spec=tileMapSpec({id:'as', title:'Mapa das associações · '+lbl, vals, sub, fmt: AN.am==='n'? fN : (v=>fN(Math.round(v))), legend:lbl});
+  const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-h"><div><h3>Mapa das associações · ${esc(lbl)}</h3><p class="note">Esquema territorial (não à escala). Por baixo do valor, variação face a ${y-1}${isPartial(y)?' (época em curso: provisório)':''}. Mude o indicador em “Indicador” (nadadores ou média dos 10 melhores) e a época no fim do período.</p></div></div><div id="asMap" class="map-w"></div>`;
+  el.insertBefore(card, el.firstChild); draw('asMap',spec); out.blocks.unshift({t:'chart',title:'Mapa das associações · '+lbl,spec});
+}
+
+/* ---------------- painel e evolução: leitura rápida ---------------- */
+const _pnContent0 = pnContent;
+pnContent = function(){ _pnContent0(); try{ const L=pnIns(); PN.ins=L; const el=$('#pnC'); if(el&&L.length) el.insertAdjacentHTML('afterbegin', insightHTML(L)); }catch(e){ console.warn(e); } };
+function pnIns(){ const c=PN; if(!c) return []; const L=[];
+  c.gs.forEach((g,k)=>{ const lv=c.lvl[k], n=c.cnt[k]; if(lv.length>=2){ const a=lv[lv.length-2], b=lv[lv.length-1]; if(a!=null&&b!=null) L.push(`${G_L[g]}: nível ${b>a+1?'subiu':b<a-1?'desceu':'estável'} (${f1(a)} → ${f1(b)} pts) e ${fN(n[n.length-1])} nadadores${n[n.length-2]!=null?` (${sg(n[n.length-1]-n[n.length-2])})`:''} face à época anterior.`); } });
+  if(c.ret!=null) L.push(`Retenção de ${f1(c.ret)}% face ao período anterior; ${c.cont?f1(c.imp/c.cont*100):'—'}% dos que continuaram melhoraram a melhor pontuação; ${fN(c.novos)} nadadores novos.`);
+  if(c.regs&&c.regs.length) L.push(`${esc(regLabel(c.regs[0][0]))} é a associação com mais nadadores (${fN(c.regs[0][1])}, ${f1(c.regs[0][1]/c.cur.size*100)}%).`);
+  if(c.sy.includes(2020)) L.push('Os valores de 2020 foram afetados pela suspensão das competições (pandemia); não devem ser lidos como perda real de nível.');
+  if(isPartial(c.y1)) L.unshift(`<span class="muted">Época ${c.y1} em curso (dados até ${fD(S.yinfo[c.y1].maxDt)}): as comparações com a época anterior são provisórias.</span>`);
+  return L; }
+const _pnModel0 = pnModel;
+pnModel = async function(){ const m=await _pnModel0(); if(PN&&PN.ins&&PN.ins.length) m.blocks.unshift({t:'p',text:'Leitura rápida\n'+insTxt(PN.ins)}); return m; };
+const _evContent0 = evContent;
+evContent = function(){ _evContent0(); try{ const L=evIns(); EVX.ins=L; const el=$('#evC'); if(el&&L.length) el.insertAdjacentHTML('afterbegin', insightHTML(L)); }catch(e){ console.warn(e); } };
+function evIns(){ const c=EVX; if(!c) return []; const L=[]; const ok=c.depth.filter(d=>d.n>=8&&!isPartial(d.y)); if(ok.length>=2){ const a=ok[0], b=ok[ok.length-1];
+    const pc=(k)=> a[k]&&b[k]? (a[k]-b[k])/a[k]*100 : null; const p1=pc('p1'), p8=pc('p8'), p24=pc('p24'); const w=v=> v==null?'—':(v>=0?'mais rápido ':'mais lento ')+f2(Math.abs(v))+'%';
+    L.push(`De ${a.y} a ${b.y}: 1.º ${w(p1)}, 8.º ${w(p8)}${p24!=null?`, 24.º ${w(p24)}`:''}.`);
+    if(p1!=null&&p24!=null) L.push(p24>p1? 'A base (24.º) evoluiu mais do que o topo — ranking mais profundo.' : 'O topo evoluiu mais do que a base — progresso concentrado em poucos nadadores.'); }
+  const r=c.rates.filter(x=>x.n>=20); if(r.length){ const m=[...r].sort((a,b)=>b.p50-a.p50)[0]; const lo=r.find(x=>x.a>m.a&&x.p50<0.5); L.push(`Maior melhoria anual mediana aos ${m.a} anos (${fPct(m.p50)})${lo?`; a partir dos ${lo.a} anos fica abaixo de 0,5%`:''}.`); }
+  return L; }
+const _evModel0 = evModel;
+evModel = async function(){ const m=await _evModel0(); if(EVX&&EVX.ins&&EVX.ins.length) m.blocks.unshift({t:'p',text:'Leitura rápida\n'+insTxt(EVX.ins)}); return m; };
+
+/* ---------------- ficha: leitura rápida, referência por idade, distância aos mínimos ---------------- */
+const F8={key:null, co:'0', id:null, next:null};
+const _rfm0 = renderFichaMore;
+renderFichaMore = function(id){
+  const res=_rfm0(id); const el=$('#fiMore'); if(!el) return res;
+  if(F8.id!==id){ F8.id=id; F8.key=null; F8.next=null; }
+  el.insertAdjacentHTML('afterbegin','<div class="card" id="f8Ref"></div><div class="card" id="f8Bul"></div>');
+  const ex={ref:f8Ref(id), bul:f8Bullet(id)};
+  let ins=[]; try{ ins=fiIns(id); }catch(e){ console.warn(e); }
+  const kp=$('#view > .kpis'); if(kp&&ins.length) kp.insertAdjacentHTML('afterend', insightHTML(ins));
+  const inner=Object.getOwnPropertyDescriptor(res,'blocks');
+  return {get blocks(){ return [...(ins.length?[{t:'p',text:'Leitura rápida\n'+insTxt(ins)}]:[]), ...ex.ref.blocks, ...ex.bul.blocks, ...(inner&&inner.get? inner.get.call(res) : res.blocks)]; }, out:res.out};
+};
+function fiIns(id){
+  const s=S.sw[id], R=S.R, L=[]; const byY=swByYearBestPts(id), ys=[...byY.keys()].sort((a,b)=>a-b); if(!ys.length) return L;
+  const g=s.g==='F'?1:0, ly=ys[ys.length-1], li=byY.get(ly), p=ptsPercentile(ly,g,ly-s.by,R.pt[li]);
+  L.push(`Em ${ly}, a melhor marca (${esc(evLabel(R.ev[li]))} ${CO_S[R.co[li]]}, ${R.pt[li]} pts) ${s.g==='F'?'coloca-a':'coloca-o'} acima de ${fN(p)}% dos nadadores da mesma idade.`);
+  if(ys.length>=2){ const pi=byY.get(ys[ys.length-2]); const d=R.pt[li]-R.pt[pi]; L.push(`Face a ${ys[ys.length-2]}: ${d>0?'melhoria':'variação'} de ${sg(d)} pts na melhor pontuação${isPartial(ly)?' (época em curso)':''}.`); }
+  const pk=swimmerPeaks(id); if(pk.peaks&&pk.peaks.length) L.push(`${pk.peaks.length} pico${pk.peaks.length>1?'s':''} de evolução (aos ${lst(pk.peaks.map(a=>a.age).sort((a,b)=>a-b).map(String))} anos).`);
+  const pb=swPBs(id), lastPB=Math.max(...[...pb.values()].map(i=>R.yr[i])); if(s.last-lastPB>=2) L.push(`<span class="down">Sem melhor marca pessoal há ${s.last-lastPB} épocas.</span>`);
+  const al=alertIndex().get(id); if(al) L.push(`⚑ Alerta de evolução em ${al.evs.length} prova${al.evs.length>1?'s':''} (${esc(al.evs.map(e=>evShort(e.ev)+' '+CO_S[e.co]).join(', '))}).`);
+  if(F8.next) L.push(`Referência mais próxima em piscina longa: ${esc(F8.next.label)} em ${esc(F8.next.ev)}, a ${f2(F8.next.g)}%.`);
+  try{ const T=talentBase(), o=T.byKey.get(id*4096+ly); if(o&&o.a<=19) L.push(`Índice de talento ${fN(Math.round(o.adj))}${o.p8!=null?` · probabilidade histórica de top‑8 absoluto ${fN(o.p8)}%`:''}.`); }catch(e){}
+  return L;
+}
+function f8Ref(id){
+  const el=$('#f8Ref'); if(!el) return {blocks:[]}; const s=S.sw[id], R=S.R, g=s.g==='F'?1:0; const pb=swPBs(id); const keys=[...pb.keys()];
+  if(!keys.length){ el.innerHTML=''; return {blocks:[]}; }
+  if(F8.key==null||!pb.has(F8.key)) F8.key=keys.reduce((b,k)=>R.pt[pb.get(k)]>R.pt[pb.get(b)]?k:b, keys[0]);
+  const e=F8.key>>1, co=F8.key&1;
+  const byAge=new Map(); for(let i=0;i<R.n;i++){ if(R.ev[i]!==e||R.co[i]!==co||D.G[i]!==g) continue; const a=D.AGE[i]; if(a<10||a>30) continue; let v=byAge.get(a); if(!v){ v=[]; byAge.set(a,v);} v.push(R.tm[i]); }
+  byAge.forEach(v=>v.sort((a,b)=>a-b));
+  const my=new Map(); for(const i of swRows(id)){ if(R.ev[i]!==e||R.co[i]!==co) continue; const a=D.AGE[i]; if(!my.has(a)||R.tm[i]<R.tm[my.get(a)]) my.set(a,i); }
+  const mA=[...my.keys()]; const a0=Math.max(10,Math.min(...mA)-1), a1=Math.min(30,Math.max(Math.max(...mA)+2, 19)); const ages=[]; for(let a=a0;a<=a1;a++) ages.push(a);
+  const q=(a,p)=>{ const v=byAge.get(a); return v&&v.length>=15? +(quantile(v,p)/100).toFixed(2) : null; };
+  const ageNow=lastYear()-s.by, gk=s.g==='F'?'F':'M';
+  const hl=[]; const addL=(tid,c)=>{ const tb=stdById(tid); if(!tb||tb.co!==co||hl.some(h=>h.id===tid)) return; const t=stdTime(tb,gk,e); if(t) hl.push({id:tid, v:t/100, label:(tb.id.startsWith('WA')?tb.id:tb.name.split(' · ')[0])+' '+fT(t), color:c}); };
+  if(co===0) addL('WA-A','#1D7A4E'); try{ addL(defaultStdId(ageNow,co),'#BA7517'); }catch(err){}
+  const spec={labels:ages.map(String), series:[
+    {label:'P90', data:ages.map(a=>q(a,.9)), color:'seq3', points:false, width:1, noLegend:true},
+    {label:'Faixa P10–P90 nacional', data:ages.map(a=>q(a,.1)), color:'seq3', points:false, width:1, fillTo:'-1', fillAlpha:.28},
+    {label:'Mediana nacional', data:ages.map(a=>q(a,.5)), color:'faint', dash:true, points:false},
+    {label:niceName(s.name), data:ages.map(a=>my.has(a)? +(R.tm[my.get(a)]/100).toFixed(2) : null), color:'s1', width:3, r:4}],
+    yRev:true, yFmt:fTs, zero:false, xTitle:'Idade', hlines:hl, legend:true};
+  const ageL=hl.find(h=>h.id!=='WA-A'); if(ageL){ const dv=spec.series.flatMap(x=>x.data).filter(v=>v!=null); spec.yMin=Math.min(ageL.v, ...dv)*0.995; }
+  const opts=keys.sort((a,b)=>a-b).map(k=>[k, evLabel(k>>1)+' '+CO_S[k&1]]);
+  el.innerHTML=`<div class="card-h"><div><h3>Referência por idade na prova</h3><p class="note">Melhor marca do nadador em cada idade sobre as faixas nacionais de todas as épocas carregadas (${G_L[g].toLowerCase()}). Mais acima = mais rápido. Linhas horizontais: ${hl.length?esc(hl.map(h=>h.label).join(' · ')):'sem mínimos para esta prova'}.</p></div>${selHTML('f8Ev',opts,F8.key,'Prova')}</div><div class="chart tall" id="f8RefCh"></div>`;
+  draw('f8RefCh',spec); $('#f8Ev').onchange=ev=>{ F8.key=+ev.target.value; f8Ref(id); };
+  return {blocks:[{t:'h',text:'Referência por idade · '+evLabel(e)+' '+CO_S[co]},{t:'chart',title:'Marca do nadador face às faixas nacionais por idade (P10–P90 e mediana)',spec}]};
+}
+function f8Bullet(id){
+  const el=$('#f8Bul'); if(!el) return {blocks:[]}; const s=S.sw[id], R=S.R, g=s.g==='F'?1:0, gk=s.g==='F'?'F':'M', L=lastYear(), ageNow=L-s.by, co=+F8.co;
+  const pb=new Map(); for(const i of swRows(id)){ if(R.co[i]!==co||R.yr[i]<L-1) continue; const e=R.ev[i]; if(!pb.has(e)||R.tm[i]<R.tm[pb.get(e)]) pb.set(e,i); }
+  const tabs=S.std.filter(tb=>tb.co===co&&stdAgeOK(tb,ageNow));
+  const short=tb=> tb.id.startsWith('WA')? tb.id : tb.name.split(' · ')[0];
+  const rows=[]; let nextBest=null;
+  for(const [e,i] of [...pb.entries()].sort((a,b)=>a[0]-b[0])){ const t=R.tm[i]; const all=[];
+    tabs.forEach(tb=>{ const st=stdTime(tb,gk,e); if(st) all.push({label:short(tb), g:(t-st)/t*100, t:fT(st)}); });
+    const g8=groupTimes(L,e,co,g,'POR'); if(g8.length>=8) all.push({label:'8.º nac.', g:(t-g8[7])/t*100, t:fT(g8[7]), nat:1});
+    if(!all.length) continue;
+    const unmet=all.filter(m=>m.g>0&&!m.nat).sort((a,b)=>a.g-b.g), met=all.filter(m=>m.g<=0&&!m.nat).sort((a,b)=>a.g-b.g);
+    const keep=new Set([unmet[0],unmet[1],met[0],all.find(m=>m.label==='WA-A'),all.find(m=>m.nat)].filter(Boolean));
+    const nx=unmet[0]||null;
+    rows.push({ev:evShort(e)+' '+CO_S[co], pb:fT(t)+' · '+R.yr[i], marks:[...keep], next:nx}); if(nx&&(!nextBest||nx.g<nextBest.g)) nextBest={label:nx.label, g:nx.g, ev:evLabel(e)+' '+CO_S[co]};
+  }
+  if(co===0) F8.next=nextBest;
+  el.innerHTML=`<div class="card-h"><div><h3>Distância aos mínimos e referências</h3><p class="note">Melhor marca de ${L-1}–${L} em cada prova face às referências mais relevantes para os ${ageNow} anos (regras de idade de cada tabela): os dois próximos mínimos por cumprir, o mais exigente já cumprido, o Mínimo A do Mundial e o 8.º nacional (◆, portugueses, ${L}). Passe o cursor sobre cada traço para ver o tempo.</p></div>${segHTML('f8Co',[['0','PL 50'],['1','PC 25']],F8.co,'Piscina')}</div><div id="f8BulCh"></div>`;
+  bindSeg(el,'f8Co',v=>{ F8.co=v; f8Bullet(id); });
+  if(!rows.length){ $('#f8BulCh').innerHTML=`<p class="note">Sem marcas nas duas últimas épocas nesta piscina ou sem tabelas aplicáveis à idade.</p>`; return {blocks:[]}; }
+  const spec=bulletSpec(rows,'Distância aos mínimos e referências · '+CO_M[co]); draw('f8BulCh',spec);
+  return {blocks:[{t:'h',text:'Distância aos mínimos e referências · '+CO_M[co]},{t:'chart',title:'Quanto falta para cada referência (%, melhor marca das duas últimas épocas)',spec}]};
+}
+
+/* ---------------- clubes e associações: leitura rápida ---------------- */
+const _ceContent0 = ceContent;
+ceContent = function(){ _ceContent0(); try{ const x=CEX, c=x.cur, L=[]; const ev=x.t0.rows; const pv=ev.find(r=>r.y===x.y1-1);
+  L.push(`${fN(c.n)} nadadores em ${x.y1}${pv?` (${sg(c.n-pv.n)} face a ${x.y1-1})`:''}${x.rkN?` — ${ord(x.rkN.r)} ${x.isC?'clube':'associação'} nacional em número de nadadores`:''}.`);
+  if(c.lvl!=null&&pv&&pv.lvl!=null) L.push(`Nível dos 10 melhores ${c.lvl>pv.lvl+2?'subiu':c.lvl<pv.lvl-2?'desceu':'estável'}: ${f1(pv.lvl)} → ${f1(c.lvl)} pts.`);
+  if(c.ret!=null) L.push(`Retenção de ${f1(c.ret)}% dos nadadores de ${x.y1-1}; ${fN(c.novos)} novos no ranking.`);
+  if(c.t24) L.push(`${c.t24} nadadores no top‑24 do escalão (${c.t8} no top‑8)${x.rk24?`, ${ord(x.rk24.r)} a nível nacional`:''}; ${c.mins} com mínimo ou índice.`);
+  if(isPartial(x.y1)) L.unshift(`<span class="muted">Época ${x.y1} em curso: comparações provisórias.</span>`);
+  const el=$('#ceC'); const row=el&&el.querySelector('.row'); if(row) row.insertAdjacentHTML('afterend', insightHTML(L)); CEX.ins=L;
+  }catch(e){ console.warn(e); } };
+const _ceModel0 = ceModel;
+ceModel = async function(){ const m=await _ceModel0(); if(CEX&&CEX.ins) m.blocks.unshift({t:'p',text:'Leitura rápida\n'+insTxt(CEX.ins)}); return m; };
+
+/* ---------------- arranque ---------------- */
+startHelp();
 
 </script>
 <script>
@@ -3846,6 +4382,13 @@ async function buildPDF(m, stamp){
       doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...NAVY); doc.setCharSpace(1.6); doc.text(b.text, W/2, y, {align:'center'}); doc.setCharSpace(0); y+=12; doc.setTextColor(26,26,26);
     } else if(b.t==='h'){
       need(14); y+=2; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...NAVY); doc.text(b.text, M, y); doc.setDrawColor(...GOLD); doc.setLineWidth(.5); doc.line(M, y+1.8, M+18, y+1.8); y+=7; doc.setTextColor(20,27,43);
+    } else if(b.t==='p' && /^Leitura rápida\n/.test(b.text)){
+      const items=b.text.split('\n').slice(1); doc.setFont('helvetica','normal'); doc.setFontSize(9.3); const lh=4.2;
+      const wrapped=items.map(t=>doc.splitTextToSize(t, CW-10)); const hh=8+wrapped.reduce((s,l)=>s+l.length*lh+1,0)+2; need(hh+4);
+      doc.setFillColor(251,246,238); doc.setDrawColor(...GOLD); doc.setLineWidth(.3); doc.roundedRect(M, y-2, CW, hh, 2, 2, 'FD');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...GOLD); doc.text('LEITURA RÁPIDA', M+4, y+3.2);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.3); doc.setTextColor(20,27,43); let yy=y+8.5; wrapped.forEach(l=>{ doc.text(l, M+5, yy, {lineHeightFactor:1.4}); yy+=l.length*lh+1; });
+      y+=hh+4;
     } else if(b.t==='p'){
       doc.setFont('helvetica','normal'); doc.setFontSize(m.decl?11:9.5); const lh=m.decl?5.6:4.4;
       const lines=doc.splitTextToSize(b.text, CW); if(b.space) y+=4; need(lines.length*lh+2);
@@ -3923,6 +4466,7 @@ async function buildDOCX(m, stamp){
     if(b.t==='letterhead'){ body.push(wPara([wRun('FEDERAÇÃO PORTUGUESA DE NATAÇÃO',{b:1,color:'042C53',sz:28}), '<w:r><w:tab/></w:r>', wRun(b.ref||'',{color:'666666',sz:18})],{after:0,tabs:cwTw})); body.push(wPara([wRun('Direção Técnica Nacional',{color:'185FA5',sz:20})],{after:360,border:'042C53'})); }
     else if(b.t==='dtitle') body.push(wPara([wRun(b.text,{b:1,color:'042C53',sz:32,sp:60})],{jc:'center',before:240,after:360}));
     else if(b.t==='h') body.push(wPara([wRun(b.text,{b:1,color:'042C53',sz:26})],{before:240,after:100,keep:1,border:'BA7517'}));
+    else if(b.t==='p' && /^Leitura rápida\n/.test(b.text)){ body.push(wPara([wRun('LEITURA RÁPIDA',{b:1,color:'BA7517',sz:16,sp:20})],{before:120,after:40,keep:1})); b.text.split('\n').slice(1).forEach(t=>body.push(wPara([wRun(t,{sz:19})],{after:40,keep:1}))); body.push(wPara('',{after:80})); }
     else if(b.t==='p') body.push(wPara([wRun(b.text,{sz:m.decl?22:19})],{jc:b.justify?'both':'left',after:m.decl?160:100,before:b.space?240:0,line:m.decl?340:276}));
     else if(b.t==='kpis') body.push(wTable(b.items.map(i=>i[0]), [b.items.map(i=>i[1]+(i[2]?' — '+i[2]:''))], null, cwTw, 18));
     else if(b.t==='table'){ body.push(wTable(b.head, b.rows, b.align, cwTw, b.small?(b.head.length>11?13:15):17, b.fills)); if(b.note && !m.decl) body.push(wPara([wRun(b.note,{i:1,sz:15,color:'6E7887'})],{after:160})); }
@@ -3967,7 +4511,7 @@ async function buildDOCX(m, stamp){
 /* ============================================================
    Navegação e arranque
    ============================================================ */
-const VIEWS = {painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, declaracoes:vDeclaracoes, dados:vDados};
+const VIEWS = {painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, guia:vGuia, declaracoes:vDeclaracoes, dados:vDados};
 let READY=false, LOADING_UP=true;
 function go(v){ if(location.hash.slice(1)===v) route(); else location.hash=v; }
 function route(){
