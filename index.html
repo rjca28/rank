@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="pt-PT">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Observatório Natação Pura</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -308,7 +309,15 @@ th.gl{text-decoration:underline dotted color-mix(in srgb,var(--muted) 70%,transp
 .vw-l{margin-top:8px;display:grid;gap:3px}.vw-r{display:flex;gap:4px;align-items:center}.vw-i{flex:1;text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:14px}.vw-i:hover{border-color:var(--accent)}
 .lbl2{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:6px 0 2px}
 @media (max-width:760px){.areas{margin-left:0;width:100%;overflow-x:auto;flex-wrap:nowrap}.areas button{flex:none}}
+.sum3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:6px}
+@media (max-width:860px){.sum3{grid-template-columns:minmax(0,1fr)}}
+ul.xl{margin:4px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px;line-height:1.4}
+ul.xl.good li::marker{color:var(--good)} ul.xl.bad li::marker{color:var(--bad)}
+.repbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:10px 0}.repbar.due{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 8%,var(--surface))}.repbar .btns{display:flex;gap:8px;flex-wrap:wrap}
 </style>
+</head>
+<body>
+
 
 <header class="hdr">
   <div class="hdr-in">
@@ -4560,7 +4569,7 @@ renderFichaMore = function(id){
   const res=_rfm9(id); const el=$('#fiMore'); if(!el) return res;
   const spec=timelineSpec(id); let tl=[];
   if(spec){ el.insertAdjacentHTML('afterbegin',`<div class="card" id="f9Tl"><div class="card-h"><div><h3>Linha do tempo da carreira</h3><p class="note">Clube em cada época, melhor pontuação, número de melhores marcas pessoais, picos de evolução (▲), primeira vez em cada tabela de mínimos (verde = mínimos World Aquatics) e marcas em competições internacionais. Passe o cursor para ver os detalhes.</p></div></div><div id="f9TlCh"></div></div>`); draw('f9TlCh',spec); tl=[{t:'h',text:'Linha do tempo da carreira'},{t:'chart',title:'Linha do tempo da carreira',spec}]; }
-  const hd=$('#view .sw-hd > .row:last-child'); if(hd&&!$('#fiOne')) hd.insertAdjacentHTML('afterbegin',`<div class="exp" id="fiOne"><span class="lbl">Ficha 1 página</span><button class="btn" data-op="pdf">PDF</button><button class="btn" data-op="docx">Word</button></div>`);
+  const hd=$('#view .sw-hd > .row:last-child'); if(hd&&!$('#fiOne')) hd.insertAdjacentHTML('afterbegin',`<div class="exp" id="fiOne"><span class="lbl">Ficha resumo</span><button class="btn" data-op="pdf">PDF</button><button class="btn" data-op="docx">Word</button></div>`);
   $$('#fiOne [data-op]').forEach(b=>b.onclick=async()=>{ const tx=b.textContent; b.disabled=true; b.textContent='A gerar…'; try{ await exportModel(onePagerModel(id), b.dataset.op); }catch(e){ console.error(e); toast('Erro: '+(e.message||e)); } finally{ b.disabled=false; b.textContent=tx; } });
   const inner=Object.getOwnPropertyDescriptor(res,'blocks');
   return {get blocks(){ return [...tl, ...(inner&&inner.get? inner.get.call(res) : res.blocks)]; }, out:res.out};
@@ -4586,13 +4595,13 @@ function onePagerModel(id){
 }
 
 /* ======================= 5. GRÁFICOS ANTES/DEPOIS ======================= */
-function dumbbellSpec(rows, la, lb, fmt, title, unit, lowerBetter){
+function dumbbellSpec(rows, la, lb, fmt, title, unit, lowerBetter, WW=1400){
   const H=Math.max(200, 80+rows.length*30);
-  return {kind:'svg', w:1400, h:H, title, svg:(th, exp)=>{
-    const W=1400, l=260, r=W-150, t=46, b=H-34; const vs=rows.flatMap(o=>[o.a,o.b]).filter(v=>v!=null); let mn=Math.min(...vs), mx=Math.max(...vs); const pad=(mx-mn)*.06||1; mn-=pad; mx+=pad;
+  return {kind:'svg', w:WW, h:H, title, svg:(th, exp)=>{
+    const W=WW, l=WW<1000?120:260, r=W-(WW<1000?95:150), t=46, b=H-34; const vs=rows.flatMap(o=>[o.a,o.b]).filter(v=>v!=null); let mn=Math.min(...vs), mx=Math.max(...vs); const pad=(mx-mn)*.06||1; mn-=pad; mx+=pad;
     const X=v=>l+(r-l)*(v-mn)/(mx-mn), ink=th.ink||'#0E1B2B', mut=th.muted||'#56667A', line=th.grid||'#E3E8EF', good=th.good||'#1D7A4E', bad=th.bad||'#B3372F';
     let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${xs(title)}" style="font-family:${xs(LIGHT.font)}">`; if(exp) s+=`<rect width="${W}" height="${H}" fill="#fff"/>`;
-    s+=`<circle cx="${l}" cy="16" r="7" fill="${mut}" opacity=".55"/><text x="${l+12}" y="21" font-size="14" fill="${mut}">${xs(la)}</text><circle cx="${l+170}" cy="16" r="7" fill="${good}"/><text x="${l+182}" y="21" font-size="14" fill="${mut}">${xs(lb)} ${lowerBetter?'(verde = mais rápido, vermelho = mais lento)':'(verde = subiu, vermelho = desceu)'}</text>`;
+    s+=`<circle cx="${l}" cy="16" r="7" fill="${mut}" opacity=".55"/><text x="${l+12}" y="21" font-size="14" fill="${mut}">${xs(la)}</text> <circle cx="${l+(WW<1000?90:170)}" cy="16" r="7" fill="${good}"/><text x="${l+(WW<1000?102:182)}" y="21" font-size="14" fill="${mut}">${xs(lb)} ${lowerBetter?'(verde = mais rápido, vermelho = mais lento)':'(verde = subiu, vermelho = desceu)'}</text>`;
     for(let k=0;k<=5;k++){ const v=mn+(mx-mn)*k/5; s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${t-6}" y2="${b}" stroke="${line}"/><text x="${X(v)}" y="${H-12}" text-anchor="middle" font-size="13" fill="${mut}">${xs(fmt(v))}</text>`; }
     rows.forEach((o,k)=>{ const y=t+k*30+8; s+=`<text x="${l-14}" y="${y+5}" text-anchor="end" font-size="14" fill="${ink}">${xs(o.lab)}</text>`; if(o.a==null||o.b==null){ s+=`<text x="${l}" y="${y+5}" font-size="12" fill="${mut}">sem dados nas duas épocas</text>`; return; }
       const c=(lowerBetter? o.b<=o.a : o.b>=o.a)?good:bad; s+=`<line x1="${X(o.a)}" x2="${X(o.b)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="4" opacity=".55"/><circle cx="${X(o.a)}" cy="${y}" r="7" fill="${mut}" opacity=".55"/><circle cx="${X(o.b)}" cy="${y}" r="8" fill="${c}"><title>${xs(o.lab+': '+fmt(o.a)+' → '+fmt(o.b))}</title></circle><text x="${r+14}" y="${y+5}" font-size="14" font-weight="700" fill="${c}">${o.b-o.a>=0?'+':'−'}${xs(fmt(Math.abs(o.b-o.a)))}${unit||''}</text>`; });
@@ -4702,6 +4711,299 @@ function syncAreas(){ const tabs=$('#tabs'); if(!tabs) return; const sel=$('.tab
 <script>
 'use strict';
 /* ============================================================
+   Resumo executivo alargado · resumo do nadador alargado
+   ============================================================ */
+/* ---------------- indicadores adicionais ---------------- */
+const _ei0 = execIndicators;
+execIndicators = function(){
+  const base=_ei0(), R=S.R;
+  const ck='execagg'; const ag=D.cache.get(ck)||aggBest({g:'',co:'',esc:'',nat:'POR',reg:'',ev:'',minp:''}).per; D.cache.set(ck,ag);
+  const memo=(k,f)=>y=>{ const c='x10'+k+y; if(D.cache.has(c)) return D.cache.get(c); const v=f(y); D.cache.set(c,v); return v; };
+  const novos=memo('nv',y=>{ const m=ag.get(y); if(!m) return null; let n=0; for(const sw of m.keys()) if(S.sw[sw].first===y && y!==S.years[0]) n++; return n; });
+  const intl=memo('in',y=>{ if(!S.years.includes(y)) return null; const s=new Set(); for(let i=0;i<R.n;i++) if(R.yr[i]===y&&D.POR[i]&&isIntl(i)) s.add(R.sw[i]); return s.size; });
+  const jov=memo('jv',y=>{ const m=ag.get(y); if(!m) return null; const v=[...m.values()].filter(i=>D.AGE[i]>=15&&D.AGE[i]<=18).map(i=>R.pt[i]).sort((a,b)=>b-a).slice(0,30); return v.length>=10? +mean(v).toFixed(1) : null; });
+  const prof=memo('pf',y=>{ if(!S.years.includes(y)) return null; const acc=new Map(); for(let i=0;i<R.n;i++){ if(R.yr[i]!==y||R.co[i]!==0||!D.POR[i]) continue; const k=R.ev[i]*2+D.G[i]; let a=acc.get(k); if(!a){ a=[]; acc.set(k,a);} a.push(R.pt[i]); } const v=[]; for(const a of acc.values()){ if(a.length<8) continue; a.sort((x,z)=>z-x); v.push(a[7]); } return v.length? +mean(v).toFixed(1) : null; });
+  return [...base,
+    {id:'nov', l:'Nadadores novos no ranking', f:novos, fmt:fN},
+    {id:'int', l:'Com marcas em competições internacionais', f:intl, fmt:fN},
+    {id:'jov', l:'Nível dos jovens 15–18 anos (top‑30, pts)', f:jov, fmt:f1},
+    {id:'prof', l:'Profundidade: pontos do 8.º nacional (média PL)', f:prof, fmt:f1}];
+};
+
+/* ---------------- secções adicionais do resumo executivo ---------------- */
+let RX10=null;
+function rxSections(y){
+  const R=S.R, ag=D.cache.get('execagg')||aggBest({g:'',co:'',esc:'',nat:'POR',reg:'',ev:'',minp:''}).per, cur=ag.get(y)||new Map(), prv=ag.get(y-1)||new Map();
+  // por escalão
+  const escR=ESC_G.map((e,k)=>{ const a=[...cur.values()].filter(i=>D.ESC[i]===k).map(i=>R.pt[i]).sort((x,z)=>z-x), b=[...prv.values()].filter(i=>D.ESC[i]===k).map(i=>R.pt[i]).sort((x,z)=>z-x);
+    return {esc:e.n, n:a.length, np:b.length, dn:b.length?(a.length-b.length)/b.length*100:null, lv:a.length>=5?mean(a.slice(0,20)):null, lp:b.length>=5?mean(b.slice(0,20)):null}; });
+  escR.forEach(r=>r.dl= r.lv!=null&&r.lp!=null? r.lv-r.lp : null);
+  const escSpec=dumbbellSpec(escR.filter(r=>r.lv!=null&&r.lp!=null).map(r=>({lab:r.esc, a:r.lp, b:r.lv})), String(y-1), String(y), v=>fN(Math.round(v)), 'Nível por escalão (top‑20)', ' pts', false, 760);
+  // destaques
+  const top=[...cur.entries()].sort((a,b)=>R.pt[b[1]]-R.pt[a[1]]).slice(0,10).map(([sw,i],k)=>{ const j=prv.get(sw); return {k:k+1, sw, name:niceName(S.sw[sw].name), g:S.sw[sw].g, age:D.AGE[i], club:S.cl[R.cl[i]].code, ev:evLabel(R.ev[i])+' '+CO_S[R.co[i]], t:R.tm[i], pt:R.pt[i], d:j!=null?R.pt[i]-R.pt[j]:null}; });
+  const prog=[...cur.entries()].filter(([sw,i])=>prv.has(sw)&&R.pt[i]>=600&&D.AGE[i]>=14).map(([sw,i])=>({sw, name:niceName(S.sw[sw].name), g:S.sw[sw].g, age:D.AGE[i], club:S.cl[R.cl[i]].code, ev:evLabel(R.ev[i])+' '+CO_S[R.co[i]], pt:R.pt[i], d:R.pt[i]-R.pt[prv.get(sw)]})).sort((a,b)=>b.d-a.d).slice(0,10).map((r,k)=>Object.assign(r,{k:k+1}));
+  // grupos AR
+  const pbs=pbYearSet(), wa=stdById('WA-A');
+  const grp=[]; S.groups.forEach(g=>groupMembers(g.id).forEach(({m,s})=>{ if(!s){ grp.push({g:g.name, name:m.name, found:false}); return; } const i=cur.get(s.id), j=prv.get(s.id); let gap=null;
+    if(wa){ for(const [k2,ii] of swPBs(s.id)){ if((k2&1)||R.yr[ii]<y-1||R.yr[ii]>y) continue; const st=stdTime(wa,s.g==='F'?'F':'M',k2>>1); if(!st) continue; const gg=(R.tm[ii]-st)/st*100; if(gap==null||gg<gap.g) gap={g:gg,e:k2>>1}; } }
+    grp.push({g:g.name, id:s.id, name:niceName(s.name), found:true, age:y-s.by, pt:i!=null?R.pt[i]:null, d:i!=null&&j!=null?R.pt[i]-R.pt[j]:null, pb:pbs.has(s.id*4096+y), gap}); }));
+  // mínimos internacionais
+  const wl=[]; S.std.filter(t=>/^WA/.test(t.id)).forEach(tb=>(mnAll(tb).get(y)||[]).forEach(x=>{ if(!D.POR[x.i]) return; wl.push({sw:R.sw[x.i], name:niceName(S.sw[R.sw[x.i]].name), g:S.sw[R.sw[x.i]].g, ev:evLabel(R.ev[x.i]), t:R.tm[x.i], st:x.st, tb:tb.id, dt:R.dt[x.i]}); }));
+  const wbest=new Map(); wl.forEach(r=>{ const k=r.sw+'_'+r.ev; const c=wbest.get(k); if(!c||r.tb==='WA-A') wbest.set(k,r); }); const wlist=[...wbest.values()].sort((a,b)=>a.tb.localeCompare(b.tb)||a.name.localeCompare(b.name));
+  // associações
+  const ra=new Map(), rb=new Map(); for(const i of cur.values()){ const r=S.cl[R.cl[i]].reg||'—'; ra.set(r,(ra.get(r)||0)+1); } for(const i of prv.values()){ const r=S.cl[R.cl[i]].reg||'—'; rb.set(r,(rb.get(r)||0)+1); }
+  const regCh=[...rb.entries()].filter(([r,n])=>n>=30).map(([r,n])=>({r, n, a:ra.get(r)||0, p:((ra.get(r)||0)-n)/n*100})).sort((a,b)=>a.p-b.p);
+  // pontos de atenção
+  const att=[]; const bad=(RXX&&RXX.rows||[]).filter(r=>r.st.k==='bad'); if(bad.length) att.push(`Indicadores a piorar: ${esc_(bad.map(r=>r.d.l.toLowerCase()))}.`);
+  const noPB=grp.filter(r=>r.found&&!r.pb); if(noPB.length) att.push(`Membros dos grupos AR sem melhor marca pessoal em ${y}: ${esc_(noPB.map(r=>r.name))}.`);
+  const escD=escR.filter(r=>r.dn!=null).sort((a,b)=>a.dn-b.dn)[0]; if(escD&&escD.dn<-3) att.push(`Maior quebra de participação: ${esc(escD.esc)} (${sg1(escD.dn)}%).`);
+  const escL=escR.filter(r=>r.dl!=null).sort((a,b)=>a.dl-b.dl)[0]; if(escL&&escL.dl<-3) att.push(`Maior descida de nível: ${esc(escL.esc)} (${sg(escL.dl)} pts no top‑20).`);
+  if(regCh.length&&regCh[0].p<-5) att.push(`Associação com maior redução de nadadores: ${esc(regLabel(regCh[0].r))} (${sg1(regCh[0].p)}%).`);
+  if(!att.length) att.push('Sem sinais de alerta relevantes nos indicadores desta época.');
+  const pos=[]; const up=(RXX&&RXX.rows||[]).filter(r=>r.st.k==='good'); if(up.length) pos.push(`Indicadores a melhorar: ${esc_(up.map(r=>r.d.l.toLowerCase()))}.`);
+  if(prog[0]) pos.push(`Maior progressão individual: ${esc(prog[0].name)} (${sg(prog[0].d)} pts, ${prog[0].ev}).`);
+  const escU=escR.filter(r=>r.dl!=null).sort((a,b)=>b.dl-a.dl)[0]; if(escU&&escU.dl>3) pos.push(`Maior subida de nível: ${esc(escU.esc)} (${sg(escU.dl)} pts no top‑20).`);
+  if(wlist.length) pos.push(`${new Set(wlist.filter(r=>r.tb==='WA-A').map(r=>r.sw)).size} nadador(es) com Mínimo A do Mundial e ${new Set(wlist.map(r=>r.sw)).size} com algum mínimo internacional.`);
+  return {esc:escR, escSpec, top, prog, grp, wlist, att, pos};
+}
+function esc_(a){ return lst(a.map(x=>esc(x))); }
+const _rx10 = rxContent;
+rxContent = function(){
+  _rx10(); const el=$('#rxC'); if(!el||!RXX) return; const y=RXX.y, X=rxSections(y); RX10=X;
+  el.insertAdjacentHTML('beforeend',`<div class="grid g2" style="align-items:start"><div class="card"><h3>Pontos fortes</h3><ul class="xl good">${X.pos.map(t=>`<li>${t}</li>`).join('')||'<li>—</li>'}</ul></div><div class="card"><h3>Pontos de atenção</h3><ul class="xl bad">${X.att.map(t=>`<li>${t}</li>`).join('')}</ul></div></div>
+    <div class="grid g2" style="align-items:start"><div class="card"><div class="card-h"><div><h3>Por escalão · ${y-1} → ${y}</h3><p class="note">Nadadores portugueses e nível (média dos 20 melhores) em cada escalão.</p></div></div><div id="rxEsc"></div><div id="rxEscT" style="margin-top:8px"></div></div>
+      <div class="card"><h3>Destaques individuais · ${y}</h3><p class="note">Os 10 portugueses com maior pontuação na época.</p><div id="rxTop" style="margin-top:8px"></div></div></div>
+    <div class="grid g2" style="align-items:start"><div class="card"><h3>Maiores progressões · ${y-1} → ${y}</h3><p class="note">Nadadores com 14+ anos e 600+ pontos, ordenados pela subida da melhor pontuação.</p><div id="rxProg" style="margin-top:8px"></div></div>
+      <div class="card"><h3>Mínimos internacionais · ${y}</h3><p class="note">Marcas portuguesas dentro dos mínimos World Aquatics (Mínimo A e Mínimo FPN).</p><div id="rxWa" style="margin-top:8px"></div></div></div>
+    <div class="card"><h3>Grupos de alto rendimento · ${y}</h3><p class="note">Pontuação, variação, melhor marca pessoal na época e distância ao Mínimo A do Mundial (melhor prova de PL das duas últimas épocas).</p><div id="rxGrp" style="margin-top:8px"></div></div>`);
+  draw('rxEsc', X.escSpec);
+  const tE=new DataTable('rxEscT',[{k:'esc',l:'Escalão'},{k:'n',l:'Nadadores '+y,num:1},{k:'dn',l:'Δ %',num:1,f:r=>r.dn==null?'—':`<span class="${r.dn>=0?'up':'down'}">${sg1(r.dn)}%</span>`,x:r=>r.dn==null?'':+r.dn.toFixed(1)},{k:'lv',l:'Nível '+y,num:1,f:r=>r.lv==null?'—':f1(r.lv),x:r=>r.lv==null?'':+r.lv.toFixed(1)},{k:'dl',l:'Δ nível',num:1,f:r=>r.dl==null?'—':`<span class="${r.dl>=0?'up':'down'}">${sg(r.dl)}</span>`,x:r=>r.dl==null?'':Math.round(r.dl)}], X.esc, {page:10, nosortbar:true});
+  const tT=new DataTable('rxTop',[{k:'k',l:'#',num:1,dir0:'asc'},{k:'name',l:'Nadador',f:r=>swLink(r.sw,r.name),x:r=>r.name},{k:'g',l:'G'},{k:'age',l:'Id.',num:1},{k:'club',l:'Clube'},{k:'ev',l:'Prova'},{k:'t',l:'Tempo',num:1,f:r=>fT(r.t)},{k:'pt',l:'Pts',num:1},{k:'d',l:'Δ',num:1,f:r=>r.d==null?'—':sg(r.d),x:r=>r.d??''}], X.top, {page:10, nosortbar:true});
+  const tP=new DataTable('rxProg',[{k:'k',l:'#',num:1,dir0:'asc'},{k:'name',l:'Nadador',f:r=>swLink(r.sw,r.name),x:r=>r.name},{k:'g',l:'G'},{k:'age',l:'Id.',num:1},{k:'club',l:'Clube'},{k:'ev',l:'Melhor prova'},{k:'pt',l:'Pts',num:1},{k:'d',l:'Subida',num:1,f:r=>`<span class="up">${sg(r.d)}</span>`,x:r=>r.d}], X.prog, {page:10, nosortbar:true});
+  const tW=new DataTable('rxWa',[{k:'name',l:'Nadador',f:r=>swLink(r.sw,r.name),x:r=>r.name},{k:'g',l:'G'},{k:'ev',l:'Prova'},{k:'t',l:'Tempo',num:1,f:r=>fT(r.t)},{k:'tb',l:'Mínimo',f:r=>`<span class="pill ${r.tb==='WA-A'?'good':'gold'}">${esc(r.tb)}</span>`,x:r=>r.tb},{k:'st',l:'Referência',num:1,f:r=>fT(r.st)}], X.wlist, {page:20, nosortbar:true, empty:'Nenhuma marca portuguesa dentro dos mínimos internacionais nesta época.'});
+  const tG=new DataTable('rxGrp',[{k:'g',l:'Grupo',cls:'wrap'},{k:'name',l:'Nadador',f:r=>r.found?swLink(r.id,r.name):esc(r.name),x:r=>r.name},{k:'age',l:'Id.',num:1,f:r=>r.found?r.age:'—'},{k:'sp',l:'Pts por época',nosort:1,noexp:1,f:r=>r.found?sparkSw(r.id):''},{k:'pt',l:'Pts '+y,num:1,f:r=>r.pt??'—'},{k:'d',l:'Δ',num:1,f:r=>r.d==null?'—':`<span class="${r.d>=0?'up':'down'}">${sg(r.d)}</span>`,x:r=>r.d??''},{k:'pb',l:'MP na época',f:r=>r.found?(r.pb?'<span class="pill good">Sim</span>':'<span class="pill bad">Não</span>'):'—',x:r=>r.found?(r.pb?'Sim':'Não'):''},{k:'gap',l:'Mín. A Mundial',num:1,f:r=>r.gap?`<span class="pill ${r.gap.g<=0?'good':r.gap.g<=1?'gold':''}">${r.gap.g<=0?'✓ ':''}${fPct(r.gap.g)}</span> <span class="muted small">${esc(evShort(r.gap.e))}</span>`:'—',x:r=>r.gap?r.gap.g.toFixed(2)+'% ('+evLabel(r.gap.e)+')':''}], X.grp, {page:30, nosortbar:true});
+  Object.assign(RX10,{tE,tT,tP,tW,tG});
+};
+const _rxm10 = rxModel;
+rxModel = async function(){
+  const m=await _rxm10(); const X=RX10; if(!X) return m; const src=m.blocks.pop();
+  m.blocks.push({t:'table',sheet:'Pontos',head:['Pontos fortes','Pontos de atenção'],rows:Array.from({length:Math.max(X.pos.length,X.att.length)},(_,k)=>[stripTags(X.pos[k]||''),stripTags(X.att[k]||'')]),align:['l','l'],fills:Array.from({length:Math.max(X.pos.length,X.att.length)},()=>['#E8F4EC','#FBE9E7'])},
+    {t:'h',text:`Por escalão · ${RXX.y-1} → ${RXX.y}`},{t:'chart',title:'Nível por escalão (média dos 20 melhores)',spec:X.escSpec},Object.assign({t:'table',sheet:'Por escalão'},X.tE.exportRows()),
+    {t:'h',text:'Destaques individuais'},Object.assign({t:'table',sheet:'Destaques',small:true},X.tT.exportRows()),
+    {t:'h',text:'Maiores progressões'},Object.assign({t:'table',sheet:'Progressões',small:true},X.tP.exportRows()),
+    {t:'h',text:'Mínimos internacionais'},Object.assign({t:'table',sheet:'Mínimos internacionais',small:true},X.tW.exportRows()),
+    {t:'h',text:'Grupos de alto rendimento'},Object.assign({t:'table',sheet:'Grupos AR',small:true},X.tG.exportRows()), src);
+  return m;
+};
+
+/* ---------------- resumo do nadador ---------------- */
+function swSummary(id){
+  const s=S.sw[id], R=S.R, L=lastYear(), g=s.g==='F'?1:0; const pb=swPBs(id), byY=swByYearBestPts(id), ys=[...byY.keys()].sort((a,b)=>a-b);
+  const pbRows=[...pb.entries()].map(([k,i])=>({ev:evLabel(k>>1)+' '+CO_S[k&1], t:R.tm[i], pt:R.pt[i], y:R.yr[i], age:D.AGE[i], rk:D.RK[i], rke:D.RKE[i], meet:S.mt[R.mt[i]].name, intl:isIntl(i)})).sort((a,b)=>b.pt-a.pt).slice(0,8);
+  const seas=ys.slice(-5).reverse().map(y=>{ const rr=swRows(id).filter(i=>R.yr[i]===y); const b=byY.get(y), p=byY.get(y-1); let mins=0; S.std.forEach(tb=>{ if((mnAll(tb).get(y)||[]).some(x=>R.sw[x.i]===id)) mins++; });
+    return {y, age:y-s.by, club:[...new Set(rr.map(i=>S.cl[R.cl[i]].code))].join(', '), pt:R.pt[b], d:p!=null?R.pt[b]-R.pt[p]:null, n:rr.length, t8:rr.filter(i=>D.RK[i]<=8).length, rke:Math.min(...rr.map(i=>D.RKE[i])), mins, pc:ptsPercentile(y,g,y-s.by,R.pt[b])}; });
+  const minsNow=[]; S.std.forEach(tb=>{ const l=[...(mnAll(tb).get(L)||[]), ...(mnAll(tb).get(L-1)||[])].filter(x=>R.sw[x.i]===id); if(l.length) minsNow.push({tb:tb.id.startsWith('WA')?tb.id:tb.name.split(' · ')[0], name:tb.name, evs:[...new Set(l.map(x=>evShort(R.ev[x.i])+' '+CO_S[R.co[x.i]]))].join(', '), wa:tb.id.startsWith('WA')}); });
+  const laps=[]; if(S.L&&S.L.n){ const m=new Map(); for(let i=0;i<S.L.n;i++){ if(S.L.sw[i]!==id||S.L.yr[i]<L-1) continue; const k=S.L.ev[i]*2+S.L.co[i]; const c=m.get(k); if(c==null||S.L.tm[i]<S.L.tm[c]) m.set(k,i); }
+    for(const [k,i] of m){ const ind=pb.get(k); laps.push({ev:evLabel(k>>1)+' '+CO_S[k&1], lap:S.L.tm[i], ind:ind!=null?R.tm[ind]:null, dt:S.L.dt[i], meet:S.mt[S.L.mt[i]].name}); } }
+  const stk={}; for(const [k,i] of pb){ if(R.yr[i]<L-2) continue; const st=S.ev[k>>1].slice(-1); if(!stk[st]||R.pt[i]>stk[st].p) stk[st]={p:R.pt[i], i}; }
+  const SN={L:'Livres',C:'Costas',B:'Bruços',M:'Mariposa',E:'Estilos'}, sl=Object.entries(stk).sort((a,b)=>b[1].p-a[1].p);
+  const fortes=sl.slice(0,2).map(([k,o])=>`${SN[k]} — ${evShort(R.ev[o.i])} ${CO_S[R.co[o.i]]}, ${o.p} pts`), fracos=sl.length>2? sl.slice(-2).reverse().map(([k,o])=>`${SN[k]} — ${o.p} pts`) : [];
+  const objs=(F8.bulRows||[]).filter(r=>r.next).sort((a,b)=>a.next.g-b.next.g).slice(0,4).map(r=>`${r.ev}: ${r.next.label} (falta ${f2(r.next.g)}%)`);
+  let sim=null; try{ const r=similarSwimmers(id,10); if(r&&r.list.length){ const futs=r.list.filter(x=>x.fut).map(x=>x.fut.p); sim={n:r.list.length, med:futs.length?Math.round(median(futs)):null, t8:r.list.filter(x=>x.brk!=null&&x.brk<=8).length, c:r.c}; } }catch(e){}
+  const grp=S.groups.filter(gr=>groupMembers(gr.id).some(x=>x.s&&x.s.id===id)).map(gr=>gr.name);
+  const lastPB=Math.max(...[...pb.values()].map(i=>R.yr[i]));
+  return {pbRows, seas, minsNow, laps, fortes, fracos, objs, sim, grp, since:s.last-lastPB};
+}
+let SM10=null;
+const _rfm10 = renderFichaMore;
+renderFichaMore = function(id){
+  const res=_rfm10(id); const el=$('#fiMore'); if(!el) return res;
+  let X; try{ X=swSummary(id); }catch(e){ console.warn(e); return res; } SM10={id,X};
+  const li=a=>a.length? a.map(t=>`<li>${esc(t)}</li>`).join('') : '<li class="muted">—</li>';
+  el.insertAdjacentHTML('afterbegin',`<div class="card" id="f10Sum"><div class="card-h"><div><h3>Resumo do nadador</h3><p class="note">Síntese para treinador e atleta: pontos fortes, o que melhorar, próximos objetivos, melhores marcas, últimas épocas, mínimos cumpridos e tempos de estafeta.${X.grp.length?' Membro de: '+esc(X.grp.join(', '))+'.':''}</p></div></div>
+    <div class="sum3"><div><div class="lbl2">Pontos fortes</div><ul class="xl good">${li(X.fortes)}</ul></div><div><div class="lbl2">A melhorar</div><ul class="xl bad">${li(X.fracos)}${X.since>=2?`<li>Sem melhor marca pessoal há ${X.since} épocas</li>`:''}</ul></div><div><div class="lbl2">Próximos objetivos</div><ul class="xl">${li(X.objs)}</ul></div></div>
+    ${X.sim&&X.sim.med?`<p class="note" style="margin-top:8px">Trajetórias semelhantes: dos ${X.sim.n} nadadores anteriores com percurso parecido até aos ${X.sim.c} anos, a mediana da pontuação máxima atingida depois foi ${fN(X.sim.med)} pts e ${X.sim.t8} chegaram ao top‑8 nacional.</p>`:''}
+    <div class="grid g2" style="align-items:start;margin-top:10px"><div><div class="lbl2">Melhores marcas pessoais</div><div id="f10Pb"></div></div><div><div class="lbl2">Últimas épocas</div><div id="f10Se"></div></div></div>
+    <div class="grid g2" style="align-items:start;margin-top:10px"><div><div class="lbl2">Mínimos e índices (${lastYear()-1}–${lastYear()})</div><div id="f10Mn"></div></div><div><div class="lbl2">Tempos de estafeta (lap, ${lastYear()-1}–${lastYear()})</div><div id="f10Lp"></div></div></div></div>`);
+  ['f10Pb','f10Se','f10Mn','f10Lp'].forEach(k=>TBL_OPEN.add(k));
+  const tPb=new DataTable('f10Pb',[{k:'ev',l:'Prova'},{k:'t',l:'Tempo',num:1,f:r=>`<b>${fT(r.t)}</b>`,x:r=>fT(r.t)},{k:'pt',l:'Pts',num:1},{k:'y',l:'Época',num:1},{k:'age',l:'Id.',num:1},{k:'rk',l:'Rk nac.',num:1,f:r=>ord(r.rk),x:r=>r.rk},{k:'rke',l:'Rk esc.',num:1,f:r=>ord(r.rke),x:r=>r.rke}], X.pbRows, {page:8, nosortbar:true});
+  const tSe=new DataTable('f10Se',[{k:'y',l:'Época',num:1},{k:'age',l:'Id.',num:1},{k:'club',l:'Clube'},{k:'pt',l:'Melhor pts',num:1},{k:'d',l:'Δ',num:1,f:r=>r.d==null?'—':`<span class="${r.d>=0?'up':'down'}">${sg(r.d)}</span>`,x:r=>r.d??''},{k:'pc',l:'Percentil',num:1,f:r=>'P'+fN(r.pc),x:r=>Math.round(r.pc)},{k:'t8',l:'Top‑8 nac.',num:1},{k:'rke',l:'Melhor rk esc.',num:1,f:r=>ord(r.rke),x:r=>r.rke},{k:'mins',l:'Tabelas',num:1,title:'Tabelas de mínimos/índices cumpridas'}], X.seas, {page:5, nosortbar:true});
+  const tMn=new DataTable('f10Mn',[{k:'tb',l:'Tabela',f:r=>`<span class="pill ${r.wa?'good':''}">${esc(r.tb)}</span>`,x:r=>r.name},{k:'evs',l:'Provas',cls:'wrap'}], X.minsNow, {page:12, nosortbar:true, empty:'Nenhuma tabela cumprida nas duas últimas épocas.'});
+  const tLp=new DataTable('f10Lp',[{k:'ev',l:'Prova'},{k:'lap',l:'Lap',num:1,f:r=>`<b>${fT(r.lap)}</b>`,x:r=>fT(r.lap)},{k:'ind',l:'Individual',num:1,f:r=>r.ind==null?'—':fT(r.ind)},{k:'dt',l:'Data',f:r=>fD(r.dt)}], X.laps, {page:8, nosortbar:true, empty:'Sem tempos lap carregados para este nadador.'});
+  SM10.t={tPb,tSe,tMn,tLp};
+  const inner=Object.getOwnPropertyDescriptor(res,'blocks');
+  const sumBlocks=()=>[{t:'h',text:'Resumo do nadador'},{t:'table',sheet:'Resumo',head:['Pontos fortes','A melhorar','Próximos objetivos'],rows:Array.from({length:Math.max(X.fortes.length,X.fracos.length,X.objs.length,1)},(_,k)=>[X.fortes[k]||'',X.fracos[k]||'',X.objs[k]||'']),align:['l','l','l']},Object.assign({t:'table',sheet:'Melhores marcas'},tPb.exportRows()),Object.assign({t:'table',sheet:'Últimas épocas'},tSe.exportRows())];
+  return {get blocks(){ return [...sumBlocks(), ...(inner&&inner.get? inner.get.call(res) : res.blocks)]; }, out:res.out};
+};
+/* ficha resumo exportável alargada */
+const _op10 = onePagerModel;
+onePagerModel = function(id){
+  const m=_op10(id); if(!SM10||SM10.id!==id) return m; const X=SM10.X, T=SM10.t; const src=m.blocks.pop();
+  m.blocks.splice(2,0,{t:'table',sheet:'Síntese',head:['Pontos fortes','A melhorar','Próximos objetivos'],rows:Array.from({length:Math.max(X.fortes.length,X.fracos.length,X.objs.length,1)},(_,k)=>[X.fortes[k]||'',X.fracos[k]||'',X.objs[k]||'']),align:['l','l','l'],fills:Array.from({length:Math.max(X.fortes.length,X.fracos.length,X.objs.length,1)},()=>['#E8F4EC','#FBE9E7','#F6EBD3'])});
+  m.blocks.push({t:'h',text:'Melhores marcas pessoais'},Object.assign({t:'table',sheet:'Melhores marcas',small:true},T.tPb.exportRows()),{t:'h',text:'Últimas épocas'},Object.assign({t:'table',sheet:'Últimas épocas',small:true},T.tSe.exportRows()));
+  if(X.minsNow.length) m.blocks.push({t:'h',text:'Mínimos e índices cumpridos ('+(lastYear()-1)+'–'+lastYear()+')'},Object.assign({t:'table',sheet:'Mínimos',small:true},T.tMn.exportRows()));
+  if(X.laps.length) m.blocks.push({t:'h',text:'Tempos de estafeta (lap)'},Object.assign({t:'table',sheet:'Lap',small:true},T.tLp.exportRows()));
+  const tl=timelineSpec(id); if(tl) m.blocks.push({t:'chart',title:'Linha do tempo da carreira',spec:tl});
+  if(X.sim&&X.sim.med) m.blocks.push({t:'p',text:`Trajetórias semelhantes: dos ${X.sim.n} nadadores anteriores com percurso parecido até aos ${X.sim.c} anos, a mediana da pontuação máxima atingida depois foi ${X.sim.med} pts e ${X.sim.t8} chegaram ao top-8 nacional. É uma referência histórica, não uma previsão.`});
+  m.blocks.push(src); return m;
+};
+HELP.push([/^Resumo do nadador/, 'Síntese da ficha em linguagem simples.', 'Pontos fortes = estilos com melhor pontuação recente; a melhorar = estilos mais fracos; objetivos = referências mais próximas por cumprir.', 'Use como base para a conversa com o treinador e o atleta.']);
+HELP.push([/^Pontos fortes$|^Pontos de atenção$/, 'Síntese automática do resumo executivo.', 'Verde = o que está a correr bem; vermelho = sinais de alerta.', 'Comece por aqui na reunião de direção.']);
+HELP.push([/^Por escalão ·|^Destaques individuais|^Maiores progressões|^Mínimos internacionais|^Grupos de alto rendimento ·/, 'Detalhe do resumo executivo.', 'Época escolhida face à anterior.', 'Identifique quem está a puxar o nível e onde há quebras.']);
+
+</script>
+<script>
+'use strict';
+/* ============================================================
+   Carga competitiva · projeção de marca · relatório de acompanhamento
+   ============================================================ */
+
+/* ======================= 2. CARGA COMPETITIVA ======================= */
+AN_SECS.push(['carga','Carga competitiva']);
+const CG={by:'nev', esc:''};
+const CG_BINS={nev:[['1',n=>n===1],['2–3',n=>n>=2&&n<=3],['4–6',n=>n>=4&&n<=6],['7–9',n=>n>=7&&n<=9],['10+',n=>n>=10]], nmt:[['1',n=>n===1],['2',n=>n===2],['3–4',n=>n>=3&&n<=4],['5–7',n=>n>=5&&n<=7],['8+',n=>n>=8]]};
+function cargaData(){
+  const R=S.R, ck='carga'+AN.g+AN.co+AN.nat; let base=D.cache.get(ck);
+  if(!base){
+    const m=new Map(); // sw*4096+y -> {evs:Set, mts:Set, d0,d1, best, intl}
+    for(let i=0;i<R.n;i++){ if(AN.g!==''&&D.G[i]!==+AN.g) continue; if(AN.co!==''&&R.co[i]!==+AN.co) continue; if(AN.nat==='POR'&&!D.POR[i]) continue; if(AN.nat==='EST'&&D.POR[i]) continue;
+      const k=R.sw[i]*4096+R.yr[i]; let o=m.get(k); if(!o){ o={sw:R.sw[i], y:R.yr[i], evs:new Set(), mts:new Set(), d0:1e9, d1:-1e9, best:-1, intl:0}; m.set(k,o); }
+      o.evs.add(R.ev[i]*2+R.co[i]); o.mts.add(R.mt[i]); if(R.dt[i]>0){ o.d0=Math.min(o.d0,R.dt[i]); o.d1=Math.max(o.d1,R.dt[i]); } if(o.best<0||R.pt[i]>R.pt[o.best]) o.best=i; if(isIntl(i)) o.intl++; }
+    const list=[]; for(const o of m.values()){ const p=m.get(o.sw*4096+o.y-1); if(!p) continue; const age=o.y-S.sw[o.sw].by; list.push({sw:o.sw, y:o.y, age, esc:escG(age), g:D.G[o.best], nev:o.evs.size, nmt:o.mts.size, span:o.d1>=o.d0?(o.d1-o.d0)/30.4:0, intl:o.intl, pt:R.pt[o.best], d:R.pt[o.best]-R.pt[p.best]}); }
+    const byA=new Map(); list.forEach(o=>{ const k=o.g*100+o.age; if(!byA.has(k)) byA.set(k,[]); byA.get(k).push(o.d); });
+    const med=new Map([...byA].map(([k,v])=>[k, v.length>=15? median(v) : null]));
+    list.forEach(o=>{ const e=med.get(o.g*100+o.age); o.ev = e==null? null : o.d-e; });
+    base=list.filter(o=>o.ev!=null); D.cache.set(ck,base);
+  }
+  return base.filter(o=>o.y>=AN.y0&&o.y<=AN.y1);
+}
+function anCarga(el, out){
+  anExtra(segHTML('cgBy',[['nev','Provas ranqueadas'],['nmt','Competições com melhor marca']],CG.by,'Medida de carga')+selHTML('cgEsc',[['','Todos os escalões'],...ESC_G.map((e,k)=>[String(k),e.n])],CG.esc,'Escalão'), x=>{ bindSeg(x,'cgBy',v=>{CG.by=v; anContent();}); $('#cgEsc',x).onchange=e=>{CG.esc=e.target.value; anContent();}; });
+  const all=cargaData(), list=CG.esc===''? all : all.filter(o=>o.esc===+CG.esc), bins=CG_BINS[CG.by];
+  if(!list.length){ el.innerHTML='<div class="card empty">Sem nadadores com marcas em duas épocas seguidas para os filtros escolhidos.</div>'; out.blocks=[]; return; }
+  const agg=v=>{ const e=v.map(o=>o.ev).sort((a,b)=>a-b), imp=v.filter(o=>o.d>0).length; return {n:v.length, med:e.length?quantile(e,.5):null, q1:e.length?quantile(e,.25):null, q3:e.length?quantile(e,.75):null, imp:v.length?imp/v.length*100:null, pt:v.length?mean(v.map(o=>o.pt)):null}; };
+  const rows=bins.map(([l,f])=>Object.assign({bin:l}, agg(list.filter(o=>f(o[CG.by])))));
+  const escRows=ESC_G.map((e,k)=>{ const v=all.filter(o=>o.esc===k); return {esc:e.n, k, ...bins.reduce((acc,[l,f])=>{ const a=agg(v.filter(o=>f(o[CG.by]))); acc['b'+l]=a.n>=20?a.med:null; acc['n'+l]=a.n; return acc; },{})}; });
+  const corr=(()=>{ const x=list.map(o=>o[CG.by]), y=list.map(o=>o.ev), n=x.length, mx=mean(x), my=mean(y); let a=0,b=0,c=0; for(let i=0;i<n;i++){ a+=(x[i]-mx)*(y[i]-my); b+=(x[i]-mx)**2; c+=(y[i]-my)**2; } return b&&c? a/Math.sqrt(b*c) : null; })();
+  const lab=CG.by==='nev'?'provas ranqueadas na época':'competições com melhor marca na época';
+  const spec={type:'bar', labels:rows.map(r=>r.bin), series:[{label:'Evolução mediana face ao esperado (pts)', data:rows.map(r=>r.med==null?null:+r.med.toFixed(1)), color:'s1', colors:rows.map(r=>r.med!=null&&r.med<0?'bad':'s3')}], legend:false, zero:true, yFmt:v=>fN(v), tipFmt:v=>(v>=0?'+':'')+f1(v)+' pts', xTitle:'N.º de '+lab};
+  const spec2={type:'bar', labels:rows.map(r=>r.bin), series:[{label:'Melhoraram a melhor pontuação (%)', data:rows.map(r=>r.imp==null?null:+r.imp.toFixed(1)), color:'s1'}], legend:false, zero:true, yFmt:v=>fN(v)+'%', xTitle:'N.º de '+lab};
+  const best=[...rows].filter(r=>r.n>=30&&r.med!=null).sort((a,b)=>b.med-a.med)[0], worst=[...rows].filter(r=>r.n>=30&&r.med!=null).sort((a,b)=>a.med-b.med)[0];
+  const ins=[`Entre ${fN(list.length)} nadadores-época, os que têm ${esc(best?best.bin:'—')} ${lab} evoluem mais face ao esperado para a idade (mediana ${best?sg(best.med):'—'} pts); os com ${esc(worst?worst.bin:'—')} evoluem menos (${worst?sg(worst.med):'—'} pts).`,
+    corr!=null?`Relação global ${Math.abs(corr)<0.1?'fraca':Math.abs(corr)<0.3?'moderada':'forte'} entre carga e evolução (r = ${f2(corr)}): ${Math.abs(corr)<0.1?'a quantidade de provas, por si só, explica pouco da evolução':corr>0?'mais carga tende a acompanhar maior evolução':'mais carga tende a acompanhar menor evolução'}.`:'',
+    '<span class="muted">Os rankings só guardam a melhor marca de cada prova por época: "competições" conta as competições onde o nadador fez essas melhores marcas, não o total de competições disputadas. Associação não implica causa.</span>'];
+  el.innerHTML=insightHTML(ins)+`<div class="grid g2"><div class="card"><div class="card-h"><div><h3>Carga competitiva e evolução</h3><p class="note">Evolução da melhor pontuação face à época anterior, descontada a evolução mediana nacional da mesma idade e género, por n.º de ${lab}. Verde = acima do esperado; vermelho = abaixo.</p></div></div><div class="chart" id="cgCh1"></div></div>
+    <div class="card"><div class="card-h"><div><h3>Percentagem que melhorou</h3><p class="note">Nadadores que subiram a melhor pontuação face à época anterior, por n.º de ${lab}.</p></div></div><div class="chart" id="cgCh2"></div></div></div>
+    <div class="card"><h3>Detalhe por nível de carga</h3><div id="cgT1" style="margin-top:8px"></div></div>
+    <div class="card"><div class="card-h"><div><h3>Por escalão</h3><p class="note">Evolução mediana face ao esperado (pts) por escalão e nível de carga (grupos com pelo menos 20 nadadores). Mostra em que idades mais provas se associam a mais evolução.</p></div></div><div id="cgT2" style="margin-top:8px"></div></div>`;
+  draw('cgCh1',spec); draw('cgCh2',spec2);
+  const t1=new DataTable('cgT1',[{k:'bin',l:CG.by==='nev'?'Provas':'Competições'},{k:'n',l:'Nadadores‑época',num:1},{k:'pt',l:'Pts médios',num:1,f:r=>r.pt==null?'—':fN(Math.round(r.pt)),x:r=>r.pt==null?'':Math.round(r.pt)},{k:'imp',l:'Melhoraram',num:1,f:r=>r.imp==null?'—':f1(r.imp)+'%',x:r=>r.imp==null?'':+r.imp.toFixed(1)},{k:'med',l:'Face ao esperado (mediana)',num:1,f:r=>r.med==null?'—':`<span class="${r.med>=0?'up':'down'}">${sg(r.med)}</span>`,x:r=>r.med==null?'':Math.round(r.med)},{k:'q',l:'P25–P75',num:1,f:r=>r.q1==null?'—':sg(r.q1)+' a '+sg(r.q3),sv:r=>r.med}], rows, {page:10, nosortbar:true});
+  const t2=new DataTable('cgT2',[{k:'esc',l:'Escalão',sv:r=>r.k},...bins.map(([l])=>({k:'b'+l,l:l,num:1,f:r=>r['b'+l]==null?'—':`<span class="${r['b'+l]>=0?'up':'down'}">${sg(r['b'+l])}</span> <span class="muted small">n=${r['n'+l]}</span>`,x:r=>r['b'+l]==null?'':Math.round(r['b'+l]),sv:r=>r['b'+l]}))], escRows, {page:10, nosortbar:true});
+  out.blocks=[{t:'p',text:'Leitura rápida\n'+insTxt(ins)},{t:'chart',title:'Evolução face ao esperado por nível de carga',spec},{t:'chart',title:'Percentagem que melhorou por nível de carga',spec:spec2},Object.assign({t:'table',sheet:'Carga'},t1.exportRows()),{t:'h',text:'Por escalão'},Object.assign({t:'table',sheet:'Por escalão'},t2.exportRows()),{t:'src',text:'Carga = n.º de provas (prova × piscina) com marca no ranking da época, ou n.º de competições onde foram feitas essas melhores marcas. Os rankings guardam só a melhor marca de cada prova, por isso não medem o total de competições disputadas. Evolução face ao esperado = variação da melhor pontuação face à época anterior menos a mediana nacional dessa variação na mesma idade e género.'}];
+}
+const _an11 = anContent;
+anContent = function(){
+  if(AN.sec==='carga'){ const el=$('#anC'); const out={blocks:[]}; ANX=out; el.innerHTML=''; try{ anCarga(el,out); }catch(e){ console.error(e); el.innerHTML='<div class="card empty">Erro: '+esc(e.message)+'</div>'; } return; }
+  _an11();
+};
+HELP.push([/^Carga competitiva e evolução|^Percentagem que melhorou|^Detalhe por nível de carga|^Por escalão$/, 'Relação entre o número de provas (ou competições) na época e a evolução da melhor pontuação.', 'Barras = evolução mediana face ao esperado para a idade; positiva = evoluíram mais do que a média nacional da idade.', 'Faixas de carga com evolução sistematicamente acima indicam uma carga competitiva favorável para a idade.']);
+
+/* ======================= 3. PROJEÇÃO DE MARCA ======================= */
+/* intervalo provável para a época seguinte: variação observada em nadadores do mesmo género, idade, prova e piscina com marca semelhante (±3%, alarga até ±6%) */
+function projectMark(e, co, g, age, t){
+  const pm=pairMap(e,co,g,''), R=S.R; let rat=[], tol=0.03, aw=0;
+  const okAge=(x,w)=> age>=20 ? x>=Math.max(19,age-2-w) && x<=age+2+w : Math.abs(x-age)<=w;
+  outer: for(aw=0; aw<=2; aw++){ for(tol=0.03; tol<=0.0601; tol+=0.015){ rat=[]; for(const a of pm.values()) for(const [y,i] of a){ if(!okAge(D.AGE[i],aw)) continue; const j=a.get(y+1); if(j===undefined) continue; if(Math.abs(R.tm[i]/t-1)>tol) continue; rat.push(R.tm[j]/R.tm[i]); } if(rat.length>=25) break outer; } }
+  if(rat.length<12) return null; rat.sort((x,y)=>x-y); aw=Math.min(aw,2);
+  return {n:rat.length, tol, aw, p10:t*quantile(rat,.1), p25:t*quantile(rat,.25), p50:t*quantile(rat,.5), p75:t*quantile(rat,.75), p90:t*quantile(rat,.9), prob:st=>rat.filter(r=>t*r<=st).length/rat.length*100};
+}
+function swProjection(id){
+  const s=S.sw[id], R=S.R, L=lastYear(), g=s.g==='F'?1:0, age=L-s.by, gk=s.g==='F'?'F':'M';
+  const cur=new Map(); for(const i of swRows(id)){ if(R.yr[i]<L-1) continue; const k=R.ev[i]*2+R.co[i]; if(!cur.has(k)||R.tm[i]<R.tm[cur.get(k)]) cur.set(k,i); }
+  const tabs=S.std.filter(tb=>stdAgeOK(tb,age+1));
+  const rows=[]; for(const [k,i] of [...cur.entries()].sort((a,b)=>R.pt[b[1]]-R.pt[a[1]]).slice(0,8)){ const e=k>>1, co=k&1, t=R.tm[i], a=R.yr[i]===L? age : age-1; const p=projectMark(e,co,g,a,t); if(!p) continue;
+    const refs=tabs.filter(tb=>tb.co===co).map(tb=>({tb, st:stdTime(tb,gk,e)})).filter(x=>x.st&&x.st<t).sort((x,y)=>y.st-x.st); const nx=refs[0]||null;
+    rows.push({k, ev:evLabel(e)+' '+CO_S[co], t, y:R.yr[i], p, next:nx? {label:nx.tb.id.startsWith('WA')?nx.tb.id:nx.tb.name.split(' · ')[0], st:nx.st, prob:p.prob(nx.st)} : null}); }
+  return {rows, age, L};
+}
+function projSpec(rows, title){
+  const H=Math.max(160, 70+rows.length*56);
+  return {kind:'svg', w:1400, h:H, title, svg:(th, exp)=>{
+    const W=1400, l=230, r=W-260, ink=th.ink||'#0E1B2B', mut=th.muted||'#56667A', line=th.grid||'#E3E8EF', s1=th.s1||'#185FA5', good=th.good||'#1D7A4E';
+    const X=(o,v)=>{ const lo=o.p.p10*0.995, hi=Math.max(o.t, o.p.p90)*1.005; return l+(r-l)*(hi-v)/(hi-lo); };
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${xs(title)}" style="font-family:${xs(LIGHT.font)}">`; if(exp) s+=`<rect width="${W}" height="${H}" fill="#fff"/>`;
+    s+=`<text x="${l}" y="20" font-size="13" fill="${mut}">← mais lento</text><text x="${r}" y="20" text-anchor="end" font-size="13" fill="${mut}">mais rápido →</text>`;
+    rows.forEach((o,k)=>{ const y=50+k*56;
+      s+=`<text x="${l-14}" y="${y+4}" text-anchor="end" font-size="16" font-weight="700" fill="${ink}">${xs(o.ev)}</text><text x="${l-14}" y="${y+21}" text-anchor="end" font-size="13" fill="${mut}">atual ${xs(fT(o.t))}</text>`;
+      s+=`<line x1="${l}" x2="${r}" y1="${y}" y2="${y}" stroke="${line}" stroke-width="2"/>`;
+      s+=`<line x1="${X(o,o.p.p10)}" x2="${X(o,o.p.p90)}" y1="${y}" y2="${y}" stroke="${s1}" stroke-width="4" opacity=".35"/><rect x="${X(o,o.p.p75)}" y="${y-9}" width="${Math.max(2,X(o,o.p.p25)-X(o,o.p.p75))}" height="18" rx="5" fill="${s1}" opacity=".45"><title>${xs('P25–P75: '+fT(o.p.p75)+' a '+fT(o.p.p25))}</title></rect>`;
+      s+=`<line x1="${X(o,o.p.p50)}" x2="${X(o,o.p.p50)}" y1="${y-12}" y2="${y+12}" stroke="${s1}" stroke-width="4"><title>${xs('Mediana: '+fT(o.p.p50))}</title></line><text x="${X(o,o.p.p50)}" y="${y-16}" text-anchor="middle" font-size="13" font-weight="700" fill="${s1}">${xs(fT(o.p.p50))}</text>`;
+      s+=`<circle cx="${X(o,o.t)}" cy="${y}" r="6" fill="${ink}"><title>${xs('Marca atual '+fT(o.t))}</title></circle>`;
+      if(o.next){ const xn=X(o,o.next.st); if(xn>=l&&xn<=r) s+=`<line x1="${xn}" x2="${xn}" y1="${y-14}" y2="${y+14}" stroke="${good}" stroke-width="3" stroke-dasharray="4 3"/><text x="${xn}" y="${y+28}" text-anchor="middle" font-size="12" fill="${good}" font-weight="700">${xs(o.next.label)}</text>`; }
+      s+=`<text x="${r+16}" y="${y+5}" font-size="14" fill="${o.next?good:mut}" font-weight="600">${xs(o.next? o.next.label+': '+fN(o.next.prob)+'% de prob.' : 'sem próxima referência')}</text>`; });
+    return s+'</svg>'; }};
+}
+const _rfm11 = renderFichaMore;
+renderFichaMore = function(id){
+  const res=_rfm11(id); const el=$('#fiMore'); if(!el) return res;
+  let P; try{ P=swProjection(id); }catch(e){ console.warn(e); return res; }
+  if(!P.rows.length) return res;
+  const card=document.createElement('div'); card.className='card'; card.id='f11Pr';
+  card.innerHTML=`<div class="card-h"><div><h3>Projeção para a próxima época</h3><p class="note">Intervalo provável da melhor marca em ${P.L+1}, a partir do que aconteceu a nadadores do mesmo género, prova e piscina, com idade igual ou próxima (alarga-se a faixa nos seniores) e marca semelhante (±3% a ±6%). Barra = 50% centrais (P25–P75); traço = mediana; linha fina = 80% (P10–P90); ponto = marca atual; tracejado verde = próximo mínimo aplicável aos ${P.age+1} anos. É uma referência estatística, não um objetivo.</p></div></div><div id="f11PrCh"></div><div id="f11PrT" style="margin-top:8px"></div>`;
+  const anchor=$('#f8Bul')||el.firstChild; anchor.insertAdjacentElement('afterend',card);
+  const spec=projSpec(P.rows,'Projeção para a próxima época'); draw('f11PrCh',spec);
+  TBL_OPEN.add('f11PrT');
+  const t=new DataTable('f11PrT',[{k:'ev',l:'Prova'},{k:'t',l:'Atual',num:1,f:r=>fT(r.t)+' <span class="muted small">'+r.y+'</span>',x:r=>fT(r.t)},{k:'p50',l:'Projeção (mediana)',num:1,f:r=>`<b>${fT(r.p.p50)}</b>`,x:r=>fT(r.p.p50),sv:r=>r.p.p50},{k:'iq',l:'Intervalo provável (P25–P75)',num:1,f:r=>fT(r.p.p75)+' – '+fT(r.p.p25),sv:r=>r.p.p25},{k:'nx',l:'Próximo mínimo',f:r=>r.next?esc(r.next.label)+' '+fT(r.next.st):'—',x:r=>r.next?r.next.label+' '+fT(r.next.st):''},{k:'pr',l:'Probabilidade',num:1,f:r=>r.next?`<span class="pill ${r.next.prob>=50?'good':r.next.prob>=25?'gold':''}">${fN(r.next.prob)}%</span>`:'—',x:r=>r.next?Math.round(r.next.prob):'',sv:r=>r.next?r.next.prob:-1},{k:'n',l:'Casos',num:1,f:r=>r.p.n,x:r=>r.p.n,title:'Nadadores de referência usados'}], P.rows, {page:8, nosortbar:true});
+  F11=P; F11.spec=spec; F11.t=t;
+  const inner=Object.getOwnPropertyDescriptor(res,'blocks');
+  return {get blocks(){ return [{t:'h',text:'Projeção para '+(P.L+1)},{t:'chart',title:'Intervalo provável da melhor marca na próxima época',spec},Object.assign({t:'table',sheet:'Projeção'},t.exportRows()), ...(inner&&inner.get? inner.get.call(res) : res.blocks)]; }, out:res.out};
+};
+let F11=null;
+const _op11 = onePagerModel;
+onePagerModel = function(id){ const m=_op11(id); if(F11&&F11.rows&&F11.rows.length){ const src=m.blocks.pop(); m.blocks.push({t:'h',text:'Projeção para '+(F11.L+1)},{t:'chart',title:'Intervalo provável da melhor marca na próxima época',spec:F11.spec},Object.assign({t:'table',sheet:'Projeção',small:true},F11.t.exportRows()),src); } return m; };
+HELP.push([/^Projeção para a próxima época/, 'Intervalo provável da melhor marca na próxima época, com base em nadadores semelhantes (mesma idade, prova e marca parecida).', 'Barra = metade central dos casos; traço = mediana; à direita, probabilidade histórica de cumprir o próximo mínimo.', 'Probabilidades acima de 50% sugerem um mínimo ao alcance; abaixo de 25%, um objetivo exigente.']);
+
+/* ======================= 6. RELATÓRIO DE ACOMPANHAMENTO ======================= */
+S.repSnap=null;
+async function loadRepSnap(){ const d=await cfgLoad('repsnap'); if(d&&d.snap) S.repSnap=d.snap; }
+function serSnap(s){ return {at:new Date().toISOString(), y:s.y, n:s.n, years:s.years, alerts:[...s.alerts.keys()], mins:[...s.mins.keys()], gp:[...s.gp.entries()].map(([k,o])=>[k,{pts:o.pts,pb:[...o.pb.entries()]}])}; }
+function desSnap(o){ if(!o) return null; return {y:o.y, n:o.n, years:o.years, at:o.at, alerts:new Map(o.alerts.map(k=>[k,1])), mins:new Map(o.mins.map(k=>[k,1])), gp:new Map(o.gp.map(([k,v])=>[k,{pts:v.pts, pb:new Map(v.pb)}]))}; }
+function reportModel(){
+  const prev=desSnap(S.repSnap), nm=newsModel(prev); if(!nm) return null;
+  const y=lastYear(), yc=lastClosed(), since=prev&&prev.at? new Date(prev.at).toLocaleDateString('pt-PT') : null;
+  const XI=execIndicators().map(d=>({d, v:d.f(y), p:d.f(y-1)}));
+  const al=computeAlerts(Object.assign({},AL,{y:String(y)})).list.slice(0,20);
+  let X=null; try{ X=rxSections(y); }catch(e){}
+  const stag=[]; S.groups.forEach(g=>groupMembers(g.id).forEach(({s})=>{ if(!s) return; const pb=swPBs(s.id); const lp=Math.max(...[...pb.values()].map(i=>S.R.yr[i])); if(s.last-lp>=2) stag.push([niceName(s.name), g.name, s.last-lp]); }));
+  const ins=[since?`Desde o último relatório (${since}): ${nm.alRows.length} novos alertas, ${nm.mnRows.length} novos mínimos ou índices e ${nm.gRows.filter(r=>r.pbs).length} membros dos grupos AR com novas melhores marcas.`:`Primeiro relatório: comparação da época ${y} com ${y-1}.`,
+    `Dados até ${fD(S.yinfo[y].maxDt)}${isPartial(y)?' (época em curso)':''}; ${fN(S.n)} marcas de ${S.years[0]} a ${y}.`,
+    stag.length?`Membros dos grupos AR com 2+ épocas sem melhor marca pessoal: ${stag.map(r=>r[0]).join(', ')}.`:'Todos os membros dos grupos AR fizeram melhor marca pessoal nas duas últimas épocas.'];
+  const blocks=[{t:'p',text:'Leitura rápida\n'+insTxt(ins)},
+    {t:'h',text:'Indicadores · '+y+(isPartial(y)?' (em curso)':'')+' face a '+(y-1)},{t:'table',sheet:'Indicadores',head:['Indicador',String(y),String(y-1),'Variação'],rows:XI.map(r=>[r.d.l, r.v==null?'':r.d.fmt(r.v), r.p==null?'':r.d.fmt(r.p), r.v!=null&&r.p!=null? (r.d.pct? (r.v-r.p>0?'+':'')+(r.v-r.p).toFixed(1).replace('.',',')+' p.p.' : ((r.v-r.p)/Math.abs(r.p)*100>0?'+':'')+((r.v-r.p)/Math.abs(r.p)*100).toFixed(1).replace('.',',')+'%') : '']),align:['l','r','r','r']},
+    {t:'h',text:(since?'Novos alertas de evolução':'Alertas de evolução')+(nm.alRows.length>40?' (40 mais relevantes de '+nm.alRows.length+'; lista completa no separador Alertas)':'')},{t:'table',sheet:'Novos alertas',small:true,head:['Nadador','G','Idade','Clube','Provas','Melhoria'],rows:nm.alRows.slice(0,40).map(r=>[r.name,r.g,r.age,r.club,r.n,r.evs]),align:['l','l','r','l','r','l']},
+    {t:'h',text:since?'Novos mínimos e índices':'Mínimos e índices novos face à época anterior'},{t:'table',sheet:'Novos mínimos',small:true,head:['Nadador','G','Idade','Clube','Tabela','Prova','Tempo','Mínimo'],rows:nm.mnRows.map(r=>[r.name,r.g,r.age,r.club,r.tb,r.ev,fT(r.t),fT(r.st)]),align:['l','l','r','l','l','l','r','r']},
+    {t:'h',text:'Grupos de alto rendimento'},{t:'table',sheet:'Grupos AR',small:true,head:['Nadador','Grupo','Pts '+y,since?'Pts antes':'Pts '+(y-1),since?'Novas melhores marcas':'Melhores marcas na época','Épocas sem MP'],rows:nm.gRows.map(r=>[r.name,r.grp,r.pts??'',r.prev??'',r.pbs||'',r.since]),align:['l','l','r','r','l','r']},
+    ...(X?[{t:'h',text:'Mínimos internacionais da época'},{t:'table',sheet:'Mínimos internacionais',small:true,head:['Nadador','G','Prova','Tempo','Mínimo'],rows:X.wlist.map(r=>[r.name,r.g,r.ev,fT(r.t),r.tb]),align:['l','l','l','r','l']},{t:'h',text:'Destaques individuais · '+y},{t:'table',sheet:'Destaques',small:true,head:['#','Nadador','G','Idade','Clube','Prova','Tempo','Pts'],rows:X.top.map(r=>[r.k,r.name,r.g,r.age,r.club,r.ev,fT(r.t),r.pt]),align:['r','l','l','r','l','l','r','r']}]:[]),
+    {t:'h',text:'Alertas de evolução em vigor (top 20)'},{t:'table',sheet:'Alertas',small:true,head:['Nadador','G','Idade','Clube','Provas'],rows:al.map(a=>[niceName(S.sw[a.sw].name),a.g,a.age,a.club,a.evs.map(e=>evShort(e.ev)+' '+CO_S[e.co]).join(', ')]),align:['l','l','r','l','l']},
+    {t:'src',text:'Relatório de acompanhamento gerado pelo Observatório Natação Pura. "Novos" = em relação ao estado registado no último relatório guardado'+(since?' ('+since+')':'')+'. Mínimos e índices: nacionalidade portuguesa, idades de acesso de cada tabela.'}];
+  return {title:'Relatório de acompanhamento — '+new Date().toLocaleDateString('pt-PT'), subtitle:since?'Novidades desde '+since:'Época '+y+' face a '+(y-1), filename:'Relatorio_acompanhamento_'+todayISO(), orientation:'p', blocks, ins};
+}
+async function markReport(){ const s=newsSnapshot(); if(!s) return; S.repSnap=serSnap(s); try{ await cfgSave('repsnap',{snap:S.repSnap}); }catch(e){ console.warn(e); } }
+function reportDue(){ if(!hasData()) return null; const s=S.repSnap; if(!s) return {why:'Ainda não foi gerado nenhum relatório de acompanhamento.'}; const days=(Date.now()-new Date(s.at))/86400000; if(s.n!==S.n) return {why:`Há dados novos desde o último relatório (${new Date(s.at).toLocaleDateString('pt-PT')}).`}; if(days>=30) return {why:`Passaram ${Math.floor(days)} dias desde o último relatório (${new Date(s.at).toLocaleDateString('pt-PT')}).`}; return null; }
+function reportBarHTML(){ const d=reportDue(); return `<div class="repbar ${d?'due':''}"><div><b>Relatório de acompanhamento</b> <span class="muted">${d? esc(d.why) : 'Em dia · último relatório em '+new Date(S.repSnap.at).toLocaleDateString('pt-PT')+'.'} Reúne novidades, alertas, mínimos e estado dos grupos AR desde o último relatório.</span></div><div class="row" style="gap:6px"><button class="btn${d?' primary':''}" data-rep2="pdf">PDF</button><button class="btn${d?' primary':''}" data-rep2="docx">Word</button></div></div>`; }
+let REP_LAST=null; /* o mesmo relatório pode ser exportado em PDF e Word durante 15 min */
+function bindReportBar(root){ $$('[data-rep2]',root).forEach(b=>b.onclick=async()=>{ const tx=b.textContent; b.disabled=true; b.textContent='A gerar…'; try{ const fresh=REP_LAST&&Date.now()-REP_LAST.at<15*60*1000; const m=fresh?REP_LAST.m:reportModel(); await exportModel(m,b.dataset.rep2); if(!fresh){ REP_LAST={m,at:Date.now()}; await markReport(); } toast('Relatório gerado e registado como último relatório.'); $$('.repbar').forEach(x=>{ x.outerHTML=reportBarHTML(); }); bindReportBar(document); }catch(e){ console.error(e); toast('Erro: '+(e.message||e)); } finally{ b.disabled=false; b.textContent=tx; } }); }
+const _vRes11 = vResumo;
+vResumo = function(root){ _vRes11(root); const h=$('.view-head',root); if(h){ h.insertAdjacentHTML('afterend', reportBarHTML()); bindReportBar(root); } };
+const _vDad11 = vDados;
+vDados = function(root){ _vDad11(root); const c=$('#mgCard',root); if(c&&hasData()){ c.insertAdjacentHTML('beforebegin', reportBarHTML()); bindReportBar(root); } };
+const _show11 = showNews;
+showNews = function(prev){ _show11(prev); const m=$('.modal'); if(m){ const h=m.querySelector('.card-h'); if(h){ h.insertAdjacentHTML('afterend', reportBarHTML()); bindReportBar(m); } } };
+
+</script>
+<script>
+'use strict';
+/* ============================================================
    Exportação: Excel (SheetJS) · PDF (jsPDF) · Word (DOCX via JSZip)
    ============================================================ */
 const NAVY=[4,44,83], BLUE=[24,95,165], GOLD=[186,117,23];
@@ -4750,8 +5052,17 @@ function buildXLSX(m, stamp){
 }
 
 /* ---------- PDF ---------- */
+/* a fonte base do PDF (Helvetica/WinAnsi) não tem alguns símbolos: substituir por equivalentes legíveis */
+const PDF_MAP=[[/Δ\s?/g,'Var. '],[/[‑‐]/g,'-'],[/−/g,'-'],[/→/g,'->'],[/←/g,'<-'],[/≥/g,'>='],[/≤/g,'<='],[/✓\s?/g,''],[/⚑\s?/g,''],[/▲/g,'+'],[/▼/g,'-'],[/▬/g,'='],[/◆/g,'*'],[/ρ/g,'rho'],[/★\s?/g,''],[/[▸◂]/g,''],[/┊/g,'|'],[/ /g,' ']];
+const pdfSafe = v => typeof v==='string' ? PDF_MAP.reduce((t,[re,r])=>t.replace(re,r), v) : v;
+function pdfSafeModel(m){
+  const blocks=m.blocks.map(b=>{ const o=Object.assign({},b); ['text','title','note','role','name','ref'].forEach(k=>{ if(o[k]!=null) o[k]=pdfSafe(o[k]); });
+    if(o.head) o.head=o.head.map(pdfSafe); if(o.rows) o.rows=o.rows.map(r=>r.map(pdfSafe)); if(o.items) o.items=o.items.map(it=>Array.isArray(it)?it.map(pdfSafe):Object.assign({},it,{title:pdfSafe(it.title)})); return o; });
+  return Object.assign({}, m, {title:pdfSafe(m.title), subtitle:pdfSafe(m.subtitle), blocks});
+}
 async function buildPDF(m, stamp){
   if(!window.jspdf) throw new Error('Biblioteca PDF indisponível');
+  m=pdfSafeModel(m);
   const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:m.orientation||'p', unit:'mm', format:'a4'});
   const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), M=m.decl?20:12, CW=W-2*M;
   let y;
@@ -4935,7 +5246,7 @@ window.addEventListener('hashchange', route);
     await loadUploads();
     await loadStandards();
     await loadGroups();
-    await Promise.all([loadMerges(), loadTargets(), loadRelayRef(), loadViews()]);
+    await Promise.all([loadMerges(), loadTargets(), loadRelayRef(), loadViews(), (typeof loadRepSnap==='function'?loadRepSnap():null)]);
     LOADING_UP=false;
     rebuildSwimmers(); refreshHeader();
     if(!hasData() && !location.hash.slice(1)) location.hash='dados'; else route();
