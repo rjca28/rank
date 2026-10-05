@@ -320,6 +320,26 @@ th.gl{text-decoration:underline dotted color-mix(in srgb,var(--muted) 70%,transp
 ul.xl{margin:4px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px;line-height:1.4}
 ul.xl.good li::marker{color:var(--good)} ul.xl.bad li::marker{color:var(--bad)}
 .repbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:10px 0}.repbar.due{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 8%,var(--surface))}.repbar .btns{display:flex;gap:8px;flex-wrap:wrap}
+.areas .go-btn{margin-left:4px;border-color:color-mix(in srgb,var(--hdr-muted) 60%,transparent);color:var(--hdr-ink)}
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:12px}
+.sc{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;color:var(--ink);font:inherit;min-width:0}
+.sc b{font-size:15px;color:var(--accent)} .sc span{font-size:13px;color:var(--muted)}
+.sc:hover{border-color:var(--accent);background:var(--accent-soft)}
+.steps{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.steps li>span{flex:1;min-width:200px}
+.steps li i{width:10px;height:10px;border-radius:50%;flex:none;background:var(--faint)}
+.steps li.st-good i{background:var(--good)}.steps li.st-gold i{background:var(--gold)}.steps li.st-bad i{background:var(--bad)}
+.go-m{width:min(640px,100%);margin-top:8vh}.go-m #goQ{width:100%;font-size:17px;min-height:44px}
+.go-r{margin-top:8px;max-height:60vh;overflow:auto;display:flex;flex-direction:column}
+.go-g{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin:10px 0 3px}
+.go-i{display:flex;justify-content:space-between;gap:12px;text-align:left;background:none;border:0;border-radius:7px;padding:7px 10px;cursor:pointer;color:var(--ink);font:inherit}
+.go-i span{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.go-i.on,.go-i:hover{background:var(--accent-soft)}
+#tourBg{position:fixed;inset:0;z-index:110}
+#tourHL{position:fixed;z-index:111;border-radius:10px;border:2px solid var(--gold);box-shadow:0 0 0 9999px rgba(6,18,33,.55);pointer-events:none;transition:all .2s}
+#tourPop{position:fixed;z-index:112;width:min(380px,calc(100vw - 24px));background:var(--surface);color:var(--ink);border:1px solid var(--gold);border-radius:12px;padding:14px 16px;box-shadow:0 12px 34px rgba(0,0,0,.3)}
+#tourPop h3{margin:4px 0 6px}#tourPop p{margin:0 0 12px;font-size:14px;line-height:1.45}
+.tp-h{display:flex;justify-content:space-between;align-items:center}.tp-h .lnk{background:none;border:0;cursor:pointer;color:var(--muted);font-size:16px}
 </style>
 </head>
 <body>
@@ -331,8 +351,9 @@ ul.xl.good li::marker{color:var(--good)} ul.xl.bad li::marker{color:var(--bad)}
       <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="none" stroke="#BA7517" stroke-width="2"/><path d="M7 22c3-3 6-3 9 0s6 3 9 0 6-3 9 0" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/><path d="M7 28c3-3 6-3 9 0s6 3 9 0 6-3 9 0" fill="none" stroke="#A9BFD8" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="13" r="3" fill="#BA7517"/></svg>
       <div><h1>OBSERVATÓRIO NATAÇÃO PURA</h1><p id="hdrSub">Rankings nacionais absolutos · FPN · Direção Técnica Nacional</p></div>
     </div>
-    <div class="areas" id="areas" role="group" aria-label="Áreas"><button type="button" data-area="nac" aria-pressed="false">Nacional</button><button type="button" data-area="nad" aria-pressed="false">Nadadores</button><button type="button" data-area="sel" aria-pressed="false">Seleções</button><button type="button" data-area="dad" aria-pressed="false">Dados e guia</button><button type="button" id="vwBtn" class="vw-btn" aria-haspopup="true">★ Vistas</button></div>
+    <div class="areas" id="areas" role="group" aria-label="Áreas"><button type="button" data-area="nac" aria-pressed="false">Nacional</button><button type="button" data-area="nad" aria-pressed="false">Nadadores</button><button type="button" data-area="sel" aria-pressed="false">Seleções</button><button type="button" data-area="dad" aria-pressed="false">Dados e guia</button><button type="button" id="vwBtn" class="vw-btn" aria-haspopup="true">★ Vistas</button><button type="button" id="goBtn" class="go-btn" title="Ir para… (tecla / ou Ctrl+K)">⌕ Ir para…</button></div>
     <nav class="tabs" role="tablist" id="tabs" data-area="nac">
+      <button class="tab" role="tab" data-a="nac" data-v="inicio">Início</button>
       <button class="tab" role="tab" data-a="nac" data-v="resumo">Resumo</button>
       <button class="tab" role="tab" data-a="nac" data-v="estrategia">Estratégia</button>
       <button class="tab" role="tab" data-a="nac" data-v="painel">Painel nacional</button>
@@ -1119,7 +1140,7 @@ function vGuia(root){ GU.fi=null;
   <div class="card" id="guFi"><h3>Fiabilidade dos modelos</h3><div class="loading"><div>A testar as projeções com épocas passadas…</div><div class="bar"><i></i></div></div></div>
   <div class="card" id="guVer"></div>`;
   const tg=new DataTable('guT',[{k:0,l:'Termo',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Definição',cls:'wrap',x:r=>r[1]}], GLOSS, {page:60, nosortbar:true});
-  const TABS=[['Nacional › Resumo','Os 8 indicadores-chave numa página, com semáforo e tendência.'],['Nacional › Estratégia','Relatório estratégico anual, painel do ciclo, plano de sucessão, território, programas de apoio e cenários de investimento.'],['Nacional › Painel nacional','Leitura coletiva: participação, nível, idades, escalões, associações, dinâmica, picos e abandono.'],['Nacional › Evolução','Profundidade do ranking, curvas por idade e taxas de melhoria por prova.'],['Nacional › Análises','Perfil sectorial, funil de talento, densidade, géneros, clubes, território, idade relativa, carga competitiva, mobilidade entre clubes, entre outras.'],['Nacional › Rankings','Ranking por prova com filtros e ordenação múltipla.'],['Nacional › Europa','Portugal face aos 100 melhores europeus: posição, provas prioritárias, marcas de acesso futuras, trajetórias até à final, acesso a finais, evolução desde 2003, países; absolutos e juniores.'],['Nacional › Clubes e associações','Fichas de clube e de associação.'],['Nacional › Metas PAR','Metas por época e cumprimento.'],['Nadadores › Nadadores','Pesquisa e lista; a ficha individual reúne toda a análise do nadador (inclui ficha de uma página).'],['Nadadores › Comparar','Comparação lado a lado entre nadadores.'],['Nadadores › Talento','Índice de talento e probabilidade histórica de chegar ao top‑8/top‑3.'],['Nadadores › Quadrante','Nível face à idade vs evolução face ao esperado: investir, consolidar, em ascensão, monitorizar.'],['Nadadores › Alertas','Nadadores em evolução acima da média nacional.'],['Nadadores › Risco de abandono','Nadadores com perfil de risco de deixar a modalidade, com os fatores que pesam em cada caso.'],['Nadadores › Declarações','Declarações individuais.'],['Seleções › Grupos AR','Seguimento da PO, BEO e outros grupos.'],['Seleções › Pré-convocatórias','Candidatos às atividades do PAR 2027, os 5 mais próximos, retirar e convocar por decisão técnica, simulador de critérios.'],['Seleções › Estafetas','Melhores equipas possíveis (com tempos lap), por clube e potencial vs realizado.'],['Seleções › Mínimos','Tabelas de mínimos e índices editáveis e quem as cumpre.'],['Dados e guia › Dados','Carregamento, cópia de segurança, unificação de nadadores, novidades e estado da base partilhada.'],['Dados e guia › Qualidade dos dados','Marcas a verificar (melhorias anormais, tempos repetidos, datas, clubes): validar ou excluir das análises.'],['Dados e guia › Guia de leitura','Esta página.'],['Versão de consulta','Para clubes e associações: ficha da entidade, os seus nadadores, rankings, Europa e guia (gerada em Dados).'],['★ Vistas','Atalhos com filtros já escolhidos; guarde as suas próprias vistas.']];
+  const TABS=[['Nacional › Início','Página inicial por perfil (Direção, Seleções, Treinador / clube) com atalhos, estado dos dados, próximos passos e visita guiada.'],['Ir para… (tecla / ou Ctrl+K)','Pesquisa global: nadadores, clubes, associações, rankings por prova, separadores e secções de análise.'],['Nacional › Resumo','Os 8 indicadores-chave numa página, com semáforo e tendência.'],['Nacional › Estratégia','Relatório estratégico anual, painel do ciclo, plano de sucessão, território, programas de apoio e cenários de investimento.'],['Nacional › Painel nacional','Leitura coletiva: participação, nível, idades, escalões, associações, dinâmica, picos e abandono.'],['Nacional › Evolução','Profundidade do ranking, curvas por idade e taxas de melhoria por prova.'],['Nacional › Análises','Perfil sectorial, funil de talento, densidade, géneros, clubes, território, idade relativa, carga competitiva, mobilidade entre clubes, entre outras.'],['Nacional › Rankings','Ranking por prova com filtros e ordenação múltipla.'],['Nacional › Europa','Portugal face aos 100 melhores europeus: posição, provas prioritárias, marcas de acesso futuras, trajetórias até à final, acesso a finais, evolução desde 2003, países; absolutos e juniores.'],['Nacional › Clubes e associações','Fichas de clube e de associação.'],['Nacional › Metas PAR','Metas por época e cumprimento.'],['Nadadores › Nadadores','Pesquisa e lista; a ficha individual reúne toda a análise do nadador (inclui ficha de uma página).'],['Nadadores › Comparar','Comparação lado a lado entre nadadores.'],['Nadadores › Talento','Índice de talento e probabilidade histórica de chegar ao top‑8/top‑3.'],['Nadadores › Quadrante','Nível face à idade vs evolução face ao esperado: investir, consolidar, em ascensão, monitorizar.'],['Nadadores › Alertas','Nadadores em evolução acima da média nacional.'],['Nadadores › Risco de abandono','Nadadores com perfil de risco de deixar a modalidade, com os fatores que pesam em cada caso.'],['Nadadores › Declarações','Declarações individuais.'],['Seleções › Grupos AR','Seguimento da PO, BEO e outros grupos.'],['Seleções › Pré-convocatórias','Candidatos às atividades do PAR 2027, os 5 mais próximos, retirar e convocar por decisão técnica, simulador de critérios.'],['Seleções › Estafetas','Melhores equipas possíveis (com tempos lap), por clube e potencial vs realizado.'],['Seleções › Mínimos','Tabelas de mínimos e índices editáveis e quem as cumpre.'],['Dados e guia › Dados','Carregamento, cópia de segurança, unificação de nadadores, novidades e estado da base partilhada.'],['Dados e guia › Qualidade dos dados','Marcas a verificar (melhorias anormais, tempos repetidos, datas, clubes): validar ou excluir das análises.'],['Dados e guia › Guia de leitura','Esta página.'],['Versão de consulta','Para clubes e associações: ficha da entidade, os seus nadadores, rankings, Europa e guia (gerada em Dados).'],['★ Vistas','Atalhos com filtros já escolhidos; guarde as suas próprias vistas.']];
   const ts=new DataTable('guS',[{k:0,l:'Separador',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Para que serve',cls:'wrap',x:r=>r[1]}], TABS, {page:30, nosortbar:true});
   bindExp(root,'gu',async()=>({title:'Guia de leitura', subtitle:'Código de cores, símbolos e glossário', filename:'Guia_de_leitura', orientation:'p', blocks:[{t:'h',text:'Código de cores'},{t:'table',sheet:'Cores',head:['Cor','Significado'],rows:[['Azul','Masculinos · nadador em análise · série principal'],['Laranja','Femininos · segunda série'],['Verde','Evolução · cumpre · acima da referência'],['Cinzento','Estagnação · referência · sem dados'],['Vermelho','Regressão · abaixo da referência'],['Dourado','Perto de um objetivo · próxima referência'],['Linha tracejada','Referência nacional ou mínimo'],['Sombreado','Época em curso (provisório)'],['Linha vertical 2020','Pandemia: competições suspensas']],align:['l','l']},{t:'h',text:'Glossário'},Object.assign({t:'table',sheet:'Glossário'},tg.exportRows()),{t:'h',text:'Separadores'},Object.assign({t:'table',sheet:'Separadores'},ts.exportRows()), ...(GU.fi?GU.fi():[]), ...GU.ver()]}));
   GU.ver=guVersions();
@@ -1142,8 +1163,9 @@ function guReliability(){
   return ()=>[{t:'h',text:'Fiabilidade dos modelos'},{t:'p',text:'Leitura rápida\n'+insTxt(ins)},{t:'chart',title:'Projeção de marca: probabilidade prevista vs frequência observada',spec},Object.assign({t:'table',sheet:'Fiabilidade projeção'},t.exportRows()), ...more.flatMap(f=>f())];
 }
 /* ---------- registo de versões ---------- */
-const APP_VERSION='2.4';
+const APP_VERSION='2.5';
 const CHANGELOG=[
+  ['2.5','outubro 2026',['Início por perfil: atalhos para Direção, Seleções e Treinador / clube, com o estado dos dados e os próximos passos (europeus por carregar, metas do ciclo, qualidade dos dados, relatório em atraso)','Ir para…: pesquisa global de nadadores, clubes, associações, rankings por prova e secções de análise, no cabeçalho ou com a tecla / (ou Ctrl+K)','Visita guiada de 10 passos pelas partes mais importantes da plataforma, proposta na primeira utilização e disponível no Início']],
   ['2.4','outubro 2026',['Relatório estratégico anual: documento único (PDF/Word) com recomendações e todas as análises estratégicas','Estratégia › Programas de apoio: efeito da PO, BEO e outros grupos face a nadadores semelhantes não apoiados, antes e depois do início do apoio','Estratégia › Cenários de investimento: presenças esperadas em finais ou meias-finais europeias com apoio concentrado, distribuído ou otimizado','Pré-convocatórias: retirar nadadores (a vaga passa ao seguinte), os 5 mais próximos dos critérios com convocação por decisão técnica, decisões guardadas','Simulador de critérios: ajuste global dos índices, entradas e saídas face aos critérios oficiais e comparação de todas as atividades']],
   ['2.3','outubro 2026',['Estratégia › Painel do ciclo: metas editáveis do ciclo (ex.: LA 2028), estado no caminho / em risco / fora do caminho e projeção','Estratégia › Plano de sucessão: titular, saída estimada, sucessores prováveis e risco por prova até 2028, 2030 ou 2032','Estratégia › Território: nadadores e talentos por 100 mil habitantes por associação, com população editável','Correção: ANDS identificada como Distrito de Santarém']],
   ['2.2','outubro 2026',['Provas prioritárias: mapa “investir / manter / desenvolver / pouco realista” por proximidade da final europeia e base de nadadores','Marcas de acesso futuras: tendência das marcas de final e meia-final europeias e projeção para o ano-alvo (ex.: 2028)','Trajetória até à final: melhoria necessária por época, melhoria habitual e probabilidade de cada candidato chegar à marca projetada','Probabilidade de final projetada na ficha do nadador']],
@@ -1409,7 +1431,6 @@ async function restoreBackup(file, root, opts={}){
   if(obj.relayRef&&typeof obj.relayRef==='object'){ S.relayRef=obj.relayRef; try{ await cfgSave('relayref',{refs:S.relayRef}); }catch(e){} }
   if(Array.isArray(obj.groups)&&obj.groups.length){ S.groups=obj.groups; try{ await saveGroups(); logLine(msg,'<span><span class="pill good">Grupos</span> '+obj.groups.length+' grupos restaurados</span>'); }catch(e){} }
   if(Array.isArray(obj.standards)&&obj.standards.length){ S.std=obj.standards; try{ await saveStandards(); logLine(msg,'<span><span class="pill good">Mínimos</span> '+obj.standards.length+' tabelas restauradas</span>'); }catch(e){ logLine(msg,'<span class="pill bad">Mínimos</span> não foi possível guardar as tabelas'); } }
-  if(obj.scope&&obj.scope.code) setScope(obj.scope); else if(S.scope) setScope(null);
   const parts=[]; for(const p of src){ if(p.g && p.co!=null) parts.push(p); else parts.push(...splitPayload(p)); }
   l0.innerHTML=`Cópia de ${obj.created?esc(new Date(obj.created).toLocaleString('pt-PT')):'data desconhecida'} · ${parts.length} listas.`;
   let saved=0, fail=0;
@@ -1419,6 +1440,7 @@ async function restoreBackup(file, root, opts={}){
     catch(e){ fail++; ln.innerHTML=`<span><span class="pill bad">${p.year}</span> ${esc(slotLabel(p.g,p.co))}: ${esc(e.message||e.code||String(e))}</span>`; }
   }
   const keep=msg.innerHTML+`<div><b>Restauro concluído:</b> ${saved} lista${saved!==1?'s':''} restaurada${saved!==1?'s':''}${fail?`, ${fail} com erro`:''}.</div>`;
+  if(obj.scope&&obj.scope.code) setScope(obj.scope); else if(S.scope) setScope(null);
   if(root) afterDataChange(root,'daBkMsg',keep); else { rebuildSwimmers(); refreshHeader(); }
   if(!opts.quiet) toast('Restauro concluído.'); return {saved, fail, created:obj.created};
 }
@@ -2307,7 +2329,7 @@ function ceContent(){
   const minsY=y=>{ const s=new Set(), wa=new Set(); S.std.forEach(tb=>(mnAll(tb).get(y)||[]).forEach(x=>{ if(inE(x.i)&&D.POR[x.i]){ s.add(R.sw[x.i]); if(/^WA/.test(tb.id)) wa.add(R.sw[x.i]); } })); return {s,wa}; };
   const evo=sy.map(y=>{ const m=per.get(y), p=per.get(y-1), sw=[...m.keys()]; const pts=[...m.values()].map(i=>R.pt[i]).sort((a,b)=>b-a); const mm=minsY(y);
     const ret = p&&p.size? [...p.keys()].filter(s=>m.has(s)).length/p.size*100 : null;
-    return {y, n:m.size, nM:sw.filter(s=>S.sw[s].g==='M').length, nF:sw.filter(s=>S.sw[s].g==='F').length, novos:sw.filter(s=>S.sw[s].first===y).length, ret, lvl:pts.length? mean(pts.slice(0,10)) : null, med:pts.length? median(pts) : null, t24:(t24.get(y)||new Set()).size, t8:(t8.get(y)||new Set()).size, mins:mm.s.size, wa:mm.wa.size}; });
+    return {y, n:m.size, nM:sw.filter(s=>(S.sw[s]||{}).g==='M').length, nF:sw.filter(s=>(S.sw[s]||{}).g==='F').length, novos:sw.filter(s=>(S.sw[s]||{}).first===y).length, ret, lvl:pts.length? mean(pts.slice(0,10)) : null, med:pts.length? median(pts) : null, t24:(t24.get(y)||new Set()).size, t8:(t8.get(y)||new Set()).size, mins:mm.s.size, wa:mm.wa.size}; });
   const cur=evo[evo.length-1]||{}, prev=evo[evo.length-2]||null;
   // posição entre entidades do mesmo tipo em y1
   const ents=new Map(); for(let i=0;i<R.n;i++){ if(R.yr[i]!==y1) continue; const k=isC? R.cl[i] : S.cl[R.cl[i]].reg; if(!k&&k!==0) continue; let o=ents.get(k); if(!o){ o={sw:new Set(), t24:new Set()}; ents.set(k,o);} o.sw.add(R.sw[i]); if(D.RKE[i]<=24) o.t24.add(R.sw[i]); }
@@ -5181,7 +5203,7 @@ function vDados(root){
   { const mgc=$('#mgCard',root); if(mgc&&hasData()){ const q=qcCounts(); mgc.insertAdjacentHTML('beforebegin', `<div class="repbar ${q.hi?'due':''}"><div><b>Qualidade dos dados</b> <span class="muted">${q.rev? fN(q.rev)+' sinais por rever'+(q.hi?' ('+fN(q.hi)+' de prioridade alta)':'') : 'Sem sinais por rever'}${q.ex? ' · '+fN(q.ex)+' marca'+(q.ex>1?'s':'')+' excluída'+(q.ex>1?'s':'')+' das análises':''}.</span></div><button class="btn${q.hi?' primary':''}" id="daQc">Abrir</button></div>`); $('#daQc',root).onclick=()=>go('qualidade'); } }
 }
 function logLine(el, html){ const d=document.createElement('div'); d.innerHTML=html; el.appendChild(d); return d; }
-function afterDataChange(root, msgId, keep){ assemble(); _clubOpts=null; refreshHeader(); vDados(root); if(keep!=null) $('#'+msgId).innerHTML=keep; }
+function afterDataChange(root, msgId, keep){ assemble(); _clubOpts=null; refreshHeader(); if(!root.isConnected) return; vDados(root); if(keep!=null) $('#'+msgId).innerHTML=keep; }
 async function handleSlotUpload(file, key, root){
   const [y,g,co]=key.split('_'); const msg=$('#daMsg'); msg.innerHTML=''; let snap=null; try{ snap=newsSnapshot(); }catch(e){}
   const line=logLine(msg, `${esc(file.name)}: a ler…`);
@@ -6093,6 +6115,154 @@ HELP.push([/^Relatório estratégico anual/, 'Documento único para a Direção 
 <script>
 'use strict';
 /* ============================================================
+   Início por perfil, pesquisa global ("Ir para…") e visita guiada
+   ============================================================ */
+const PROFILES = [['dir','Direção'],['sel','Seleções'],['tec','Treinador / clube']];
+const lsGet=(k,d)=>{ try{ const v=localStorage.getItem('obsnp_'+k); return v==null? d : v; }catch(e){ return d; } };
+const lsSet=(k,v)=>{ try{ localStorage.setItem('obsnp_'+k,v); }catch(e){} };
+/* atalhos: [título, descrição, ação] — a ação escolhe a secção e abre o separador */
+const goSec=(view, setup)=>()=>{ try{ if(setup) setup(); }catch(e){} go(view); };
+const SHORTCUTS = {
+  dir:[
+    ['Resumo executivo','Os indicadores-chave da última época numa página.',goSec('resumo')],
+    ['Relatório estratégico anual','Documento único com recomendações para a Direção.',goSec('estrategia',()=>{ ST.sec='ciclo'; })],
+    ['Painel do ciclo','Metas do ciclo olímpico: no caminho, em risco ou fora.',goSec('estrategia',()=>{ ST.sec='ciclo'; })],
+    ['Portugal e a Europa','Posição europeia e distância às finais, por prova.',goSec('europa',()=>{ EU.sec='pos'; })],
+    ['Provas prioritárias','Onde investir: proximidade da final europeia e base de nadadores.',goSec('europa',()=>{ EU.sec='prior'; })],
+    ['Plano de sucessão','Quem substitui os melhores portugueses até 2032.',goSec('estrategia',()=>{ ST.sec='suc'; })],
+    ['Programas de apoio','Efeito da PO, BEO e outros grupos face a nadadores semelhantes.',goSec('estrategia',()=>{ ST.sec='prog'; })],
+    ['Território','Talento por habitante em cada associação.',goSec('estrategia',()=>{ ST.sec='terr'; })],
+    ['Cenários de investimento','Concentrar ou distribuir o apoio: finalistas esperados.',goSec('estrategia',()=>{ ST.sec='cen'; })],
+    ['Painel nacional','Participação, nível, idades e associações.',goSec('painel')],
+  ],
+  sel:[
+    ['Pré-convocatórias','Candidatos por atividade do PAR, os 5 mais próximos e simulador de critérios.',goSec('convocatorias')],
+    ['Grupos AR','Seguimento da PO, BEO e outros grupos.',goSec('grupos')],
+    ['Acesso a finais europeias','Portugueses perto das marcas de final e meia-final.',goSec('europa',()=>{ EU.sec='finais'; })],
+    ['Trajetória até à final','Melhoria necessária e probabilidade até ao ano-alvo.',goSec('europa',()=>{ EU.sec='traj'; })],
+    ['Alertas de evolução','Nadadores a evoluir acima da média nacional.',goSec('alertas')],
+    ['Talento','Índice de talento e probabilidade de chegar ao top‑8.',goSec('talento')],
+    ['Quadrante de decisão','Investir, consolidar, em ascensão, monitorizar.',goSec('quadrante')],
+    ['Risco de abandono','Talentos com risco de deixar a modalidade.',goSec('abandono')],
+    ['Estafetas','Melhores equipas possíveis, com tempos lap.',goSec('estafetas')],
+    ['Mínimos','Tabelas de mínimos e quem as cumpre.',goSec('minimos')],
+  ],
+  tec:[
+    ['Nadadores','Pesquisar um nadador e abrir a ficha completa.',goSec('nadadores')],
+    ['Comparar nadadores','Lado a lado: marcas, evolução, referências.',goSec('comparar')],
+    ['Rankings','Ranking por prova, idade, escalão, clube.',goSec('rankings')],
+    ['Clube ou associação','Ficha do clube: nadadores, nível, formados e retidos.',goSec('entidades')],
+    ['Mínimos','Quem cumpre cada mínimo ou índice.',goSec('minimos')],
+    ['Alertas de evolução','Quem está a evoluir acima da média.',goSec('alertas')],
+    ['Portugal e a Europa','Onde estão os portugueses face aos 100 melhores europeus.',goSec('europa',()=>{ EU.sec='pos'; })],
+    ['Guia de leitura','Cores, símbolos e glossário.',goSec('guia')],
+  ],
+};
+function vInicio(root){
+  const prof=lsGet('profile','dir'), sc=SHORTCUTS[prof]||SHORTCUTS.dir, L=lastYear(), maxDt=Math.max(...Object.values(S.yinfo).map(o=>o.maxDt));
+  // estado dos dados e próximos passos
+  const steps=[];
+  const euYs=S.eu&&S.eu.size? [...new Set([...S.eu.values()].map(p=>p.season))].sort((a,b)=>a-b) : [];
+  steps.push(euYs.length>=10? ['good',`Rankings europeus: ${euYs.length} épocas (${euYs[0]}–${euYs[euYs.length-1]}).`,null] : ['gold',euYs.length? `Rankings europeus: só ${euYs.length} época${euYs.length>1?'s':''} carregada${euYs.length>1?'s':''}. Carregue as épocas desde 2003 para ativar tendências e projeções.` : 'Rankings europeus ainda não carregados: necessários para a Europa, provas prioritárias e cenários.',['Carregar',()=>go('dados')]]);
+  const metasOk=S.ciclo&&S.ciclo.items&&S.ciclo.items.some(i=>i.target!=null&&i.target!=='');
+  steps.push(metasOk? ['good','Metas oficiais do ciclo definidas.',null] : ['gold','Metas do ciclo ainda sugeridas automaticamente: defina as metas oficiais.',['Definir',goSec('estrategia',()=>{ ST.sec='ciclo'; })]]);
+  try{ const q=qcCounts(); steps.push(q.hi? ['bad',`${fN(q.hi)} sinais de prioridade alta na qualidade dos dados.`,['Rever',()=>go('qualidade')]] : ['good','Qualidade dos dados sem sinais de prioridade alta por rever.',null]); }catch(e){}
+  try{ const d=reportDue(); if(d) steps.push(['gold','Relatório de acompanhamento: '+d.why,['Gerar',()=>go('resumo')]]); }catch(e){}
+  const tourDone=lsGet('tour','')==='1';
+  root.innerHTML=`<div class="view-head"><div><h2>Início</h2><div class="sub">Rankings carregados até <b>${fD(maxDt)}</b> · ${S.years.length} épocas (${S.years[0]}–${L}) · ${fN(S.n)} marcas. Escolha o seu perfil para ver os atalhos mais úteis; use “Ir para…” (tecla /) para encontrar qualquer nadador, clube, prova ou análise.</div></div><div class="row" style="gap:8px"><button class="btn" id="inGo">⌕ Ir para…</button><button class="btn primary" id="inTour">Visita guiada</button></div></div>
+    ${tourDone?'':`<div class="repbar due"><div><b>Primeira vez aqui?</b> <span class="muted">A visita guiada mostra em 5 minutos as partes mais importantes da plataforma.</span></div><div class="row" style="gap:6px"><button class="btn primary" id="inTour2">Começar</button><button class="btn" id="inTourNo">Agora não</button></div></div>`}
+    <div class="card"><div class="card-h"><div><h3>Atalhos</h3><p class="note">O perfil fica guardado neste navegador.</p></div>${segHTML('inPerf',PROFILES,prof,'Perfil')}</div><div class="sc-grid">${sc.map((s,k)=>`<button type="button" class="sc" data-sc="${k}"><b>${esc(s[0])}</b><span>${esc(s[1])}</span></button>`).join('')}</div></div>
+    <div class="card"><h3>Estado dos dados e próximos passos</h3><ul class="steps">${steps.map((s,k)=>`<li class="st-${s[0]}"><i></i><span>${s[1]}</span>${s[2]?`<button class="btn sm" data-step="${k}">${esc(s[2][0])}</button>`:''}</li>`).join('')}</ul></div>`;
+  bindSeg(root,'inPerf',v=>{ lsSet('profile',v); vInicio(root); });
+  $$('[data-sc]',root).forEach(b=>b.onclick=()=>sc[+b.dataset.sc][2]());
+  $$('[data-step]',root).forEach(b=>b.onclick=()=>steps[+b.dataset.step][2][1]());
+  $('#inGo',root).onclick=openGoTo; $('#inTour',root).onclick=startTour; const t2=$('#inTour2',root); if(t2) t2.onclick=startTour; const tn=$('#inTourNo',root); if(tn) tn.onclick=()=>{ lsSet('tour','1'); vInicio(root); };
+}
+HELP.push([/^Atalhos$/, 'Os separadores mais usados por cada perfil.', 'Escolha Direção, Seleções ou Treinador / clube.', 'Use também “Ir para…” para chegar a qualquer nadador, clube ou análise.']);
+
+/* ---------------- pesquisa global ---------------- */
+function goToIndex(){
+  const st=[];
+  const add=(l,k,fn,grp='Análises')=>st.push({l, k:norm(l+' '+k), fn, grp});
+  $$('#tabs .tab').forEach(t=>{ if(!t.hidden) add(t.textContent.trim(),'separador',()=>go(t.dataset.v),'Separadores'); });
+  EU_SECS.forEach(([k,l])=>add('Europa › '+l,'europeu europa',goSec('europa',()=>{ EU.sec=k; })));
+  if(S.scope) return st;
+  AN_SECS.forEach(([k,l])=>add('Análises › '+l,'analise',goSec('analises',()=>{ AN.sec=k; })));
+  ST_SECS.forEach(([k,l])=>add('Estratégia › '+l,'estrategia',goSec('estrategia',()=>{ ST.sec=k; })));
+  add('Relatório estratégico anual','pdf word direcao',goSec('estrategia',()=>{ ST.sec='ciclo'; }));
+  add('Relatório de acompanhamento','novidades pdf word',goSec('resumo'));
+  add('Cópia de segurança (JSON)','backup base restaurar',goSec('dados'));
+  add('Rankings europeus (carregar PDF)','swimrankings',goSec('dados'));
+  add('Versão de consulta para clubes','consulta base',goSec('dados'));
+  add('Visita guiada','tour ajuda',startTour,'Ajuda');
+  return st;
+}
+function openGoTo(){
+  if($('#goModal')) return; const idx=goToIndex();
+  const bg=document.createElement('div'); bg.className='modal-bg'; bg.id='goModal';
+  bg.innerHTML=`<div class="modal card go-m" role="dialog" aria-modal="true" aria-label="Ir para"><input id="goQ" type="search" placeholder="Nadador, clube, associação, prova ou análise…" autocomplete="off"><div id="goR" class="go-r"></div><p class="note" style="margin-top:6px">↑ ↓ para escolher · Enter para abrir · Esc para fechar</p></div>`;
+  document.body.appendChild(bg); const q=$('#goQ'), R=$('#goR'); let items=[], cur=0;
+  const close=()=>bg.remove();
+  const render=()=>{ const v=q.value.trim(), t=norm(v).split(/\s+/).filter(Boolean); items=[];
+    if(t.length&&hasData()){
+      searchSwimmers(v,6).forEach(s=>items.push({grp:'Nadadores', l:niceName(s.name), d:(s.g==='F'?'F':'M')+' · '+(lastYear()-s.by)+' anos · '+(S.cl[s.club]?S.cl[s.club].code:''), fn:()=>{ FS.id=null; go('n'+s.id); }}));
+      S.cl.filter(c=>c.code&&c.code!=='?'&&t.every(w=>norm(c.name+' '+c.code).includes(w))).slice(0,5).forEach(c=>items.push({grp:'Clubes', l:c.name, d:c.code+(c.reg?' · '+c.reg:''), fn:goSec('entidades',()=>{ CE.type='club'; CE.club=c.id; })}));
+      S.regions.filter(r=>t.every(w=>norm(r+' '+regLabel(r)).includes(w))).slice(0,3).forEach(r=>items.push({grp:'Associações', l:regLabel(r), d:r, fn:goSec('entidades',()=>{ CE.type='reg'; CE.reg=r; })}));
+      S.ev.forEach((c,e)=>{ const lab=evLabel(e); if(t.every(w=>norm(lab+' '+c+' ranking').includes(w))) items.push({grp:'Rankings', l:'Ranking · '+lab, d:'piscina longa e curta', fn:goSec('rankings',()=>{ K.ev=String(e); })}); });
+    }
+    const st=goToIndex().filter(o=>!t.length||t.every(w=>o.k.includes(w))).slice(0, t.length? 8 : 14); items=items.slice(0,18).concat(st.map(o=>({grp:o.grp, l:o.l, d:'', fn:o.fn})));
+    cur=Math.min(cur,Math.max(0,items.length-1));
+    let g=''; R.innerHTML=items.map((it,k)=>{ const h= it.grp!==g? `<div class="go-g">${esc(it.grp)}</div>` : ''; g=it.grp; return h+`<button type="button" class="go-i${k===cur?' on':''}" data-gi="${k}"><b>${esc(it.l)}</b>${it.d?`<span>${esc(it.d)}</span>`:''}</button>`; }).join('')||'<p class="note">Sem resultados.</p>'; };
+  const pick=k=>{ const it=items[k]; if(!it) return; close(); it.fn(); };
+  q.oninput=()=>{ cur=0; render(); }; R.onclick=e=>{ const b=e.target.closest('[data-gi]'); if(b) pick(+b.dataset.gi); };
+  bg.addEventListener('click',e=>{ if(e.target===bg) close(); });
+  q.onkeydown=e=>{ if(e.key==='Escape'){ close(); } else if(e.key==='ArrowDown'){ cur=Math.min(items.length-1,cur+1); render(); e.preventDefault(); } else if(e.key==='ArrowUp'){ cur=Math.max(0,cur-1); render(); e.preventDefault(); } else if(e.key==='Enter'){ pick(cur); } };
+  render(); setTimeout(()=>q.focus(),0);
+}
+document.addEventListener('keydown',e=>{ if((e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test((e.target.tagName||'')))||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k')){ e.preventDefault(); openGoTo(); } });
+
+/* ---------------- visita guiada ---------------- */
+const TOUR = [
+  {go:()=>go('inicio'), sel:'#inPerf', t:'Início por perfil', x:'Escolha o seu perfil (Direção, Seleções ou Treinador / clube) para ver os atalhos mais úteis. Por baixo, o estado dos dados e os próximos passos.'},
+  {sel:'#areas', t:'Áreas e separadores', x:'A plataforma está organizada em quatro áreas: Nacional, Nadadores, Seleções e Dados e guia. Cada área mostra os seus separadores por baixo. “★ Vistas” guarda combinações de filtros.'},
+  {sel:'#goBtn', t:'Ir para…', x:'Encontre qualquer nadador, clube, associação, prova ou análise pelo nome. Atalho: tecla / ou Ctrl+K.'},
+  {go:()=>go('resumo'), sel:'#view .xgrid', t:'Resumo executivo', x:'Os indicadores-chave da última época, com semáforo face à época anterior ou à meta e tendência. Exporta numa página A4.'},
+  {go:()=>{ const R=S.R, L=lastClosed(); let b=-1, bp=-1; for(let i=0;i<R.n;i++) if(R.yr[i]===L&&D.POR[i]&&R.pt[i]>bp){ bp=R.pt[i]; b=R.sw[i]; } FS.id=null; go('n'+b); }, sel:'#f10Sum', t:'Ficha do nadador', x:'Tudo sobre um nadador: resumo com pontos fortes e objetivos, linha do tempo, distância aos mínimos, projeção para a próxima época e nível europeu. “Ficha resumo” gera uma página em PDF ou Word.'},
+  {go:()=>go('rankings'), sel:'#view .exp', t:'Filtros e exportação', x:'Em todos os separadores, a barra de filtros fica fixa no topo e os botões Excel, PDF e Word exportam exatamente o que está no ecrã, com a leitura rápida.'},
+  {go:goSec('estrategia',()=>{ ST.sec='ciclo'; }), sel:'#view .repbar', t:'Estratégia', x:'Painel do ciclo, plano de sucessão, território, programas de apoio e cenários de investimento. O relatório estratégico anual junta tudo num documento com recomendações.'},
+  {go:goSec('europa',()=>{ EU.sec='pos'; }), sel:'#euNav', t:'Portugal e a Europa', x:'Com os rankings europeus carregados em Dados: posição dos portugueses, provas prioritárias, marcas de acesso futuras, trajetórias e finais.'},
+  {go:()=>go('convocatorias'), sel:'#cvN', t:'Pré-convocatórias', x:'Os critérios do PAR aplicados a cada atividade. Pode retirar nadadores, convocar um dos 5 mais próximos por decisão técnica e testar critérios no simulador.'},
+  {go:()=>go('guia'), sel:'#view .gsws', t:'Ajuda sempre à mão', x:'Os ícones “?” junto a cada gráfico e quadro explicam o que mostra e como ler. O Guia de leitura reúne cores, símbolos, glossário e a fiabilidade dos modelos.'},
+];
+let TOURI=-1;
+async function startTour(){ const m=$('#goModal'); if(m) m.remove(); TOURI=0; await tourShow(); }
+function tourEnd(){ TOURI=-1; ['tourHL','tourPop','tourBg'].forEach(id=>{ const e=$('#'+id); if(e) e.remove(); }); lsSet('tour','1'); window.removeEventListener('resize',tourPlace); }
+async function tourShow(){
+  const s=TOUR[TOURI]; if(!s) return tourEnd();
+  if(s.go){ try{ s.go(); }catch(e){} }
+  let el=null; for(let k=0;k<40&&!el;k++){ await new Promise(r=>setTimeout(r,150)); el=$(s.sel); if(el&&!el.offsetParent&&el.id!=='areas') el=null; }
+  if(TOURI<0) return;
+  let bg=$('#tourBg'); if(!bg){ bg=document.createElement('div'); bg.id='tourBg'; document.body.appendChild(bg); }
+  let hl=$('#tourHL'); if(!hl){ hl=document.createElement('div'); hl.id='tourHL'; document.body.appendChild(hl); }
+  let pop=$('#tourPop'); if(!pop){ pop=document.createElement('div'); pop.id='tourPop'; pop.setAttribute('role','dialog'); document.body.appendChild(pop); }
+  pop.innerHTML=`<div class="tp-h"><span class="muted small">${TOURI+1} de ${TOUR.length}</span><button class="lnk" id="tpX" aria-label="Fechar">✕</button></div><h3>${esc(s.t)}</h3><p>${esc(s.x)}</p><div class="row" style="gap:6px;justify-content:flex-end">${TOURI?'<button class="btn" id="tpB">Anterior</button>':''}<button class="btn primary" id="tpN">${TOURI===TOUR.length-1?'Concluir':'Seguinte'}</button></div>`;
+  $('#tpX').onclick=tourEnd; $('#tpN').onclick=()=>{ TOURI++; tourShow(); }; const b=$('#tpB'); if(b) b.onclick=()=>{ TOURI--; tourShow(); };
+  hl.dataset.sel=el? s.sel : ''; if(el){ const r0=el.getBoundingClientRect(); if(el.id==='areas'||el.id==='goBtn'){ window.scrollTo({top:0, behavior:'instant'}); const ar=$('#areas'); if(ar) ar.scrollLeft= el.id==='goBtn'? ar.scrollWidth : 0; } else if(r0.height>innerHeight*0.45) window.scrollBy({top:r0.top-Math.round(innerHeight*0.45), behavior:'instant'}); else el.scrollIntoView({block:'center', behavior:'instant'}); }
+  tourPlace(); window.removeEventListener('resize',tourPlace); window.addEventListener('resize',tourPlace);
+}
+function tourPlace(){
+  const hl=$('#tourHL'), pop=$('#tourPop'); if(!hl||!pop) return; const el=hl.dataset.sel? $(hl.dataset.sel) : null, W=innerWidth, H=innerHeight;
+  if(!el){ hl.style.display='none'; pop.style.left=Math.max(16,(W-pop.offsetWidth)/2)+'px'; pop.style.top=Math.max(16,(H-pop.offsetHeight)/2)+'px'; return; }
+  const r=el.getBoundingClientRect(), pad=6; hl.style.display='block'; Object.assign(hl.style,{left:(r.left-pad)+'px', top:(r.top-pad)+'px', width:(r.width+2*pad)+'px', height:(Math.max(0,Math.min(r.bottom,H-pad)-r.top)+2*pad)+'px'});
+  const pw=pop.offsetWidth, ph=pop.offsetHeight; let top=r.bottom+14; if(top+ph>H-10) top=Math.max(10, r.top-ph-14); if(top<10) top=Math.min(H-ph-10, r.top+20);
+  pop.style.left=Math.min(Math.max(12, r.left), W-pw-12)+'px'; pop.style.top=top+'px';
+}
+document.addEventListener('keydown',e=>{ if(TOURI<0) return; if(e.key==='Escape') tourEnd(); else if(e.key==='ArrowRight'){ TOURI++; tourShow(); } else if(e.key==='ArrowLeft'&&TOURI>0){ TOURI--; tourShow(); } });
+
+</script>
+<script>
+'use strict';
+/* ============================================================
    Navegação: vistas guardadas e menu de áreas
    ============================================================ */
 const VIEW_STATE = {painel:()=>[P], evolucao:()=>[E], rankings:()=>[K], nadadores:()=>[N], analises:()=>[AN,AN5,AN6], talento:()=>[TL], estafetas:()=>[ES], entidades:()=>[CE], grupos:()=>[GRP], metas:()=>[MT], alertas:()=>[AL], minimos:()=>[MN], quadrante:()=>[QD], resumo:()=>[RX], convocatorias:()=>[CV]};
@@ -6107,7 +6277,7 @@ const VIEW_PRESETS = [
   {name:'Estafetas juniores mistas PL', hash:'estafetas', st:[{g:'X',co:'0',esc:'3',amin:'17',amax:'18',rel:'4x100E'}]},
   {name:'Funil de talento (top‑24)', hash:'analises', st:[{sec:'funil'},{topN:'24'},{}]},
 ];
-function curView(){ const h=location.hash.slice(1)||'painel'; return /^n\d+$/.test(h)? 'nadadores' : h; }
+function curView(){ const h=location.hash.slice(1)||'inicio'; return /^n\d+$/.test(h)? 'nadadores' : h; }
 function snapState(o){ const r={}; for(const [k,v] of Object.entries(o)){ if(v==null||['string','number','boolean'].includes(typeof v)) r[k]=v; } return r; }
 function applyView(v){ const f=VIEW_STATE[v.hash]; if(f) f().forEach((o,k)=>{ if(v.st&&v.st[k]) Object.assign(o, v.st[k]); }); if(location.hash.slice(1)===v.hash) route(); else location.hash=v.hash; }
 function viewsPanel(){
@@ -6131,7 +6301,7 @@ const AREAS=[['nac','Nacional'],['nad','Nadadores'],['sel','Seleções'],['dad',
 function syncAreas(){ const tabs=$('#tabs'); if(!tabs) return; if(S.scope){ tabs.dataset.area='consulta'; return; } const sel=$('.tab[aria-selected="true"]',tabs); const a=sel? sel.dataset.a : (tabs.dataset.area||'nac'); tabs.dataset.area=a; $$('#areas [data-area]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.area===a))); }
 (function initAreas(){
   const ar=$('#areas'); if(!ar) return;
-  ar.addEventListener('click',e=>{ const b=e.target.closest('[data-area]'); if(b){ const a=b.dataset.area; $('#tabs').dataset.area=a; $$('#areas [data-area]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); const first=$(`.tab[data-a="${a}"]`); if(first) go(first.dataset.v); return; } if(e.target.closest('#vwBtn')) viewsPanel(); });
+  ar.addEventListener('click',e=>{ const b=e.target.closest('[data-area]'); if(b){ const a=b.dataset.area; $('#tabs').dataset.area=a; $$('#areas [data-area]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); const first=$(`.tab[data-a="${a}"]`); if(first) go(first.dataset.v); return; } if(e.target.closest('#vwBtn')) viewsPanel(); if(e.target.closest('#goBtn')) openGoTo(); });
   new MutationObserver(syncAreas).observe($('#tabs'),{attributes:true,subtree:true,attributeFilter:['aria-selected']}); syncAreas();
 })();
 
@@ -6345,15 +6515,15 @@ async function buildDOCX(m, stamp){
 /* ============================================================
    Arranque e encaminhamento
    ============================================================ */
-const VIEWS = {estrategia:vEstrategia, europa:vEuropa, abandono:vAbandono, qualidade:vQualidade, painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, guia:vGuia, resumo:vResumo, quadrante:vQuadrante, declaracoes:vDeclaracoes, dados:vDados};
+const VIEWS = {inicio:vInicio, estrategia:vEstrategia, europa:vEuropa, abandono:vAbandono, qualidade:vQualidade, painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, guia:vGuia, resumo:vResumo, quadrante:vQuadrante, declaracoes:vDeclaracoes, dados:vDados};
 let READY=false, LOADING_UP=true;
 function go(v){ if(location.hash.slice(1)===v) route(); else location.hash=v; }
 function route(){
   if(!READY) return;
-  const h=location.hash.slice(1)||'painel', main=$('#main');
+  const h=location.hash.slice(1)||'inicio', main=$('#main');
   let tab=h, fn=VIEWS[h];
   if(/^n\d+$/.test(h)){ tab='nadadores'; fn=root=>vFicha(root, +h.slice(1)); }
-  if(!fn){ tab='painel'; fn=vPainel; }
+  if(!fn){ tab='inicio'; fn=vInicio; }
   if(h==='sair-consulta'){ setScope(null); location.hash=''; return; }
   if(S.scope){ scopeApplyState(); if(!CONSULT_TABS.has(tab)){ tab='entidades'; fn=VIEWS.entidades; } }
   if(!hasData() && tab!=='dados' && tab!=='minimos'){ const t=tab; fn=root=>{ root.innerHTML = LOADING_UP ? `<div class="loading"><div>A carregar os rankings guardados…</div><div class="bar"><i></i></div></div>` : `<div class="card empty" style="padding:40px"><h3 style="margin-bottom:8px">Ainda não há rankings carregados</h3><p class="muted">Carregue, para cada época, os rankings masculinos e femininos de piscina curta e de piscina longa.</p><button class="btn primary" onclick="go('dados')" style="margin-top:12px">Ir para Dados</button></div>`; }; }
