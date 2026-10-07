@@ -1944,6 +1944,14 @@ function projectMark(e, co, g, age, t, maxY=9999){
   if(rat.length<12) return null; rat.sort((x,y)=>x-y); aw=Math.min(aw,2); tol=Math.min(tol,0.06);
   return {n:rat.length, tol, aw, rat, p10:t*quantile(rat,.1), p25:t*quantile(rat,.25), p50:t*quantile(rat,.5), p75:t*quantile(rat,.75), p90:t*quantile(rat,.9), prob:st=>rat.filter(r=>t*r<=st).length/rat.length*100};
 }
+/* projeção com recurso: quando a marca é mais rápida do que quase todos os nadadores comparáveis (elite), usa a evolução
+   de nadadores um pouco mais lentos (3%, 6%, 10%) e, nos seniores, uma idade abaixo; a projeção aplica-se sempre à marca do próprio */
+function projectMarkF(e, co, g, age, t, maxY=9999){
+  const p=projectMark(e,co,g,age,t,maxY); if(p) return p;
+  for(const [f,a] of [[1.03,age],[1.06,age],[1.06,Math.max(19,age-1)],[1.10,age],[1.10,Math.max(19,age-1)],[1.15,Math.max(19,age-2)]]){ const q=projectMark(e,co,g,a,t*f,maxY); if(!q) continue;
+    const rat=q.rat; return {n:q.n, tol:q.tol, aw:q.aw, rat, fb:f, p10:t*quantile(rat,.1), p25:t*quantile(rat,.25), p50:t*quantile(rat,.5), p75:t*quantile(rat,.75), p90:t*quantile(rat,.9), prob:st=>rat.filter(r=>t*r<=st).length/rat.length*100}; }
+  return null;
+}
 /* probabilidade de chegar a st até daqui a n épocas: simulação encadeada com as variações de nadadores semelhantes (idade e marca) em cada época */
 function projectReach(e, co, g, age, t, st, n, sims=400, boost=0){
   const ck='reach'+e+'_'+co+'_'+g; let C=D.cache.get(ck); if(!C){ C=new Map(); D.cache.set(ck,C); }
@@ -1973,14 +1981,15 @@ function swProjection(id){
   const s=S.sw[id], R=S.R, L=lastYear(), g=s.g==='F'?1:0, age=L-s.by, gk=s.g==='F'?'F':'M';
   const cur=new Map(); for(const i of swRows(id)){ if(R.yr[i]<L-1) continue; const k=R.ev[i]*2+R.co[i]; if(!cur.has(k)||R.tm[i]<R.tm[cur.get(k)]) cur.set(k,i); }
   const tabs=S.std.filter(tb=>stdAgeOK(tb,age+1));
-  const rows=[]; for(const [k,i] of [...cur.entries()].sort((a,b)=>R.pt[b[1]]-R.pt[a[1]]).slice(0,8)){ const e=k>>1, co=k&1, t=R.tm[i]; let p;
-    if(R.yr[i]===L) p=projectMark(e,co,g,age,t);
-    else { /* base em L−1: duas épocas encadeadas (L e L+1) */ const p1=projectMark(e,co,g,age-1,t); if(!p1) continue; const p2=projectMark(e,co,g,age,p1.p50); if(!p2) continue;
+  const ordK=[...cur.entries()].sort((a,b)=>R.pt[b[1]]-R.pt[a[1]]), topKey=ordK.length? ordK[0][0] : null;
+  const rows=[]; for(const [k,i] of ordK.slice(0,8)){ const e=k>>1, co=k&1, t=R.tm[i]; let p;
+    if(R.yr[i]===L) p=projectMarkF(e,co,g,age,t);
+    else { /* base em L−1: duas épocas encadeadas (L e L+1) */ const p1=projectMarkF(e,co,g,age-1,t); if(!p1) continue; const p2=projectMarkF(e,co,g,age,p1.p50); if(!p2) continue;
       const rr=[]; for(const a of p1.rat) for(let j=0;j<p2.rat.length;j+=Math.max(1,Math.floor(p2.rat.length/40))) rr.push(a*p2.rat[j]); rr.sort((x,y)=>x-y);
-      p={n:p1.n, tol:p1.tol, aw:p1.aw, rat:rr, two:true, p10:t*quantile(rr,.1), p25:t*quantile(rr,.25), p50:t*quantile(rr,.5), p75:t*quantile(rr,.75), p90:t*quantile(rr,.9), prob:st=>rr.filter(r=>t*r<=st).length/rr.length*100}; }
+      p={n:p1.n, tol:p1.tol, aw:p1.aw, rat:rr, two:true, fb:p1.fb||p2.fb, p10:t*quantile(rr,.1), p25:t*quantile(rr,.25), p50:t*quantile(rr,.5), p75:t*quantile(rr,.75), p90:t*quantile(rr,.9), prob:st=>rr.filter(r=>t*r<=st).length/rr.length*100}; }
     if(!p) continue;
     const refs=tabs.filter(tb=>tb.co===co).map(tb=>({tb, st:stdTime(tb,gk,e)})).filter(x=>x.st&&x.st<t).sort((x,y)=>y.st-x.st); const nx=refs[0]||null;
-    rows.push({k, ev:evLabel(e)+' '+CO_S[co], t, y:R.yr[i], p, next:nx? {label:nx.tb.id.startsWith('WA')?nx.tb.id:nx.tb.name.split(' · ')[0], st:nx.st, prob:p.prob(nx.st)} : null}); }
+    rows.push({k, top:k===topKey, ev:evLabel(e)+' '+CO_S[co], t, y:R.yr[i], p, next:nx? {label:nx.tb.id.startsWith('WA')?nx.tb.id:nx.tb.name.split(' · ')[0], st:nx.st, prob:p.prob(nx.st)} : null}); }
   return {rows, age, L};
 }
 
@@ -4379,11 +4388,11 @@ function fichaProjection(id, el){
   F11=null; let P; try{ P=swProjection(id); }catch(e){ console.warn(e); return ()=>[]; }
   if(!P.rows.length) return ()=>[];
   const card=document.createElement('div'); card.className='card'; card.id='f11Pr';
-  card.innerHTML=`<div class="card-h"><div><h3>Projeção para a próxima época</h3><p class="note">Intervalo provável da melhor marca em ${P.L+1}, a partir do que aconteceu a nadadores do mesmo género, prova e piscina, com idade igual ou próxima (alarga-se a faixa nos seniores) e marca semelhante (±3% a ±6%). Barra = 50% centrais (P25–P75); traço = mediana; linha fina = 80% (P10–P90); ponto = marca atual; tracejado verde = próximo mínimo aplicável aos ${P.age+1} anos. Quando a marca de base é de ${P.L-1} (“2 épocas”), a projeção encadeia duas épocas de evolução. A probabilidade é a percentagem de casos semelhantes que chegaram ao mínimo nessa época. É uma referência estatística, não um objetivo.${(()=>{ const b=D.cache.get('pbt'+lastClosed()); return b&&b.all? ` Teste retrospetivo em ${b.T}: ${f1(b.all.in50)}% das marcas reais caíram no intervalo central (esperado 50%).` : ' A fiabilidade destes intervalos é testada no Guia de leitura › Fiabilidade dos modelos.'; })()}</p></div></div><div id="f11PrCh"></div><div id="f11PrT" style="margin-top:8px"></div>`;
+  card.innerHTML=`<div class="card-h"><div><h3>Projeção para a próxima época</h3><p class="note">Intervalo provável da melhor marca em ${P.L+1}, a partir do que aconteceu a nadadores do mesmo género, prova e piscina, com idade igual ou próxima (alarga-se a faixa nos seniores) e marca semelhante (±3% a ±6%). Barra = 50% centrais (P25–P75); traço = mediana; linha fina = 80% (P10–P90); ponto = marca atual; tracejado verde = próximo mínimo aplicável aos ${P.age+1} anos. Quando a marca de base é de ${P.L-1} (“2 épocas”), a projeção encadeia duas épocas de evolução. Resultado ideal = marca obtida pelos 10% de nadadores semelhantes que mais evoluíram (P10). A prova mais pontuada aparece sempre em primeiro; quando a marca é mais rápida do que quase todos os casos comparáveis (“ref. alargada”), usa-se a evolução de nadadores até 3–15% mais lentos. A probabilidade é a percentagem de casos semelhantes que chegaram ao mínimo nessa época. É uma referência estatística, não um objetivo.${(()=>{ const b=D.cache.get('pbt'+lastClosed()); return b&&b.all? ` Teste retrospetivo em ${b.T}: ${f1(b.all.in50)}% das marcas reais caíram no intervalo central (esperado 50%).` : ' A fiabilidade destes intervalos é testada no Guia de leitura › Fiabilidade dos modelos.'; })()}</p></div></div><div id="f11PrCh"></div><div id="f11PrT" style="margin-top:8px"></div>`;
   const anchor=$('#f8Bul')||el.firstChild; anchor.insertAdjacentElement('afterend',card);
   const spec=projSpec(P.rows,'Projeção para a próxima época'); draw('f11PrCh',spec);
   TBL_OPEN.add('f11PrT');
-  const t=new DataTable('f11PrT',[{k:'ev',l:'Prova'},{k:'t',l:'Atual',num:1,f:r=>fT(r.t)+' <span class="muted small">'+r.y+(r.p.two?' · 2 épocas':'')+'</span>',x:r=>fT(r.t)+(r.p.two?' ('+r.y+', 2 épocas)':'')},{k:'p50',l:'Projeção (mediana)',num:1,f:r=>`<b>${fT(r.p.p50)}</b>`,x:r=>fT(r.p.p50),sv:r=>r.p.p50},{k:'iq',l:'Intervalo provável (P25–P75)',num:1,f:r=>fT(r.p.p75)+' – '+fT(r.p.p25),sv:r=>r.p.p25},{k:'nx',l:'Próximo mínimo',f:r=>r.next?esc(r.next.label)+' '+fT(r.next.st):'—',x:r=>r.next?r.next.label+' '+fT(r.next.st):''},{k:'pr',l:'Probabilidade',num:1,f:r=>r.next?`<span class="pill ${r.next.prob>=50?'good':r.next.prob>=25?'gold':''}">${fN(r.next.prob)}%</span>`:'—',x:r=>r.next?Math.round(r.next.prob):'',sv:r=>r.next?r.next.prob:-1},{k:'n',l:'Casos',num:1,f:r=>r.p.n,x:r=>r.p.n,title:'Nadadores de referência usados'}], P.rows, {page:8, nosortbar:true});
+  const t=new DataTable('f11PrT',[{k:'ev',l:'Prova',f:r=>esc(r.ev)+(r.top?' <span class="pill gold" title="Prova com mais pontos nas duas últimas épocas">mais pontuada</span>':'')+(r.p.fb?' <span class="muted small" title="Marca mais rápida do que quase todos os casos comparáveis: usa a evolução de nadadores um pouco mais lentos">ref. alargada</span>':''),x:r=>r.ev+(r.top?' (mais pontuada)':'')},{k:'t',l:'Atual',num:1,f:r=>fT(r.t)+' <span class="muted small">'+r.y+(r.p.two?' · 2 épocas':'')+'</span>',x:r=>fT(r.t)+(r.p.two?' ('+r.y+', 2 épocas)':'')},{k:'id',l:'Resultado ideal (P10)',num:1,f:r=>`<b class="up">${fT(r.p.p10)}</b>`,x:r=>fT(r.p.p10),sv:r=>r.p.p10,title:'Marca alcançada pelos 10% de nadadores semelhantes que mais evoluíram'},{k:'p50',l:'Projeção (mediana)',num:1,f:r=>`<b>${fT(r.p.p50)}</b>`,x:r=>fT(r.p.p50),sv:r=>r.p.p50},{k:'iq',l:'Intervalo provável (P25–P75)',num:1,f:r=>fT(r.p.p75)+' – '+fT(r.p.p25),sv:r=>r.p.p25},{k:'ir',l:'Intervalo alargado (P10–P90)',num:1,f:r=>'<span class="muted">'+fT(r.p.p90)+' – '+fT(r.p.p10)+'</span>',x:r=>fT(r.p.p90)+' – '+fT(r.p.p10),sv:r=>r.p.p10},{k:'nx',l:'Próximo mínimo',f:r=>r.next?esc(r.next.label)+' '+fT(r.next.st):'—',x:r=>r.next?r.next.label+' '+fT(r.next.st):''},{k:'pr',l:'Probabilidade',num:1,f:r=>r.next?`<span class="pill ${r.next.prob>=50?'good':r.next.prob>=25?'gold':''}">${fN(r.next.prob)}%</span>`:'—',x:r=>r.next?Math.round(r.next.prob):'',sv:r=>r.next?r.next.prob:-1},{k:'n',l:'Casos',num:1,f:r=>r.p.n,x:r=>r.p.n,title:'Nadadores de referência usados'}], P.rows, {page:8, nosortbar:true});
   F11=P; F11.id=id; F11.spec=spec; F11.t=t;
   return ()=>[{t:'h',text:'Projeção para '+(P.L+1)},{t:'chart',title:'Intervalo provável da melhor marca na próxima época',spec},Object.assign({t:'table',sheet:'Projeção'},t.exportRows())];
 }
@@ -4447,7 +4456,13 @@ function opData(id){
   // perfil por estilo (melhor pontuação nas 3 últimas épocas)
   const stk={}; for(const [k,i] of pb){ const st=S.ev[k>>1].slice(-1); if(!stk[st]||R.pt[i]>stk[st].p) stk[st]={p:R.pt[i], i}; }
   // projeção (só ativos)
-  let proj=[]; if(active){ try{ proj=swProjection(id).rows.slice(0,3); }catch(e){} }
+  // prova mais pontuada (duas últimas épocas do nadador) e a sua evolução por época face aos da mesma idade
+  let topI=-1; for(const i of swRows(id)){ if(R.yr[i]<ly-1) continue; if(topI<0||R.pt[i]>R.pt[topI]) topI=i; }
+  const topEv= topI<0? null : {k:R.ev[topI]*2+R.co[topI], e:R.ev[topI], co:R.co[topI], i:topI, t:R.tm[topI], pt:R.pt[topI], y:R.yr[topI]};
+  let evSer=[]; if(topEv){ const pm=pairMap(topEv.e,topEv.co,g,''), ref=new Map(); for(const a of pm.values()) for(const [y,i] of a){ const k=y*100+D.AGE[i]; let l=ref.get(k); if(!l){ l=[]; ref.set(k,l); } l.push(R.tm[i]); }
+    for(const l of ref.values()) l.sort((x,z)=>x-z);
+    evSer=swEventRows(id,topEv.k).slice(-10).map(i=>{ const y=R.yr[i], a=D.AGE[i], l=ref.get(y*100+a)||[]; return {y, a, t:R.tm[i], pt:R.pt[i], p50:l.length>=5?quantile(l,.5):null, p10:l.length>=5?quantile(l,.1):null, rk:D.RK[i], part:isPartial(y)}; }); }
+  let proj=[]; if(active){ try{ const all=swProjection(id).rows; const tk=topEv? topEv.k : null; proj=[...all.filter(r=>r.k===tk), ...all.filter(r=>r.k!==tk)].slice(0,3); if(proj[0]&&proj[0].k===tk) proj[0].top=true; }catch(e){} }
   // marca pessoal mais recente e picos
   let lastPB=null; { const pbs=pbYearSet(); for(const y of ys) if(pbs.has(id*4096+y)) lastPB=y; }
   let peaks=[]; try{ peaks=swimmerPeaks(id).peaks; }catch(e){}
@@ -4455,7 +4470,7 @@ function opData(id){
   const minsNow=[]; S.std.forEach(tb=>{ const l=[...(mnAll(tb).get(ly)||[]), ...(mnAll(tb).get(ly-1)||[])].filter(x=>R.sw[x.i]===id); if(l.length) minsNow.push({tb, lab:tb.id.startsWith('WA')? (tb.id==='WA-A'?'Mínimo A Mundial':'Mínimo FPN Mundial') : tb.name.split(' · ')[0], evs:[...new Set(l.map(x=>evShort(R.ev[x.i])+' '+CO_S[R.co[x.i]]))]}); });
   const grp=S.groups.filter(gr=>groupMembers(gr.id).some(x=>x.s&&x.s.id===id)).map(gr=>gr.name);
   const bestRk=evs.length? evs.reduce((m,o)=>o.rk<m.rk||(o.rk===m.rk&&o.pt>m.pt)?o:m, evs[0]) : null;
-  return {s, id, L, ly, age, g, gk, active, di, ser, cur, prevS, evs, stk, proj, lastPB, peaks, tal, minsNow, grp, bestRk, club: s.club>=0? S.cl[s.club] : null};
+  return {s, id, L, ly, age, g, gk, active, topEv, evSer, di, ser, cur, prevS, evs, stk, proj, lastPB, peaks, tal, minsNow, grp, bestRk, club: s.club>=0? S.cl[s.club] : null};
 }
 /* ---------- conclusões-chave ---------- */
 function opConclusions(X){
@@ -4467,7 +4482,7 @@ function opConclusions(X){
   const met=X.minsNow.map(m=>m.lab); if(X.active) out.push(`${met.length?'Cumpre '+lst(met.slice(0,4))+(met.length>4?' e mais '+(met.length-4):'')+'. ':''}${near? `Próximo objetivo: ${near.next.lab} em ${evLabel(near.e)} ${CO_S[near.co]} (falta ${f2(near.next.g)}%).` : met.length? '' : 'Ainda sem tabelas de índices aplicáveis cumpridas.'}${wa&&wa.wa.g>0&&(!near||near.next.lab!==wa.wa.lab)? ` Mínimo A do Mundial a ${f1(wa.wa.g)}% em ${evLabel(wa.e)}.` : ''}`);
   const eu=!X.active? null : X.evs.filter(o=>o.eu).sort((a,b)=>(a.eu.g16??a.eu.g8)-(b.eu.g16??b.eu.g8))[0];
   if(eu){ const r=eu.eu; out.push(`Na Europa (${r.cat==='jun'?'juniores':'absolutos'} ${r.y}): ${r.rk? r.rk+'.º em '+evLabel(eu.e)+' '+CO_S[eu.co] : 'fora do top '+r.len+' em '+evLabel(eu.e)}, ${r.g8<=0? 'dentro da marca de final' : r.g16!=null&&r.g16<=0? 'dentro da marca de meia‑final, a '+f1(r.g8)+'% da final' : 'a '+f1(r.g8)+'% da marca de final'}.`); }
-  if(X.proj.length){ const q=X.proj[0]; out.push(`Projeção ${X.L+1}: em ${q.ev}, intervalo provável ${fT(q.p.p75)}–${fT(q.p.p25)} (mediana ${fT(q.p.p50)})${q.next? `; probabilidade de ${q.next.label}: ${fN(q.next.prob)}%` : ''}.`); }
+  if(X.proj.length){ const q=X.proj[0]; out.push(`Projeção ${X.L+1} na prova mais pontuada (${q.ev}): resultado ideal ${fT(q.p.p10)}; intervalo de resultados ${fT(q.p.p25)}–${fT(q.p.p75)} (mais provável ${fT(q.p.p50)})${q.next? `; probabilidade de ${q.next.label}: ${fN(q.next.prob)}%` : ''}.`); }
   else if(!X.active) out.push(`Sem marcas desde ${X.s.last}: fora do ranking${X.di&&X.di.age?' desde os '+X.di.age+' anos':''}.`);
   if(X.tal&&X.tal.p8!=null) out.push(`Índice de talento ${fN(Math.round(X.tal.adj))}: em casos semelhantes, ${fN(X.tal.p8)}% chegaram ao top‑8 absoluto.`);
   return out.slice(0,6);
@@ -4501,28 +4516,28 @@ function onePosterSpec(id){
     if(eu) g+=med(3,'Europa ('+(eu.eu.cat==='jun'?'juniores':'absolutos')+' '+eu.eu.y+')',ord(eu.eu.rk),evShort(eu.e)+' '+CO_S[eu.co]+' · '+(eu.eu.g8<=0?'dentro da final':'final a '+f1(eu.eu.g8)+'%'));
     else if(X.tal) g+=med(3,'Índice de talento',fN(Math.round(X.tal.adj)),X.tal.p8!=null?'prob. histórica de top‑8: '+fN(X.tal.p8)+'%':'face aos 10 melhores de sempre da idade');
     else g+=med(3,'Mínimos e índices',fN(X.minsNow.length),'tabelas cumpridas em '+(X.ly-1)+'–'+X.ly);
-    // painel 1: evolução vs referências nacionais da idade
-    const py=410, ph=280, pl=56, pw=640;
-    g+=T(pl,py+24,'Na natação nacional',{fd:1,fs:30,fw:700,c:C.navy})+T(pl,py+48,'Melhor pontuação por época face aos nadadores da mesma idade',{fs:15,c:C.muted});
-    const ser=X.ser.filter(o=>o.pt!=null); if(ser.length){ const gx0=pl+44, gx1=pl+pw-60, gy0=py+80, gy1=py+ph-30; const vals=ser.flatMap(o=>[o.pt,o.p50,o.p90]).filter(v=>v!=null); let lo=Math.min(...vals), hi=Math.max(...vals); const pad=(hi-lo)*.12||20; lo=Math.max(0,Math.floor((lo-pad)/50)*50); hi=Math.ceil((hi+pad)/50)*50;
-      const Xp=k=> ser.length===1? (gx0+gx1)/2 : gx0+(gx1-gx0)*k/(ser.length-1), Yp=v=>gy1-(gy1-gy0)*(v-lo)/(hi-lo||1);
-      for(let v=lo; v<=hi; v+=Math.max(50,Math.round((hi-lo)/4/50)*50)){ g+=`<line x1="${gx0}" x2="${gx1}" y1="${Yp(v)}" y2="${Yp(v)}" stroke="${C.line}"/>`+T(gx0-10,Yp(v)+5,fN(v),{fs:13,c:C.faint,a:'end'}); }
-      const band=ser.map((o,k)=>o.p90!=null?[Xp(k),Yp(o.p90)]:null).filter(Boolean), base=ser.map((o,k)=>o.p50!=null?[Xp(k),Yp(o.p50)]:null).filter(Boolean);
+    // painel 1: prova mais pontuada — melhor tempo por época face aos nadadores da mesma idade (mais acima = mais rápido)
+    const py=410, ph=280, pl=56, pw=640, TE=X.topEv;
+    g+=T(pl,py+24,'Na natação nacional'+(TE?' · '+evLabel(TE.e)+' '+CO_S[TE.co]:''),{fd:1,fs:30,fw:700,c:C.navy})+T(pl,py+48,'Prova mais pontuada: melhor tempo por época face aos nadadores da mesma idade',{fs:15,c:C.muted});
+    const ser=X.evSer; if(ser.length){ const gx0=pl+62, gx1=pl+pw-70, gy0=py+80, gy1=py+ph-30; const vals=ser.flatMap(o=>[o.t,o.p50,o.p10]).filter(v=>v!=null); let lo=Math.min(...vals), hi=Math.max(...vals); const pad=(hi-lo)*.12||lo*.01; lo-=pad; hi+=pad;
+      const Xp=k=> ser.length===1? (gx0+gx1)/2 : gx0+(gx1-gx0)*k/(ser.length-1), Yp=v=>gy0+(gy1-gy0)*(v-lo)/(hi-lo||1);
+      for(let j=0;j<=4;j++){ const v=lo+(hi-lo)*j/4; g+=`<line x1="${gx0}" x2="${gx1}" y1="${Yp(v)}" y2="${Yp(v)}" stroke="${C.line}"/>`+T(gx0-10,Yp(v)+5,fT(v),{fs:13,c:C.faint,a:'end'}); }
+      const band=ser.map((o,k)=>o.p10!=null?[Xp(k),Yp(o.p10)]:null).filter(Boolean), base=ser.map((o,k)=>o.p50!=null?[Xp(k),Yp(o.p50)]:null).filter(Boolean);
       if(band.length>1&&base.length===band.length) g+=`<path d="M${band.map(p=>p.join(' ')).join(' L')} L${[...base].reverse().map(p=>p.join(' ')).join(' L')} Z" fill="${C.water}"/>`;
       if(base.length>1) g+=`<path d="M${base.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="${C.faint}" stroke-width="2" stroke-dasharray="6 5"/>`;
       if(band.length>1) g+=`<path d="M${band.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="${C.blueL}" stroke-width="2"/>`;
-      const sp=ser.map((o,k)=>[Xp(k),Yp(o.pt)]); if(sp.length>1) g+=`<path d="M${sp.map(p=>p.map(v=>v.toFixed(1)).join(' ')).join(' L')}" fill="none" stroke="${C.navy}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>`;
+      const sp=ser.map((o,k)=>[Xp(k),Yp(o.t)]); if(sp.length>1) g+=`<path d="M${sp.map(p=>p.map(v=>v.toFixed(1)).join(' ')).join(' L')}" fill="none" stroke="${C.navy}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>`;
       sp.forEach(([x,y],k)=>{ const last=k===sp.length-1; g+=`<circle cx="${x}" cy="${y}" r="${last?8:5}" fill="${last?C.gold:C.navy}" stroke="#fff" stroke-width="2.5"/>`; });
-      const lp=sp[sp.length-1]; g+=T(Math.min(lp[0]+12,pl+pw-4),lp[1]-12,fN(ser[ser.length-1].pt)+' pts',{fs:18,fw:700,c:C.ink,a:lp[0]>gx1-40?'end':'start'});
-      const step=Math.ceil(ser.length/8); ser.forEach((o,k)=>{ if(k%step&&k!==ser.length-1) return; g+=T(Xp(k),gy1+24,String(o.y).slice(2)==='' ? o.y : "'"+String(o.y).slice(2)+(o.part?'*':''),{fs:13,c:C.muted,a:'middle'}); });
-      const ly0=py+ph+6; g+=`<line x1="${pl+44}" x2="${pl+70}" y1="${ly0}" y2="${ly0}" stroke="${C.navy}" stroke-width="4"/>`+T(pl+76,ly0+5,'nadador',{fs:13,c:C.muted})+`<rect x="${pl+150}" y="${ly0-7}" width="22" height="14" fill="${C.water}" stroke="${C.blueL}"/>`+T(pl+178,ly0+5,'entre a mediana e o P90 da idade (10% melhores)',{fs:13,c:C.muted}); }
+      const lp=sp[sp.length-1], lo2=ser[ser.length-1]; g+=T(Math.min(lp[0]+12,pl+pw-4),lp[1]-12,fT(lo2.t)+' · '+ord(lo2.rk)+' nac.',{fs:17,fw:700,c:C.ink,a:lp[0]>gx1-60?'end':'start'});
+      const step=Math.ceil(ser.length/8); ser.forEach((o,k)=>{ if(k%step&&k!==ser.length-1) return; g+=T(Xp(k),gy1+24,"'"+String(o.y).slice(2)+(o.part?'*':''),{fs:13,c:C.muted,a:'middle'}); });
+      const ly0=py+ph+6; g+=`<line x1="${pl+44}" x2="${pl+70}" y1="${ly0}" y2="${ly0}" stroke="${C.navy}" stroke-width="4"/>`+T(pl+76,ly0+5,'nadador',{fs:13,c:C.muted})+`<rect x="${pl+150}" y="${ly0-7}" width="22" height="14" fill="${C.water}" stroke="${C.blueL}"/>`+T(pl+178,ly0+5,'entre a mediana e os 10% mais rápidos da idade · mais acima = mais rápido',{fs:13,c:C.muted}); }
     // painel 2: perfil por estilo
     const qx=740, qw=444; g+=T(qx,py+24,'Perfil por estilo',{fd:1,fs:30,fw:700,c:C.navy})+T(qx,py+48,'Melhor pontuação recente em cada estilo',{fs:15,c:C.muted});
     const sk=['L','C','B','M','E'], mxP=Math.max(...sk.map(k=>X.stk[k]?X.stk[k].p:0), 1), bx0=qx+104, bw=qw-170;
     sk.forEach((k,j)=>{ const yy=py+76+j*44, o=X.stk[k], v=o?o.p:0, wv=o? bw*v/Math.max(1000,mxP) : 0, best=o&&v===mxP;
       g+=T(qx,yy+20,SNAME[k],{fs:17,fw:600,c:C.ink})+`<rect x="${bx0}" y="${yy+4}" width="${bw}" height="22" rx="11" fill="${C.soft}"/>`+(o?`<rect x="${bx0}" y="${yy+4}" width="${Math.max(22,wv).toFixed(1)}" height="22" rx="11" fill="${best?C.gold:C.blue}"/>`:'')+T(bx0+bw+12,yy+21,o? fN(v)+' pts' : '—',{fs:16,fw:700,c:o?C.ink:C.faint})+(o?T(bx0+bw+12,yy+38,evShort(R_ev(o.i))+' '+CO_S[S.R.co[o.i]],{fs:12,c:C.muted}):''); });
     // painel 3: raias — distância às referências por prova
-    const ry=py+ph+64, evR=X.evs.slice(0,4);
+    const ry=py+ph+64, evR=X.evs.slice(0, X.proj.length>=2? 3 : 4);
     g+=T(pl,ry,'Onde está em cada prova',{fd:1,fs:30,fw:700,c:C.navy})+T(pl,ry+24,'Melhor marca recente e distância às referências: à direita do nadador = ainda por alcançar; à esquerda = já cumprido',{fs:15,c:C.muted});
     const lx0=330, lx1=W-90, A=10, B=-4, fq=v=>Math.sign(v)*Math.sqrt(Math.abs(v)), Xg=v=>lx0+(lx1-lx0)*(fq(Math.max(B,Math.min(A,v)))-fq(B))/(fq(A)-fq(B));
     evR.forEach((o,j)=>{ const yy=ry+62+j*80, cy=yy+22;
@@ -4537,15 +4552,16 @@ function onePosterSpec(id){
       const sx=Xg(0); g+=`<circle cx="${sx}" cy="${cy}" r="12" fill="${C.navy}" stroke="#fff" stroke-width="3"/><circle cx="${sx}" cy="${cy}" r="4" fill="#fff"/>`; });
     if(evR.length){ const yy=ry+62+evR.length*80; [[-4,'−4%'],[-1,'−1%'],[0,'hoje'],[1,'+1%'],[4,'+4%'],[10,'+10%']].forEach(([v,l])=>{ g+=T(Xg(v),yy+4,l,{fs:12,c:C.faint,a:'middle'}); });
       g+=`<line x1="${pl}" x2="${pl+26}" y1="${yy+28}" y2="${yy+28}" stroke="${C.good}" stroke-width="4"/>`+T(pl+32,yy+33,'cumprido',{fs:13,c:C.muted})+`<line x1="${pl+110}" x2="${pl+136}" y1="${yy+28}" y2="${yy+28}" stroke="${C.gold}" stroke-width="4"/>`+T(pl+142,yy+33,'próximo índice PAR',{fs:13,c:C.muted})+`<line x1="${pl+290}" x2="${pl+316}" y1="${yy+28}" y2="${yy+28}" stroke="${C.bad}" stroke-width="4"/>`+T(pl+322,yy+33,'Mínimo A do Mundial',{fs:13,c:C.muted})+`<line x1="${pl+480}" x2="${pl+506}" y1="${yy+28}" y2="${yy+28}" stroke="${C.navy}" stroke-width="4"/>`+T(pl+512,yy+33,'marca de final europeia (8.º, máx. 2 por país)',{fs:13,c:C.muted}); }
-    // painel 4: projeção
+    // painel 4: projeção — prova mais pontuada sempre em primeiro; resultado ideal (P10) e intervalo de resultados
     const cl=opConclusions(X), lines=cl.map(t=>opWrap(t,104)), chN=64+lines.reduce((s2,l)=>s2+l.length*24+8,0), cy0=H-46-chN;
-    const jy=ry+62+Math.max(1,evR.length)*80+74; let nP=Math.min(X.proj.length, Math.floor((cy0-30-(jy+50))/44)); if(nP<1) nP=0;
-    if(nP){ g+=T(pl,jy,'Projeção '+(X.L+1),{fd:1,fs:30,fw:700,c:C.navy})+T(pl,jy+24,'Intervalo provável da melhor marca, com base na evolução de nadadores semelhantes',{fs:15,c:C.muted});
-      X.proj.slice(0,nP).forEach((q,j)=>{ const yy=jy+56+j*44, t=q.t, a=q.p.p90, b=q.p.p10, sc=v=>lx0+(lx1-lx0)*((t*1.05-v)/(t*1.05-t*0.92)), clamp=v=>Math.max(lx0,Math.min(lx1,v));
-        g+=T(pl,yy+6,q.ev,{fs:17,fw:700,c:C.ink})+T(pl+190,yy+6,'atual '+fT(t),{fs:14,c:C.muted});
-        g+=`<line x1="${clamp(sc(a))}" x2="${clamp(sc(b))}" y1="${yy}" y2="${yy}" stroke="${C.water2}" stroke-width="10" stroke-linecap="round"/><line x1="${clamp(sc(q.p.p75))}" x2="${clamp(sc(q.p.p25))}" y1="${yy}" y2="${yy}" stroke="${C.blue}" stroke-width="14" stroke-linecap="round"/><circle cx="${clamp(sc(q.p.p50))}" cy="${yy}" r="9" fill="${C.gold}" stroke="#fff" stroke-width="2.5"/><line x1="${clamp(sc(t))}" x2="${clamp(sc(t))}" y1="${yy-14}" y2="${yy+14}" stroke="${C.ink}" stroke-width="2"/>`;
-        if(q.next){ const nx=clamp(sc(q.next.st)); g+=`<line x1="${nx}" x2="${nx}" y1="${yy-16}" y2="${yy+16}" stroke="${C.bad}" stroke-width="3" stroke-dasharray="4 3"/>`; }
-        g+=T(lx1+8,yy-2,fT(q.p.p50),{fs:16,fw:700,c:C.ink})+T(lx1+8,yy+16,q.next? fN(q.next.prob)+'% '+q.next.label : '',{fs:12,c:C.muted}); });
+    const jy=ry+62+Math.max(1,evR.length)*80+74; let nP=Math.min(X.proj.length, Math.floor((cy0-30-(jy+64))/50)); if(X.proj.length&&nP<1) nP=1;
+    if(nP){ const px0=330, px1=W-330; g+=T(pl,jy,'Projeção '+(X.L+1),{fd:1,fs:30,fw:700,c:C.navy})+T(pl,jy+24,'Resultado ideal (10% de nadadores semelhantes que mais evoluíram) e intervalo de resultados',{fs:15,c:C.muted});
+      const lg=jy+46; g+=`<circle cx="${px0}" cy="${lg-5}" r="7" fill="${C.good}"/>`+T(px0+12,lg,'ideal',{fs:13,c:C.muted})+`<line x1="${px0+62}" x2="${px0+96}" y1="${lg-5}" y2="${lg-5}" stroke="${C.blue}" stroke-width="10" stroke-linecap="round"/>`+T(px0+104,lg,'intervalo provável (50%)',{fs:13,c:C.muted})+`<line x1="${px0+270}" x2="${px0+304}" y1="${lg-5}" y2="${lg-5}" stroke="${C.water2}" stroke-width="8" stroke-linecap="round"/>`+T(px0+312,lg,'intervalo alargado (80%)',{fs:13,c:C.muted})+`<circle cx="${px0+482}" cy="${lg-5}" r="6" fill="${C.gold}"/>`+T(px0+494,lg,'mais provável',{fs:13,c:C.muted})+`<line x1="${px0+600}" x2="${px0+600}" y1="${lg-14}" y2="${lg+4}" stroke="${C.ink}" stroke-width="2"/>`+T(px0+608,lg,'atual',{fs:13,c:C.muted});
+      X.proj.slice(0,nP).forEach((q,j)=>{ const yy=jy+82+j*50, t=q.t, lo=Math.min(q.p.p10,t)*0.995, hi=Math.max(q.p.p90,t)*1.005, sc=v=>px0+(px1-px0)*((hi-v)/(hi-lo)), clamp=v=>Math.max(px0,Math.min(px1,v));
+        g+=T(pl,yy+2,q.ev+(q.top?' ★':''),{fs:17,fw:700,c:C.ink})+T(pl,yy+20,'atual '+fT(t)+(q.top?' · mais pontuada':''),{fs:13,c:C.muted});
+        g+=`<line x1="${clamp(sc(q.p.p90))}" x2="${clamp(sc(q.p.p10))}" y1="${yy}" y2="${yy}" stroke="${C.water2}" stroke-width="10" stroke-linecap="round"/><line x1="${clamp(sc(q.p.p75))}" x2="${clamp(sc(q.p.p25))}" y1="${yy}" y2="${yy}" stroke="${C.blue}" stroke-width="14" stroke-linecap="round"/><line x1="${clamp(sc(t))}" x2="${clamp(sc(t))}" y1="${yy-15}" y2="${yy+15}" stroke="${C.ink}" stroke-width="2"/><circle cx="${clamp(sc(q.p.p50))}" cy="${yy}" r="8" fill="${C.gold}" stroke="#fff" stroke-width="2.5"/><circle cx="${clamp(sc(q.p.p10))}" cy="${yy}" r="9" fill="${C.good}" stroke="#fff" stroke-width="2.5"/>`;
+        if(q.next){ const nx=clamp(sc(q.next.st)); g+=`<line x1="${nx}" x2="${nx}" y1="${yy-17}" y2="${yy+17}" stroke="${C.bad}" stroke-width="3" stroke-dasharray="4 3"/>`; }
+        const tx=px1+24; g+=T(tx,yy-4,'ideal '+fT(q.p.p10),{fs:17,fw:700,c:C.good})+T(tx+130,yy-4,'provável '+fT(q.p.p50),{fs:14,fw:600,c:C.ink})+T(tx,yy+16,'intervalo '+fT(q.p.p25)+'–'+fT(q.p.p75)+(q.next? ' · '+fN(q.next.prob)+'% '+q.next.label : ''),{fs:13,c:C.muted}); });
     }
     // conclusões
     const ch=chN;
