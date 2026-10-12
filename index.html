@@ -922,7 +922,7 @@ const obsAnnot = {
   id:'obsAnnot',
   afterDatasetsDraw(chart, args, o){
     if(!o || !o.on) return; const {ctx, chartArea:a, scales} = chart; const x=scales.x, y=scales.y; if(!x||!y||!a) return;
-    const big = chart.width>1100, fs = big ? 19 : 11; ctx.save(); ctx.font = `600 ${fs}px ${LIGHT.font}`;
+    const big = chart.options.responsive===false && chart.width>1100, fs = big ? 19 : 11; ctx.save(); ctx.font = `600 ${fs}px ${LIGHT.font}`;
     if(o.partial!=null){ const px=x.getPixelForValue(o.partial), prev = o.partial>0 ? x.getPixelForValue(o.partial-1) : a.left; const l=(px+prev)/2;
       ctx.fillStyle=o.shade; ctx.fillRect(l, a.top, a.right-l, a.bottom-a.top);
       ctx.fillStyle=o.muted; ctx.textAlign='right'; ctx.fillText('em curso', a.right-3, a.bottom-5); }
@@ -937,7 +937,7 @@ const obsAnnot = {
 };
 /* valor no fim de cada linha (texto em tinta neutra; a cor da série fica no ponto) */
 const obsEnd = { id:'obsEnd',
-  afterDatasetsDraw(chart, args, o){ if(!o||!o.on) return; const {ctx, chartArea:a}=chart; if(!a) return; const big=chart.width>1100, fs=big?20:11.5;
+  afterDatasetsDraw(chart, args, o){ if(!o||!o.on) return; const {ctx, chartArea:a}=chart; if(!a) return; const big=chart.options.responsive===false&&chart.width>1100, fs=big?20:11.5;
     const items=[]; chart.data.datasets.forEach((d,k)=>{ if(d.type!=='line'||d.hidden||!chart.isDatasetVisible(k)) return; const meta=chart.getDatasetMeta(k); let li=-1; for(let j=d.data.length-1;j>=0;j--){ const v=d.data[j]; if(v!=null&&!(typeof v==='number'&&isNaN(v))){ li=j; break; } } if(li<0) return; const pt=meta.data[li]; if(!pt||pt.skip) return; items.push({x:pt.x, y:pt.y, v:typeof d.data[li]==='object'&&d.data[li]? d.data[li].y : d.data[li], c:d.borderColor}); });
     items.sort((p,q)=>p.y-q.y); const shown=[]; items.forEach(it=>{ if(shown.some(s=>Math.abs(s.y-it.y)<fs+2)) return; shown.push(it); });
     ctx.save(); ctx.font=`600 ${fs}px ${LIGHT.font}`; ctx.textBaseline='middle'; ctx.textAlign='left';
@@ -1219,8 +1219,9 @@ function guReliability(){
   return ()=>[{t:'h',text:'Fiabilidade dos modelos'},{t:'p',text:'Leitura rápida\n'+insTxt(ins)},{t:'chart',title:'Projeção de marca: probabilidade prevista vs frequência observada',spec},Object.assign({t:'table',sheet:'Fiabilidade projeção'},t.exportRows()), ...more.flatMap(f=>f())];
 }
 /* ---------- registo de versões ---------- */
-const APP_VERSION='2.6';
+const APP_VERSION='2.7';
 const CHANGELOG=[
+  ['2.7','outubro 2026',['Análises › Perfil sectorial: nova análise por distância (50, 100 e 200 m de cada técnica) com o nível dos 50, 16 e 8 melhores, variação no período, profundidade e evolução por época','Ficha resumo: prova mais pontuada no gráfico, projeção das 3 provas mais pontuadas em piscina longa e em piscina curta, resultado ideal e intervalo de resultados, distância à final europeia em cada prova']],
   ['2.6','outubro 2026',['Auditoria dos cálculos: verificação independente (68 testes, todos iguais) e correção de 40 pontos de lógica identificados na revisão (probabilidades europeias, projeção a partir de L−1, território Minho/Norte, funil de talento, épocas parciais, entre outros)','Explicação ao passar o rato em todos os quadros, gráficos e indicadores: o que mostra, como ler e a fórmula de cálculo','Gráficos redesenhados: área suave, valor no fim de cada linha, linha de referência ao passar o rato; corda de raia no cabeçalho e “Ciclo olímpico em raias” no Início','Nova ficha resumo do nadador: uma página só com gráficos e conclusões-chave (nível para a idade, posição nacional e de sempre, Europa, distância às referências, projeção), com pré-visualização, PDF e Word']],
   ['2.5','outubro 2026',['Início por perfil: atalhos para Direção, Seleções e Treinador / clube, com o estado dos dados e os próximos passos (europeus por carregar, metas do ciclo, qualidade dos dados, relatório em atraso)','Ir para…: pesquisa global de nadadores, clubes, associações, rankings por prova e secções de análise, no cabeçalho ou com a tecla / (ou Ctrl+K)','Visita guiada de 10 passos pelas partes mais importantes da plataforma, proposta na primeira utilização e disponível no Início']],
   ['2.4','outubro 2026',['Relatório estratégico anual: documento único (PDF/Word) com recomendações e todas as análises estratégicas','Estratégia › Programas de apoio: efeito da PO, BEO e outros grupos face a nadadores semelhantes não apoiados, antes e depois do início do apoio','Estratégia › Cenários de investimento: presenças esperadas em finais ou meias-finais europeias com apoio concentrado, distribuído ou otimizado','Pré-convocatórias: retirar nadadores (a vaga passa ao seguinte), os 5 mais próximos dos critérios com convocação por decisão técnica, decisões guardadas','Simulador de critérios: ajuste global dos índices, entradas e saídas face aos critérios oficiais e comparação de todas as atividades']],
@@ -2762,7 +2763,7 @@ function anContent(){
   const f=AN_CUSTOM[AN.sec]; if(f){ const el=$('#anC'); const out={blocks:[]}; ANX=out; el.innerHTML=''; try{ f(el,out); }catch(e){ console.error(e); el.innerHTML='<div class="card empty">Erro: '+esc(e.message)+'</div>'; } return; }
   anSection(); anSchemes(); anBeforeAfter();
 }
-const AN5 = {esc:'', from:'1', to:'4', topN:'24', pesc:'', thr:'5'};
+const AN5 = {esc:'', from:'1', to:'4', topN:'24', pesc:'', thr:'5', dStk:'L', dN:'16'};
 /* janela observada do funil: épocas do período até à última fechada; fim do escalão = última idade (Seniores: 2 épocas, até aos 20) */
 function funWin(){ let LC=Math.min(AN.y1, lastClosed()); if(LC<AN.y0) LC=AN.y1; return {Y0:AN.y0, LC}; }
 const escEnd = k => Math.min(ESC_G[k].b, ESC_G[k].a+1);
@@ -2783,13 +2784,32 @@ function an5(sec, el, out){
     const dists=[50,100,200,400,800,1500].filter(d=>S.ev.some((c,e)=>evDist(e)===d&&evMean.has(e)));
     const dmap=STK5.map(k=>dists.map(d=>{ const e=S.ev.findIndex(c=>c===d+k); return e>=0&&evMean.has(e)? mean(evMean.get(e)) : null; }));
     const TR=trendTable(STK5.map(k=>STK5_L[k]), sy, evo, +AN5.thr, 'Estilo');
+    /* análise sectorial por distância: 50, 100 e 200 m de cada técnica, níveis do top‑50, top‑16 e top‑8 */
+    const DN=[50,16,8], cy=anClosed(sy), DST=[50,100,200];
+    const evSet=[]; STK5.forEach(k=>DST.forEach(d=>{ const e=S.ev.indexOf(d+k); if(e>=0) evSet.push({e, k, d}); }));
+    const perY=new Map(); for(const [key,m] of acc){ const e=(key>>2)%32, y=Math.floor((key>>2)/32); const a=[...m.values()].sort((x,z)=>z-x); let o=perY.get(e); if(!o){ o=new Map(); perY.set(e,o); } let q=o.get(y); if(!q){ q=DN.map(()=>[]); o.set(y,q); } DN.forEach((n,j)=>{ if(a.length) q[j].push(mean(a.slice(0,n))); }); }
+    const lvl=(e,y,j)=>{ const q=perY.get(e)&&perY.get(e).get(y); return q&&q[j].length? mean(q[j]) : null; };
+    const drows=evSet.map(o=>{ const per=DN.map((n,j)=>{ const v=cy.map(y=>lvl(o.e,y,j)).filter(x=>x!=null); return v.length? mean(v) : null; });
+      const fy=cy.find(y=>lvl(o.e,y,0)!=null), ly=[...cy].reverse().find(y=>lvl(o.e,y,0)!=null); const dl=DN.map((n,j)=>fy!=null&&ly!=null&&fy!==ly&&lvl(o.e,ly,j)!=null&&lvl(o.e,fy,j)!=null? lvl(o.e,ly,j)-lvl(o.e,fy,j) : null);
+      return {lab:o.d+' m '+STK5_L[o.k], k:o.k, d:o.d, e:o.e, per, dl, gap: per[2]!=null&&per[0]!=null? per[2]-per[0] : null}; }); const drowsAll=drows; drows.splice(0,drows.length,...drowsAll.filter(r=>r.per.some(v=>v!=null)));
+    const dJ=DN.indexOf(+AN5.dN), dStkEvs=evSet.filter(o=>o.k===AN5.dStk);
+    const dSpec={labels:drows.map(r=>r.lab.replace(' m ',' ').replace('Livres','Liv.').replace('Costas','Cos.').replace('Bruços','Bru.').replace('Mariposa','Mar.').replace('Estilos','Est.')), series:[{label:'Média top‑50',data:drows.map(r=>r.per[0]==null?null:Math.round(r.per[0])),color:'seq3'},{label:'Média top‑16',data:drows.map(r=>r.per[1]==null?null:Math.round(r.per[1])),color:'s2'},{label:'Média top‑8',data:drows.map(r=>r.per[2]==null?null:Math.round(r.per[2])),color:'s1'}], type:'bar', yFmt:fN, tipFmt:v=>fN(v)+' pts', zero:false, yMin:Math.max(0,Math.floor((Math.min(...drows.flatMap(r=>r.per).filter(v=>v!=null))-40)/50)*50), legend:true, barMax:16};
+    const eSpec={labels:sy.map(String), series:dStkEvs.map((o,j)=>({label:o.d+' m '+STK5_L[o.k], data:sy.map(y=>{ const v=lvl(o.e,y,dJ); return v==null?null:Math.round(v); }), color:['s1','s2','s3'][j]})), yFmt:fN, tipFmt:v=>fN(v)+' pts', legend:true};
+    const dIns=(()=>{ const ok=drows.filter(r=>r.per[2]!=null); if(!ok.length) return []; const b8=[...ok].sort((a,b)=>b.per[2]-a.per[2])[0], w8=[...ok].sort((a,b)=>a.per[2]-b.per[2])[0], dp=ok.filter(r=>r.gap!=null).sort((a,b)=>a.gap-b.gap);
+      const up=ok.filter(r=>r.dl[2]!=null).sort((a,b)=>b.dl[2]-a.dl[2]);
+      return [`Top‑8 mais forte em ${b8.lab} (${fN(b8.per[2])} pts) e mais fraco em ${w8.lab} (${fN(w8.per[2])} pts).`, dp.length? `Maior profundidade (menor distância entre top‑8 e top‑50) em ${dp[0].lab} (${fN(dp[0].gap)} pts); menor em ${dp[dp.length-1].lab} (${fN(dp[dp.length-1].gap)} pts).` : '', up.length&&cy.length>1? `Maior subida do top‑8 no período em ${up[0].lab} (${up[0].dl[2]>=0?'+':'−'}${fN(Math.abs(up[0].dl[2]))} pts); maior descida em ${up[up.length-1].lab} (${up[up.length-1].dl[2]>=0?'+':'−'}${fN(Math.abs(up[up.length-1].dl[2]))} pts).` : ''].filter(Boolean); })();
     el.innerHTML=`<div class="grid g2"><div class="card"><h3>Perfil nacional por estilo</h3><p class="note">Melhor pontuação de cada nadador em cada estilo, por época, e média no período (${esc(perLabel(AN))}). Top‑8 e top‑24 calculados em cada estilo.</p><div class="chart tall" id="an5R"></div></div>
       <div class="card"><h3>Estilo × distância</h3><p class="note">Média dos pontos do top‑24 (um valor por nadador) de cada prova, calculada em cada época, piscina e género; depois faz-se a média no período. Mostra em que provas o nível nacional é mais alto.</p><div style="margin-top:8px">${heatHTML(STK5.map(k=>STK5_L[k]), dists.map(d=>d+' m'), dmap, null, fN, 'Estilo')}</div></div></div>
       <div class="card"><div class="card-h"><div><h3>Evolução por estilo (média do top‑24)</h3><p class="note">Pontos médios dos 24 melhores de cada estilo, por época, e variação face à época anterior: <span class="trk up">▲ evolução</span> subida superior a ${TR.thr} pts, <span class="trk eq">▬ estagnação</span> variação até ± ${TR.thr} pts, <span class="trk dn">▼ regressão</span> descida superior a ${TR.thr} pts (tom mais forte acima de ${TR.thr*2} pts). Tendência = declive da reta de regressão nas épocas fechadas${TR.partial?'; a época em curso é mostrada mas não entra na tendência':''}.</p></div></div>${TR.html}</div>
-      <div class="card"><h3>Evolução por estilo · gráfico</h3><div class="chart" id="an5Ev"></div></div>`;
-    draw('an5R', spec); draw('an5Ev', TR.spec);
-    out.ins=insPerfil(TR);
-    out.blocks=[{t:'chart',title:'Perfil nacional por estilo',spec},{t:'table',sheet:'Estilo x distância',head:['Estilo',...dists.map(d=>d+' m')],rows:dmap.map((r,k)=>[STK5_L[STK5[k]],...r.map(v=>v==null?'':Math.round(v))]),align:['l',...dists.map(()=>'r')]},{t:'h',text:'Evolução por estilo (média do top‑24)'},{t:'p',text:`Variação face à época anterior entre parênteses. Evolução: subida superior a ${TR.thr} pts; estagnação: variação até ± ${TR.thr} pts; regressão: descida superior a ${TR.thr} pts. Tendência: declive da reta de regressão nas épocas fechadas (pts por época).`},Object.assign({t:'table',sheet:'Evolução por estilo',small:true},TR.exp),{t:'chart',title:'Evolução por estilo (média do top‑24)',spec:TR.spec}];
+      <div class="card"><h3>Evolução por estilo · gráfico</h3><div class="chart" id="an5Ev"></div></div>
+      <div class="card"><div class="card-h"><div><h3>Análise sectorial por distância · 50, 100 e 200 m</h3><p class="note">Para cada técnica e distância: média dos pontos dos 50, 16 e 8 melhores do ranking (um valor por nadador, em cada época, piscina e género) e média das épocas ${cy.length<sy.length?'fechadas ':''}do período. Profundidade = top‑8 − top‑50 (menos pontos = ranking mais equilibrado). Δ = última − primeira época${cy.length<sy.length?' fechada':''} do período.</p></div></div>${insightHTML(dIns)}<div class="chart tall" id="an5D"></div><div id="an5DT" style="margin-top:10px"></div></div>
+      <div class="card"><div class="card-h"><div><h3>Evolução por distância · ${esc(STK5_L[AN5.dStk])} · top‑${AN5.dN}</h3><p class="note">Média dos pontos do top‑${AN5.dN} de cada distância, por época.</p></div><div class="row" style="gap:8px;flex-wrap:wrap">${segHTML('an5DS',STK5.map(k=>[k,STK5_L[k]]),AN5.dStk,'Técnica')}${segHTML('an5DN',[['50','Top‑50'],['16','Top‑16'],['8','Top‑8']],AN5.dN,'Ranking')}</div></div><div class="chart" id="an5DE"></div></div>`;
+    draw('an5R', spec); draw('an5Ev', TR.spec); draw('an5D', dSpec); draw('an5DE', eSpec);
+    bindSeg(el,'an5DS',v=>{ AN5.dStk=v; anContent(); }); bindSeg(el,'an5DN',v=>{ AN5.dN=v; anContent(); });
+    const dCols=[{k:'lab',l:'Prova',f:r=>`<b>${esc(r.lab)}</b>`,x:r=>r.lab},...DN.map((n,j)=>({k:'p'+j,l:'Top‑'+n,num:1,f:r=>r.per[j]==null?'—':fN(r.per[j]),x:r=>r.per[j]==null?'':Math.round(r.per[j]),sv:r=>r.per[j]??-1})),...DN.map((n,j)=>({k:'d'+j,l:'Δ top‑'+n,num:1,f:r=>r.dl[j]==null?'—':`<span class="${r.dl[j]>=0?'up':'down'}">${sg(r.dl[j])}</span>`,x:r=>r.dl[j]==null?'':Math.round(r.dl[j]),sv:r=>r.dl[j]??-999})),{k:'gap',l:'Profundidade (8 − 50)',num:1,f:r=>r.gap==null?'—':fN(r.gap),x:r=>r.gap==null?'':Math.round(r.gap),sv:r=>r.gap??-1,title:'Diferença de pontos entre a média do top‑8 e a do top‑50'}];
+    const dT=new DataTable('an5DT', dCols, drows, {page:20, nosortbar:true});
+    out.ins=[...insPerfil(TR), ...dIns];
+    out.blocks=[{t:'chart',title:'Perfil nacional por estilo',spec},{t:'table',sheet:'Estilo x distância',head:['Estilo',...dists.map(d=>d+' m')],rows:dmap.map((r,k)=>[STK5_L[STK5[k]],...r.map(v=>v==null?'':Math.round(v))]),align:['l',...dists.map(()=>'r')]},{t:'h',text:'Evolução por estilo (média do top‑24)'},{t:'p',text:`Variação face à época anterior entre parênteses. Evolução: subida superior a ${TR.thr} pts; estagnação: variação até ± ${TR.thr} pts; regressão: descida superior a ${TR.thr} pts. Tendência: declive da reta de regressão nas épocas fechadas (pts por época).`},Object.assign({t:'table',sheet:'Evolução por estilo',small:true},TR.exp),{t:'chart',title:'Evolução por estilo (média do top‑24)',spec:TR.spec},{t:'h',text:'Análise sectorial por distância · 50, 100 e 200 m'},{t:'p',text:'Leitura rápida\n'+insTxt(dIns)},{t:'chart',title:'Média dos pontos do top‑50, top‑16 e top‑8 por prova',spec:dSpec},Object.assign({t:'table',sheet:'Distâncias',small:true},dT.exportRows()),{t:'chart',title:'Evolução por distância · '+STK5_L[AN5.dStk]+' · top‑'+AN5.dN,spec:eSpec}];
     return;
   }
   if(sec==='funil'){
@@ -3144,6 +3164,8 @@ function anCarga(el, out){
   const t2=new DataTable('cgT2',[{k:'esc',l:'Escalão',sv:r=>r.k},...bins.map(([l])=>({k:'b'+l,l:l,num:1,f:r=>r['b'+l]==null?'—':`<span class="${r['b'+l]>=0?'up':'down'}">${sg(r['b'+l])}</span> <span class="muted small">n=${r['n'+l]}</span>`,x:r=>r['b'+l]==null?'':Math.round(r['b'+l]),sv:r=>r['b'+l]}))], escRows, {page:10, nosortbar:true});
   out.blocks=[{t:'p',text:'Leitura rápida\n'+insTxt(ins)},{t:'chart',title:'Evolução face ao esperado por nível de carga',spec},{t:'chart',title:'Percentagem que melhorou por nível de carga',spec:spec2},Object.assign({t:'table',sheet:'Carga'},t1.exportRows()),{t:'h',text:'Por escalão'},Object.assign({t:'table',sheet:'Por escalão'},t2.exportRows()),{t:'src',text:'Carga = n.º de provas (prova × piscina) com marca no ranking da época, ou n.º de competições onde foram feitas essas melhores marcas. Os rankings guardam só a melhor marca de cada prova, por isso não medem o total de competições disputadas. Evolução face ao esperado = variação da melhor pontuação face à época anterior menos a mediana nacional dessa variação na mesma idade e género.'}];
 }
+HELP.push([/^Análise sectorial por distância/, 'Nível nacional nas provas de 50, 100 e 200 m de cada técnica, medido pelos 50, 16 e 8 melhores do ranking.', 'Barras por prova: claro = top‑50, dourado = top‑16, azul = top‑8. No quadro, Δ mostra a variação no período e a profundidade a distância entre o top‑8 e o top‑50.', 'Distâncias com top‑8 forte mas profundidade grande dependem de poucos nadadores; Δ negativos mostram onde o sector perde nível.']);
+HELP.push([/^Evolução por distância/, 'Evolução, época a época, das três distâncias de uma técnica, para o ranking escolhido (top‑50, top‑16 ou top‑8).', 'Escolha a técnica e o ranking nos botões; uma linha por distância.', 'Distâncias que se afastam umas das outras mostram especialização ou perda de nível numa delas.']);
 
 </script>
 <script>
@@ -6620,6 +6642,8 @@ const EXPL = [
   [/^Curva de progressão por idade/, null, 'Tempo mediano dos nadadores ranqueados em cada idade, por subperíodo (mínimo 5 nadadores).'],
   [/^Melhoria média por época/, null, 'Média (ou mediana) da melhoria anual de todos os pares de épocas consecutivas que terminam nessa época.'],
   // Análises
+  [/^Análise sectorial por distância/, null, 'Nível(prova, N) = média, nas épocas fechadas do período, da média dos pontos dos N melhores (um valor por nadador, por época, piscina e género), com N = 50, 16 e 8. Profundidade = top‑8 − top‑50. Δ = última − primeira época fechada.'],
+  [/^Evolução por distância/, null, 'Por época: média dos pontos dos N melhores de cada distância (50, 100 e 200 m) da técnica escolhida, um valor por nadador.'],
   [/^Perfil nacional por estilo|^Evolução por estilo/, null, 'Por nadador e época: melhor pontuação em cada estilo. Nível do estilo = média (todos, top‑8 ou top‑24). Tendência = declive da reta nas épocas fechadas.'],
   [/^Estilo × distância/, null, 'Média dos pontos do top‑24 de cada prova (por época, piscina e género, um valor por nadador), média do período.'],
   [/^Melhores marcas de sempre|^Top‑3 de sempre/, null, 'Melhor tempo de cada nadador em cada idade (ou escalão) no período; os 3 mais rápidos.'],
