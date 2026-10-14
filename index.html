@@ -1221,7 +1221,7 @@ function guReliability(){
 /* ---------- registo de versões ---------- */
 const APP_VERSION='2.7';
 const CHANGELOG=[
-  ['2.7','outubro 2026',['Análises › Perfil sectorial: nova análise por distância (50, 100 e 200 m de cada técnica) com o nível dos 50, 16 e 8 melhores, variação no período, profundidade e evolução por época','Ficha resumo: prova mais pontuada no gráfico, projeção das 3 provas mais pontuadas em piscina longa e em piscina curta, resultado ideal e intervalo de resultados, distância à final europeia em cada prova']],
+  ['2.7','outubro 2026',['Clubes e associações: preponderância por técnica e grupo de distâncias (50–100, 100–200, 200–400, 800–1500 m) ao longo das épocas — % do top‑8/16/24 nacional, marcas no top‑N e pódios, por género e piscina','Análises › Perfil sectorial: nova análise por distância (50, 100 e 200 m de cada técnica) com o nível dos 50, 16 e 8 melhores, variação no período, profundidade e evolução por época','Ficha resumo: prova mais pontuada no gráfico, projeção das 3 provas mais pontuadas em piscina longa e em piscina curta, resultado ideal e intervalo de resultados, distância à final europeia em cada prova']],
   ['2.6','outubro 2026',['Auditoria dos cálculos: verificação independente (68 testes, todos iguais) e correção de 40 pontos de lógica identificados na revisão (probabilidades europeias, projeção a partir de L−1, território Minho/Norte, funil de talento, épocas parciais, entre outros)','Explicação ao passar o rato em todos os quadros, gráficos e indicadores: o que mostra, como ler e a fórmula de cálculo','Gráficos redesenhados: área suave, valor no fim de cada linha, linha de referência ao passar o rato; corda de raia no cabeçalho e “Ciclo olímpico em raias” no Início','Nova ficha resumo do nadador: uma página só com gráficos e conclusões-chave (nível para a idade, posição nacional e de sempre, Europa, distância às referências, projeção), com pré-visualização, PDF e Word']],
   ['2.5','outubro 2026',['Início por perfil: atalhos para Direção, Seleções e Treinador / clube, com o estado dos dados e os próximos passos (europeus por carregar, metas do ciclo, qualidade dos dados, relatório em atraso)','Ir para…: pesquisa global de nadadores, clubes, associações, rankings por prova e secções de análise, no cabeçalho ou com a tecla / (ou Ctrl+K)','Visita guiada de 10 passos pelas partes mais importantes da plataforma, proposta na primeira utilização e disponível no Início']],
   ['2.4','outubro 2026',['Relatório estratégico anual: documento único (PDF/Word) com recomendações e todas as análises estratégicas','Estratégia › Programas de apoio: efeito da PO, BEO e outros grupos face a nadadores semelhantes não apoiados, antes e depois do início do apoio','Estratégia › Cenários de investimento: presenças esperadas em finais ou meias-finais europeias com apoio concentrado, distribuído ou otimizado','Pré-convocatórias: retirar nadadores (a vaga passa ao seguinte), os 5 mais próximos dos critérios com convocação por decisão técnica, decisões guardadas','Simulador de critérios: ajuste global dos índices, entradas e saídas face aos critérios oficiais e comparação de todas as atividades']],
@@ -2383,7 +2383,7 @@ async function mtModel(){
     ...x.grps.flatMap(g=>[{t:'h',text:g},{t:'table',sheet:g.slice(0,31),head:['Indicador',...x.ys.map(String),'Meta '+x.y,'Cumprimento'],rows:x.rows.filter(r=>r.d.grp===g).map(r=>[r.d.l,...r.v.map(v=>fmt(v,r.d)),r.tg,r.pc==null?'':f1(r.pc)+'%']),align:['l','r','r','r','r','r','r']}]),
     {t:'src',text:'Mínimos e índices: nadadores de nacionalidade portuguesa com pelo menos uma marca dentro do tempo da tabela, na idade de acesso da tabela. Nível: média da melhor pontuação dos 50 melhores nadadores portugueses. Grupos: membros com pelo menos uma melhor marca pessoal na época.'}]};
 }
-const CE={type:'club', club:null, reg:null, y0:null, y1:null};
+const CE={type:'club', club:null, reg:null, y0:null, y1:null, tm:'pct', tN:'16', tg:'', tco:''};
 let CEX=null;
 function ceDefault(){ const R=S.R, y=lastYear(), m=new Map(); for(let i=0;i<R.n;i++) if(R.yr[i]===y) m.set(R.cl[i],(m.get(R.cl[i])||0)+1); let b=null,bn=-1; for(const [c,n] of m) if(n>bn&&S.cl[c].code!=='?'){ bn=n; b=c; } return b; }
 function vEntidades(root){
@@ -2458,6 +2458,7 @@ function ceContent(){
   let t4=null; if(!isC){ const cm=new Map(); for(const [sw,i] of m1){ const c=R.cl[i]; let o=cm.get(c); if(!o){ o={c,n:0,pts:[],t24:0}; cm.set(c,o);} o.n++; o.pts.push(R.pt[i]); if(t24.get(y1)&&t24.get(y1).has(sw)) o.t24++; }
     t4=new DataTable('ceT4',[{k:'club',l:'Clube',cls:'wrap'},{k:'code',l:'Cód.'},{k:'n',l:'Nadadores',num:1},{k:'lvl',l:'Nível top‑10',num:1,f:r=>f1(r.lvl),x:r=>+r.lvl.toFixed(1)},{k:'t24',l:'Top‑24 esc.',num:1}], [...cm.values()].map(o=>({club:S.cl[o.c].name, code:S.cl[o.c].code, n:o.n, lvl:mean(o.pts.sort((a,b)=>b-a).slice(0,10)), t24:o.t24})), {sorts:[{k:'n',dir:'desc'}], page:25}); }
   CEX={name, isC, y1, specN, specL, specE, specS, t0, t1, t2, t3, t4, cur, rkN, rk24};
+  try{ CEX.tech=ceTech(el, inE, sy, isC); }catch(e){ console.warn(e); }
   try{ const x=CEX, c=x.cur, L=[]; const ev=x.t0.rows; const pv=ev.find(r=>r.y===x.y1-1);
   L.push(`${fN(c.n)} nadadores em ${x.y1}${pv?` (${sg(c.n-pv.n)} face a ${x.y1-1})`:''}${x.rkN?` — ${ord(x.rkN.r)} ${x.isC?'clube':'associação'} nacional em número de nadadores`:''}.`);
   if(c.lvl!=null&&pv&&pv.lvl!=null) L.push(`Nível dos 10 melhores ${c.lvl>pv.lvl+2?'subiu':c.lvl<pv.lvl-2?'desceu':'estável'}: ${f1(pv.lvl)} → ${f1(c.lvl)} pts.`);
@@ -2467,6 +2468,41 @@ function ceContent(){
   const el=$('#ceC'); const row=el&&el.querySelector('.row'); if(row) row.insertAdjacentHTML('afterend', insightHTML(L)); CEX.ins=L;
   }catch(e){ console.warn(e); }
 }
+/* preponderância por técnica e grupo de distâncias: peso da entidade nas marcas de topo do ranking nacional, por época */
+const CE_DG=[['50–100',[50,100]],['100–200',[100,200]],['200–400',[200,400]],['800–1500',[800,1500]]];
+function ceTech(el, inE, sy, isC){
+  const R=S.R, N=+CE.tN, cy=sy.filter(y=>!isPartial(y)).length? sy.filter(y=>!isPartial(y)) : sy;
+  const rows=[]; STK5.forEach(k=>CE_DG.forEach(([gl,ds])=>{ const dd=ds.filter(d=>S.ev.includes(d+k)); if(!dd.length) return; const evs=dd.map(d=>S.ev.indexOf(d+k)); rows.push({k, gl, evs:new Set(evs), lab:STK5_L[k]+' · '+dd.join('–')+' m'}); }));
+  const yi=new Map(sy.map((y,j)=>[y,j]));
+  rows.forEach(r=>{ r.tot=sy.map(()=>0); r.own=sy.map(()=>0); r.pod=sy.map(()=>0); });
+  const tk=STK5.map(()=>({tot:sy.map(()=>0), own:sy.map(()=>0)}));
+  for(let i=0;i<R.n;i++){ const j=yi.get(R.yr[i]); if(j==null) continue; if(CE.tg!==''&&D.G[i]!==+CE.tg) continue; if(CE.tco!==''&&R.co[i]!==+CE.tco) continue; const rk=D.RK[i]; if(rk>N&&rk>3) continue; const mine=inE(i), e=R.ev[i];
+    for(const r of rows){ if(!r.evs.has(e)) continue; if(rk<=N){ r.tot[j]++; if(mine) r.own[j]++; } if(rk<=3&&mine) r.pod[j]++; }
+    const ki=STK5.indexOf(S.ev[e].slice(-1)); if(ki>=0&&rk<=N&&CE_DG.some(([,ds])=>ds.includes(evDist(e)))){ tk[ki].tot[j]++; if(mine) tk[ki].own[j]++; } }
+  const val=(r,j)=> CE.tm==='pct'? (r.tot[j]? r.own[j]/r.tot[j]*100 : null) : CE.tm==='n'? r.own[j] : r.pod[j];
+  rows.forEach(r=>{ r.v=sy.map((y,j)=>val(r,j)); const cv=cy.map(y=>r.v[yi.get(y)]).filter(v=>v!=null); r.avg=cv.length? mean(cv) : null; const f=cy.find(y=>r.v[yi.get(y)]!=null), l=[...cy].reverse().find(y=>r.v[yi.get(y)]!=null); r.d= f!=null&&l!=null&&f!==l? r.v[yi.get(l)]-r.v[yi.get(f)] : null; });
+  const fmt= CE.tm==='pct'? (v=>v==null?'—':f1(v)+'%') : (v=>v==null?'—':fN(v));
+  const mL={pct:`Preponderância no top‑${N} nacional`, n:`Marcas no top‑${N} nacional`, pod:'Pódios nacionais (top‑3)'}[CE.tm];
+  const vis=rows.filter(r=>r.v.some(v=>v)); const lab=vis.map(r=>r.lab);
+  const vals=vis.map(r=>[...r.v, null]);
+  const spec={labels:sy.map(String), series:STK5.map((k,ki)=>({label:STK5_L[k], data:sy.map((y,j)=>{ const t=tk[ki]; if(CE.tm==='pct') return t.tot[j]? +(t.own[j]/t.tot[j]*100).toFixed(1) : null; if(CE.tm==='n') return t.own[j]; return rows.filter(r=>r.k===k&&r.gl!=='100–200'&&r.gl!=='200–400'||false).length? null : null; }), color:['s1','s2','s3','seq3','faint'][ki]})).filter(sr=>sr.data.some(v=>v)), yFmt:CE.tm==='pct'? (v=>fN(v)+'%') : fN, tipFmt:CE.tm==='pct'? (v=>f1(v)+'%') : fN, zero:true, legend:true};
+  if(CE.tm==='pod'){ spec.series=STK5.map((k,ki)=>({label:STK5_L[k], data:sy.map((y,j)=>{ let n=0; vis.filter(r=>r.k===k).forEach(r=>{}); return null; }), color:['s1','s2','s3','seq3','faint'][ki]})); 
+    // pódios por técnica (cada prova conta uma vez)
+    const pk=STK5.map(()=>sy.map(()=>0)); for(let i=0;i<R.n;i++){ const j=yi.get(R.yr[i]); if(j==null||D.RK[i]>3||!inE(i)) continue; if(CE.tg!==''&&D.G[i]!==+CE.tg) continue; if(CE.tco!==''&&R.co[i]!==+CE.tco) continue; const ki=STK5.indexOf(S.ev[R.ev[i]].slice(-1)); if(ki>=0&&CE_DG.some(([,ds])=>ds.includes(evDist(R.ev[i])))) pk[ki][j]++; }
+    spec.series=STK5.map((k,ki)=>({label:STK5_L[k], data:pk[ki], color:['s1','s2','s3','seq3','faint'][ki]})).filter(sr=>sr.data.some(v=>v)); }
+  const ord_=vis.filter(r=>r.avg!=null).sort((a,b)=>b.avg-a.avg), ch=vis.filter(r=>r.d!=null).sort((a,b)=>b.d-a.d);
+  const ins=[ord_.length? `Maior ${CE.tm==='pct'?'preponderância':CE.tm==='n'?'presença no top‑'+N:'número de pódios'} no período: ${ord_.slice(0,3).map(r=>`${r.lab} (${fmt(r.avg)}${CE.tm==='pct'?'':' por época'})`).join('; ')}.` : 'Sem marcas no topo do ranking nacional no período.',
+    ch.length&&ch[0].d>0? `Maior subida: ${ch[0].lab} (${CE.tm==='pct'?(ch[0].d>=0?'+':'−')+f1(Math.abs(ch[0].d))+' p.p.':sg(ch[0].d)}).` : '', ch.length&&ch[ch.length-1].d<0? `Maior descida: ${ch[ch.length-1].lab} (${CE.tm==='pct'?'−'+f1(Math.abs(ch[ch.length-1].d))+' p.p.':sg(ch[ch.length-1].d)}).` : ''].filter(Boolean);
+  const card=document.createElement('div'); card.className='card'; card.id='ceTech';
+  card.innerHTML=`<div class="card-h"><div><h3>Preponderância por técnica e distância</h3><p class="note">${CE.tm==='pct'?`Percentagem das marcas do top‑${N} do ranking nacional (absoluto, todas as idades) feitas por nadadores ${isC?'do clube':'da associação'}, em cada técnica e grupo de distâncias, por época.`:CE.tm==='n'?`Número de marcas ${isC?'do clube':'da associação'} no top‑${N} do ranking nacional, por técnica, grupo de distâncias e época.`:`Número de marcas ${isC?'do clube':'da associação'} entre os 3 primeiros do ranking nacional, por técnica, grupo de distâncias e época.`} Os grupos 50–100, 100–200 e 200–400 m partilham a distância central, por isso a mesma prova pode contar em dois grupos. A última coluna é a variação entre a primeira e a última época ${cy.length<sy.length?'fechada ':''}com marcas.</p></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">${segHTML('ceTm',[['pct','Preponderância %'],['n','Marcas no top‑N'],['pod','Pódios']],CE.tm,'Indicador')}${CE.tm!=='pod'?segHTML('ceTN',[['8','Top‑8'],['16','Top‑16'],['24','Top‑24']],CE.tN,'Ranking'):''}${segHTML('ceTg',[['','Ambos'],['0','Masc.'],['1','Fem.']],CE.tg,'Género')}${segHTML('ceTco',[['','Ambas'],['0','PL'],['1','PC']],CE.tco,'Piscina')}</div></div>
+    ${insightHTML(ins)}<div class="chart" id="ceTechCh"></div><div style="margin-top:10px">${vis.length? heatHTML(lab,[...sy.map(yearLabel),'Δ'],vals,null,fmt,'Técnica · distâncias') : '<p class="muted">Sem marcas no topo do ranking nacional com estes filtros.</p>'}</div>`;
+  el.appendChild(card); draw('ceTechCh',spec);
+  // Δ colorido: a última coluna não usa a escala de cor
+  const tbl=card.querySelector('table'); if(tbl) tbl.querySelectorAll('tbody tr').forEach((tr,ri)=>{ const td=tr.lastElementChild, d=vis[ri]&&vis[ri].d; if(td){ td.style.background='none'; td.innerHTML= d==null? '—' : `<b class="${d>0?'up':d<0?'down':''}">${CE.tm==='pct'? (d>0?'+':d<0?'−':'±')+f1(Math.abs(d))+' p.p.' : sg(d)}</b>`; } });
+  const re=()=>ceContent(); bindSeg(card,'ceTm',v=>{ CE.tm=v; re(); }); bindSeg(card,'ceTN',v=>{ CE.tN=v; re(); }); bindSeg(card,'ceTg',v=>{ CE.tg=v; re(); }); bindSeg(card,'ceTco',v=>{ CE.tco=v; re(); });
+  return {ins, blocks:()=>[{t:'h',text:'Preponderância por técnica e distância · '+mL},{t:'p',text:'Leitura rápida\n'+insTxt(ins)},{t:'chart',title:mL+' por técnica',spec},{t:'table',sheet:'Técnica e distância',small:true,head:['Técnica · distâncias',...sy.map(String),'Variação'],rows:vis.map(r=>[r.lab,...r.v.map(v=>v==null?'':CE.tm==='pct'?+v.toFixed(1):v), r.d==null?'':CE.tm==='pct'?+r.d.toFixed(1):r.d]),align:['l',...sy.map(()=>'r'),'r']}]};
+}
 async function ceModel(){
   const x=CEX, c=x.cur;
   const m={title:(x.isC?'Ficha de clube — ':'Ficha de associação — ')+x.name, subtitle:perLabel(CE)+' · indicadores da época '+x.y1, filename:(x.isC?'Clube_':'Associacao_')+slug(x.name)+'_'+x.y1, orientation:'p', blocks:[
@@ -2475,6 +2511,7 @@ async function ceModel(){
     {t:'h',text:'Evolução por época'},Object.assign({t:'table',sheet:'Evolução',small:true},x.t0.exportRows()),
     {t:'h',text:'Nadadores · '+x.y1},Object.assign({t:'table',sheet:'Nadadores',small:true},x.t1.exportRows()),
     ...(x.t4?[{t:'h',text:'Clubes da associação · '+x.y1},Object.assign({t:'table',sheet:'Clubes'},x.t4.exportRows())]:[]),
+    ...(x.tech? x.tech.blocks() : []),
     {t:'h',text:'Entradas e saídas'},Object.assign({t:'table',sheet:'Entradas e saídas',small:true},x.t2.exportRows()),
     {t:'h',text:'Formados que chegaram ao top‑8 nacional'},Object.assign({t:'table',sheet:'Formados',small:true},x.t3.exportRows()),
     {t:'src',text:'Fonte: rankings nacionais absolutos da FPN. Um nadador conta num clube ou associação na época se tiver pelo menos uma marca no ranking por esse clube. Top‑24/top‑8 do escalão: ranking nacional do escalão da prova. Mínimos e índices: tabelas do separador Mínimos, com as idades de acesso, nacionalidade portuguesa.'}]};
@@ -2593,6 +2630,7 @@ function rxModelDetails(m){ const X=RX10; if(!X) return; const src=m.blocks.pop(
     {t:'h',text:'Grupos de alto rendimento'},Object.assign({t:'table',sheet:'Grupos AR',small:true},X.tG.exportRows()), src);
   return;
 }
+HELP.push([/^Preponderância por técnica e distância/, 'Peso do clube ou associação no topo do ranking nacional, por técnica (mariposa, costas, bruços, livres, estilos) e grupo de distâncias (50–100, 100–200, 200–400, 800–1500 m), ao longo das épocas.', 'Escolha o indicador: preponderância (% das marcas do top‑N nacional), número de marcas no top‑N ou pódios (top‑3). Tom mais escuro = valor mais alto; a última coluna mostra a variação no período.', 'Linhas a escurecer mostram onde a entidade está a ganhar peso; Δ negativos mostram técnicas ou distâncias em perda.']);
 
 </script>
 <script>
@@ -6642,6 +6680,7 @@ const EXPL = [
   [/^Curva de progressão por idade/, null, 'Tempo mediano dos nadadores ranqueados em cada idade, por subperíodo (mínimo 5 nadadores).'],
   [/^Melhoria média por época/, null, 'Média (ou mediana) da melhoria anual de todos os pares de épocas consecutivas que terminam nessa época.'],
   // Análises
+  [/^Preponderância por técnica e distância/, null, 'Preponderância(época, técnica, grupo) = marcas da entidade com posição ≤ N no ranking nacional absoluto das provas do grupo ÷ todas as marcas com posição ≤ N nessas provas × 100. Pódios = marcas da entidade com posição ≤ 3. Δ = última − primeira época fechada com marcas.'],
   [/^Análise sectorial por distância/, null, 'Nível(prova, N) = média, nas épocas fechadas do período, da média dos pontos dos N melhores (um valor por nadador, por época, piscina e género), com N = 50, 16 e 8. Profundidade = top‑8 − top‑50. Δ = última − primeira época fechada.'],
   [/^Evolução por distância/, null, 'Por época: média dos pontos dos N melhores de cada distância (50, 100 e 200 m) da técnica escolhida, um valor por nadador.'],
   [/^Perfil nacional por estilo|^Evolução por estilo/, null, 'Por nadador e época: melhor pontuação em cada estilo. Nível do estilo = média (todos, top‑8 ou top‑24). Tendência = declive da reta nas épocas fechadas.'],
