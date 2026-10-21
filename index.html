@@ -768,7 +768,7 @@ async function chartPNG(spec, w=1500, h=640, fmt='png'){
   const W=spec.w||1400, H=spec.h||600, svg=spec.svg(LIGHT, true).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" ');
   const img=new Image(); const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
   await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=url; });
-  const c=document.createElement('canvas'); c.width=W; c.height=H; const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); ctx.drawImage(img,0,0,W,H);
+  const k=spec.scale||1, c=document.createElement('canvas'); c.width=W*k; c.height=H*k; const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W*k,H*k); ctx.drawImage(img,0,0,W*k,H*k);
   return {url: fmt==='jpeg'? c.toDataURL('image/jpeg',.92) : c.toDataURL('image/png'), w:W, h:H};
   }
   if(spec.type==='radar'){ w=1100; h=860; }
@@ -5191,8 +5191,8 @@ function calRows(){
 }
 const CAL_SEL_ORDER = ['Infantis','Promessas Aquáticas','Jovem','Júnior','Sénior Sub23','Sénior'];
 const CAL_SEL_C = {'Infantis':'#E07B39','Promessas Aquáticas':'#16876A','Jovem':'#4C8ED6','Júnior':'#185FA5','Sénior Sub23':'#7A5BB5','Sénior':'#042C53'};
-function calSpec(rows, today){
-  const y=CAL.y, W=1500, lw=430, pw=110, rw=24, top=92, rh=48, H=top+rows.length*rh+70, xp=lw, x0=lw+pw, x1=W-rw, t0=calD(y,0,1), t1=calD(y+1,0,1), span=t1-t0, p0=calD(y-1,10,1);
+function calSpec(rows, today, o={}){
+  const y=CAL.y, W=o.W||1500, lw=430, pw=110, rw=24, top=92, rh=o.rh||48, H=top+rows.length*rh+70, xp=lw, x0=lw+pw, x1=W-rw, t0=calD(y,0,1), t1=calD(y+1,0,1), span=t1-t0, p0=calD(y-1,10,1);
   /* coluna estreita à esquerda para as datas de novembro e dezembro do ano anterior (prazos e comunicados) */
   const X=d=> d<t0? xp+6+(pw-12)*Math.max(0,Math.min(1,(d-p0)/(t0-p0))) : x0+(x1-x0)*Math.max(0,Math.min(1,(d-t0)/span)), out=d=>d<p0? -1 : d>=t1? 1 : 0;
   return {kind:'svg', w:W, h:H, title:'Calendário das ações de seleção '+y, svg:(th,exp)=>{
@@ -5210,7 +5210,7 @@ function calSpec(rows, today){
     s+=`<text x="12" y="${top-12}" font-size="13" font-weight="700" fill="${mut}">AÇÃO</text><text x="${x0-4}" y="${top-12}" text-anchor="end" font-size="9.5" fill="${mut}">semana de</text><text x="${x1}" y="22" text-anchor="end" font-size="16" font-weight="700" fill="${ink}">${y}</text>`;
     let prevSel=null;
     const dF=d=> d.getUTCFullYear()===y? calF(d).slice(0,5) : calF(d).slice(0,6)+String(d.getUTCFullYear()).slice(2);
-    rows.forEach((r,k)=>{ const rT=top+k*rh, yy=rT+17, yd=rT+37, c=CAL_SEL_C[r.sel]||'#185FA5';
+    rows.forEach((r,k)=>{ const rT=top+k*rh, yy=rT+Math.round(rh*.36), yd=rT+Math.round(rh*.77), c=CAL_SEL_C[r.sel]||'#185FA5';
       if(k%2) s+=`<rect x="0" y="${rT}" width="${W}" height="${rh}" fill="${soft}" opacity=".35"/>`;
       if(k) s+=`<line x1="0" x2="${W}" y1="${rT}" y2="${rT}" stroke="${line}" stroke-opacity=".6"/>`;
       s+=`<rect x="6" y="${yy-8}" width="6" height="16" rx="2" fill="${c}"/><text x="18" y="${yy+5}" font-size="13.5" font-weight="600" fill="${ink}">${xs(calShort(r.name))}</text><text x="${xp-10}" y="${yy+5}" text-anchor="end" font-size="12" fill="${mut}">${xs(r.sel)}</text>`;
@@ -5248,9 +5248,9 @@ function calSpec(rows, today){
 let CALX=null, CAL_TIMER=null;
 function vCalendario(root){
   const sels=CAL_SEL_ORDER.filter(x=>PAR_ACTS.some(a=>a.sel===x));
-  root.innerHTML=`<div class="view-head"><div><h2>Calendário das seleções ${CAL.y}</h2><div class="sub">Uma linha por ação de seleção do PAR: data de realização, prazo para obtenção do critério, comunicado (6.ª feira seguinte ao prazo) e relatório (6.ª feira seguinte ao fim da ação). A linha vermelha marca o dia de hoje (data do computador).</div></div>${expHTML('cal')}</div>
+  root.innerHTML=`<div class="view-head"><div><h2>Calendário das seleções ${CAL.y}</h2><div class="sub">Uma linha por ação de seleção do PAR: data de realização, prazo para obtenção do critério, comunicado (6.ª feira seguinte ao prazo) e relatório (6.ª feira seguinte ao fim da ação). A linha vermelha marca o dia de hoje (data do computador).</div></div><div style="display:flex;gap:8px;align-items:center">${expHTML('cal')}<button class="btn" id="calA3" title="Calendário completo numa só folha A3 (horizontal)">PDF A3</button></div></div>
     <div class="fbar">${segHTML('calSel',[['','Todas'],...sels.map(x=>[x,x])],CAL.sel,'Seleção')}</div><div id="calC" class="view"></div>`;
-  bindSeg(root,'calSel',v=>{ CAL.sel=v; calContent(); }); bindExp(root,'cal',calModel); calContent();
+  bindSeg(root,'calSel',v=>{ CAL.sel=v; calContent(); }); bindExp(root,'cal',calModel); $('#calA3',root).addEventListener('click',async e=>{ const b=e.currentTarget, t=b.textContent; b.disabled=true; b.textContent='A gerar…'; try{ await exportModel(await calModelA3(),'pdf'); }catch(err){ console.error(err); toast('Erro na exportação: '+(err.message||err)); } finally{ b.disabled=false; b.textContent=t; } }); calContent();
   clearInterval(CAL_TIMER); CAL_TIMER=setInterval(()=>{ const el=$('#calC'); if(!el||!el.isConnected){ clearInterval(CAL_TIMER); return; } const d=calToday(); if(!CALX||+d!==+CALX.today) calContent(); },60000);
 }
 function calToday(){ const n=new Date(); return calD(n.getFullYear(), n.getMonth(), n.getDate()); }
@@ -5268,6 +5268,8 @@ function calContent(){
   const ce=$('#calE'); if(ce) ce.addEventListener('change',async e=>{ const i=e.target.closest('[data-calp]'); if(!i) return; if(i.value) S.calPrazo[i.dataset.calp]=i.value; else delete S.calPrazo[i.dataset.calp]; try{ await cfgSave('calprazo',{p:S.calPrazo}); toast('Prazo guardado.'); }catch(err){ toast('Erro: '+(err.message||err)); } calContent(); });
   CALX={rows, today, spec, ins};
 }
+/* PDF A3 horizontal: todo o calendário numa só folha */
+async function calModelA3(){ const m=await calModel(); const x=CALX; return Object.assign(m,{format:'a3', filename:m.filename+'_A3', blocks:[m.blocks[0],{t:'chart',solo:true,fit:true,title:'Calendário anual · '+CAL.y,spec:Object.assign(calSpec(x.rows,x.today,{W:2400,rh:36}),{scale:1.8})},m.blocks[m.blocks.length-1]]}); }
 /* exportação: o calendário é dividido em blocos de até 10 ações para caber legível em cada página A4 */
 function calChunks(rows){ const n=Math.ceil(rows.length/10)||1, k=Math.ceil(rows.length/n), o=[]; for(let i=0;i<rows.length;i+=k) o.push(rows.slice(i,i+k)); return o; }
 async function calModel(){ const x=CALX; return {title:'Calendário das seleções '+CAL.y, subtitle:(CAL.sel||'Todas as seleções')+' · hoje '+calF(x.today), filename:'Calendario_selecoes_'+CAL.y+(CAL.sel?'_'+slug(CAL.sel):''), orientation:'l', blocks:[{t:'p',text:'Leitura rápida\n'+insTxt(x.ins.map(stripTags))},...calChunks(x.rows).map((rs,i,a)=>({t:'chart',solo:true,full:true,title:'Calendário anual · '+CAL.y+(a.length>1?' ('+(i+1)+'/'+a.length+')':''),spec:calSpec(rs,x.today)})),{t:'src',text:'Ações e prazos do critério: PAR (Pré-convocatórias). Comunicado = 6.ª feira seguinte ao prazo do critério; relatório = 6.ª feira seguinte ao último dia da ação. Datas de realização lidas do nome de cada ação.'}]}; }
@@ -7064,7 +7066,7 @@ function pdfSafeModel(m){
 async function buildPDF(m, stamp){
   if(!window.jspdf) throw new Error('Biblioteca PDF indisponível');
   m=pdfSafeModel(m);
-  const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:m.orientation||'p', unit:'mm', format:'a4'});
+  const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:m.orientation||'p', unit:'mm', format:m.format||'a4'});
   const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), M=m.decl?20:12, CW=W-2*M;
   if(m.poster){ /* infografia de página inteira (ficha resumo) */
     const b=m.blocks.find(x=>x.t==='poster'); const img=await chartPNG(b.spec,0,0,'jpeg'); doc.addImage(img.url,'JPEG',0,0,W,H,undefined,'FAST');
@@ -7123,7 +7125,7 @@ async function buildPDF(m, stamp){
       y=doc.lastAutoTable.finalY+5;
       if(b.note && !m.decl){ doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(110,120,135); doc.text(b.note, M, y-1.5); doc.setTextColor(20,27,43); y+=3; }
     } else if(b.t==='chart'){
-      const img=await chartPNG(b.spec, 1500, 620, 'jpeg'); const h=b.full? Math.min(CW*img.h/img.w, doc.internal.pageSize.getHeight()-46) : CW*img.h/img.w * (m.orientation==='l'?0.62:1), w=h*img.w/img.h;
+      const img=await chartPNG(b.spec, 1500, 620, 'jpeg'); const h=b.fit? Math.min(CW*img.h/img.w, H-14-y-9-(b.reserve??12)) : b.full? Math.min(CW*img.h/img.w, doc.internal.pageSize.getHeight()-46) : CW*img.h/img.w * (m.orientation==='l'?0.62:1), w=h*img.w/img.h;
       need(h+9); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(20,27,43); if(b.title) doc.text(b.title, M, y+3);
       doc.addImage(img.url,'JPEG', M, y+5, w, h, undefined, 'FAST'); y+=h+10;
     } else if(b.t==='charts'){
