@@ -408,6 +408,7 @@ ul.xl.good li::marker{color:var(--good)} ul.xl.bad li::marker{color:var(--bad)}
       <button class="tab" role="tab" data-a="nad" data-v="declaracoes">Declarações</button>
       <button class="tab" role="tab" data-a="sel" data-v="grupos">Grupos AR</button>
       <button class="tab" role="tab" data-a="sel" data-v="convocatorias">Pré-convocatórias</button>
+      <button class="tab" role="tab" data-a="sel" data-v="calendario">Calendário</button>
       <button class="tab" role="tab" data-a="sel" data-v="estafetas">Estafetas</button>
       <button class="tab" role="tab" data-a="sel" data-v="minimos">Mínimos</button>
       <button class="tab" role="tab" data-a="dad" data-v="dados">Dados</button>
@@ -1196,7 +1197,7 @@ function vGuia(root){ GU.fi=null;
   <div class="card" id="guFi"><h3>Fiabilidade dos modelos</h3><div class="loading"><div>A testar as projeções com épocas passadas…</div><div class="bar"><i></i></div></div></div>
   <div class="card" id="guVer"></div>`;
   const tg=new DataTable('guT',[{k:0,l:'Termo',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Definição',cls:'wrap',x:r=>r[1]}], GLOSS, {page:60, nosortbar:true});
-  const TABS=[['Nacional › Início','Página inicial por perfil (Direção, Seleções, Treinador / clube) com atalhos, estado dos dados, próximos passos e visita guiada.'],['Ir para… (tecla / ou Ctrl+K)','Pesquisa global: nadadores, clubes, associações, rankings por prova, separadores e secções de análise.'],['Nacional › Resumo','Os 8 indicadores-chave numa página, com semáforo e tendência.'],['Nacional › Estratégia','Relatório estratégico anual, painel do ciclo, plano de sucessão, território, programas de apoio e cenários de investimento.'],['Nacional › Painel nacional','Leitura coletiva: participação, nível, idades, escalões, associações, dinâmica, picos e abandono.'],['Nacional › Evolução','Profundidade do ranking, curvas por idade e taxas de melhoria por prova.'],['Nacional › Análises','Perfil sectorial, funil de talento, densidade, géneros, clubes, território, idade relativa, carga competitiva, mobilidade entre clubes, entre outras.'],['Nacional › Rankings','Ranking por prova com filtros e ordenação múltipla.'],['Nacional › Europa','Portugal face aos 100 melhores europeus: posição, provas prioritárias, marcas de acesso futuras, trajetórias até à final, acesso a finais, evolução desde 2003, países; absolutos e juniores.'],['Nacional › Clubes e associações','Fichas de clube e de associação.'],['Nacional › Metas PAR','Metas por época e cumprimento.'],['Nadadores › Nadadores','Pesquisa e lista; a ficha individual reúne toda a análise do nadador (inclui ficha de uma página).'],['Nadadores › Comparar','Comparação lado a lado entre nadadores.'],['Nadadores › Talento','Índice de talento e probabilidade histórica de chegar ao top‑8/top‑3.'],['Nadadores › Quadrante','Nível face à idade vs evolução face ao esperado: investir, consolidar, em ascensão, monitorizar.'],['Nadadores › Alertas','Nadadores em evolução acima da média nacional.'],['Nadadores › Risco de abandono','Nadadores com perfil de risco de deixar a modalidade, com os fatores que pesam em cada caso.'],['Nadadores › Declarações','Declarações individuais.'],['Seleções › Grupos AR','Seguimento da PO, BEO e outros grupos.'],['Seleções › Pré-convocatórias','Candidatos às atividades do PAR 2027, os 5 mais próximos, retirar e convocar por decisão técnica, simulador de critérios.'],['Seleções › Estafetas','Melhores equipas possíveis (com tempos lap), por clube e potencial vs realizado.'],['Seleções › Mínimos','Tabelas de mínimos e índices editáveis e quem as cumpre.'],['Dados e guia › Dados','Carregamento, cópia de segurança, unificação de nadadores, novidades e estado da base partilhada.'],['Dados e guia › Qualidade dos dados','Marcas a verificar (melhorias anormais, tempos repetidos, datas, clubes): validar ou excluir das análises.'],['Dados e guia › Guia de leitura','Esta página.'],['Versão de consulta','Para clubes e associações: ficha da entidade, os seus nadadores, rankings, Europa e guia (gerada em Dados).'],['★ Vistas','Atalhos com filtros já escolhidos; guarde as suas próprias vistas.']];
+  const TABS=[['Nacional › Início','Página inicial por perfil (Direção, Seleções, Treinador / clube) com atalhos, estado dos dados, próximos passos e visita guiada.'],['Ir para… (tecla / ou Ctrl+K)','Pesquisa global: nadadores, clubes, associações, rankings por prova, separadores e secções de análise.'],['Nacional › Resumo','Os 8 indicadores-chave numa página, com semáforo e tendência.'],['Nacional › Estratégia','Relatório estratégico anual, painel do ciclo, plano de sucessão, território, programas de apoio e cenários de investimento.'],['Nacional › Painel nacional','Leitura coletiva: participação, nível, idades, escalões, associações, dinâmica, picos e abandono.'],['Nacional › Evolução','Profundidade do ranking, curvas por idade e taxas de melhoria por prova.'],['Nacional › Análises','Perfil sectorial, funil de talento, densidade, géneros, clubes, território, idade relativa, carga competitiva, mobilidade entre clubes, entre outras.'],['Nacional › Rankings','Ranking por prova com filtros e ordenação múltipla.'],['Nacional › Europa','Portugal face aos 100 melhores europeus: posição, provas prioritárias, marcas de acesso futuras, trajetórias até à final, acesso a finais, evolução desde 2003, países; absolutos e juniores.'],['Nacional › Clubes e associações','Fichas de clube e de associação.'],['Nacional › Metas PAR','Metas por época e cumprimento.'],['Nadadores › Nadadores','Pesquisa e lista; a ficha individual reúne toda a análise do nadador (inclui ficha de uma página).'],['Nadadores › Comparar','Comparação lado a lado entre nadadores.'],['Nadadores › Talento','Índice de talento e probabilidade histórica de chegar ao top‑8/top‑3.'],['Nadadores › Quadrante','Nível face à idade vs evolução face ao esperado: investir, consolidar, em ascensão, monitorizar.'],['Nadadores › Alertas','Nadadores em evolução acima da média nacional.'],['Nadadores › Risco de abandono','Nadadores com perfil de risco de deixar a modalidade, com os fatores que pesam em cada caso.'],['Nadadores › Declarações','Declarações individuais.'],['Seleções › Grupos AR','Seguimento da PO, BEO e outros grupos.'],['Seleções › Calendário','Calendário anual das ações de seleção: realização, prazo do critério, comunicado e relatório, com a linha de hoje e a situação de cada ação.'],['Seleções › Pré-convocatórias','Candidatos às atividades do PAR 2027, os 5 mais próximos, retirar e convocar por decisão técnica, simulador de critérios.'],['Seleções › Estafetas','Melhores equipas possíveis (com tempos lap), por clube e potencial vs realizado.'],['Seleções › Mínimos','Tabelas de mínimos e índices editáveis e quem as cumpre.'],['Dados e guia › Dados','Carregamento, cópia de segurança, unificação de nadadores, novidades e estado da base partilhada.'],['Dados e guia › Qualidade dos dados','Marcas a verificar (melhorias anormais, tempos repetidos, datas, clubes): validar ou excluir das análises.'],['Dados e guia › Guia de leitura','Esta página.'],['Versão de consulta','Para clubes e associações: ficha da entidade, os seus nadadores, rankings, Europa e guia (gerada em Dados).'],['★ Vistas','Atalhos com filtros já escolhidos; guarde as suas próprias vistas.']];
   const ts=new DataTable('guS',[{k:0,l:'Separador',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Para que serve',cls:'wrap',x:r=>r[1]}], TABS, {page:30, nosortbar:true});
   bindExp(root,'gu',async()=>({title:'Guia de leitura', subtitle:'Código de cores, símbolos e glossário', filename:'Guia_de_leitura', orientation:'p', blocks:[{t:'h',text:'Código de cores'},{t:'table',sheet:'Cores',head:['Cor','Significado'],rows:[['Azul','Masculinos · nadador em análise · série principal'],['Laranja','Femininos · segunda série'],['Verde','Evolução · cumpre · acima da referência'],['Cinzento','Estagnação · referência · sem dados'],['Vermelho','Regressão · abaixo da referência'],['Dourado','Perto de um objetivo · próxima referência'],['Linha tracejada','Referência nacional ou mínimo'],['Sombreado','Época em curso (provisório)'],['Linha vertical 2020','Pandemia: competições suspensas']],align:['l','l']},{t:'h',text:'Glossário'},Object.assign({t:'table',sheet:'Glossário'},tg.exportRows()),{t:'h',text:'Separadores'},Object.assign({t:'table',sheet:'Separadores'},ts.exportRows()), ...(GU.fi?GU.fi():[]), ...GU.ver()]}));
   GU.ver=guVersions();
@@ -1221,7 +1222,7 @@ function guReliability(){
 /* ---------- registo de versões ---------- */
 const APP_VERSION='2.7';
 const CHANGELOG=[
-  ['2.7','outubro 2026',['Clubes e associações: preponderância por técnica e grupo de distâncias (50–100, 100–200, 200–400, 800–1500 m) ao longo das épocas — % do top‑8/16/24 nacional, marcas no top‑N e pódios, por género e piscina','Análises › Perfil sectorial: nova análise por distância (50, 100 e 200 m de cada técnica) com o nível dos 50, 16 e 8 melhores, variação no período, profundidade e evolução por época','Ficha resumo: prova mais pontuada no gráfico, projeção das 3 provas mais pontuadas em piscina longa e em piscina curta, resultado ideal e intervalo de resultados, distância à final europeia em cada prova']],
+  ['2.7','outubro 2026',['Seleções › Calendário: ações de seleção do ano numa linha cada, com realização, prazo do critério, comunicado (6.ª feira seguinte ao prazo), relatório (6.ª feira seguinte ao fim) e linha do dia de hoje','Clubes e associações: preponderância por técnica e grupo de distâncias (50–100, 100–200, 200–400, 800–1500 m) ao longo das épocas — % do top‑8/16/24 nacional, marcas no top‑N e pódios, por género e piscina','Análises › Perfil sectorial: nova análise por distância (50, 100 e 200 m de cada técnica) com o nível dos 50, 16 e 8 melhores, variação no período, profundidade e evolução por época','Ficha resumo: prova mais pontuada no gráfico, projeção das 3 provas mais pontuadas em piscina longa e em piscina curta, resultado ideal e intervalo de resultados, distância à final europeia em cada prova']],
   ['2.6','outubro 2026',['Auditoria dos cálculos: verificação independente (68 testes, todos iguais) e correção de 40 pontos de lógica identificados na revisão (probabilidades europeias, projeção a partir de L−1, território Minho/Norte, funil de talento, épocas parciais, entre outros)','Explicação ao passar o rato em todos os quadros, gráficos e indicadores: o que mostra, como ler e a fórmula de cálculo','Gráficos redesenhados: área suave, valor no fim de cada linha, linha de referência ao passar o rato; corda de raia no cabeçalho e “Ciclo olímpico em raias” no Início','Nova ficha resumo do nadador: uma página só com gráficos e conclusões-chave (nível para a idade, posição nacional e de sempre, Europa, distância às referências, projeção), com pré-visualização, PDF e Word']],
   ['2.5','outubro 2026',['Início por perfil: atalhos para Direção, Seleções e Treinador / clube, com o estado dos dados e os próximos passos (europeus por carregar, metas do ciclo, qualidade dos dados, relatório em atraso)','Ir para…: pesquisa global de nadadores, clubes, associações, rankings por prova e secções de análise, no cabeçalho ou com a tecla / (ou Ctrl+K)','Visita guiada de 10 passos pelas partes mais importantes da plataforma, proposta na primeira utilização e disponível no Início']],
   ['2.4','outubro 2026',['Relatório estratégico anual: documento único (PDF/Word) com recomendações e todas as análises estratégicas','Estratégia › Programas de apoio: efeito da PO, BEO e outros grupos face a nadadores semelhantes não apoiados, antes e depois do início do apoio','Estratégia › Cenários de investimento: presenças esperadas em finais ou meias-finais europeias com apoio concentrado, distribuído ou otimizado','Pré-convocatórias: retirar nadadores (a vaga passa ao seguinte), os 5 mais próximos dos critérios com convocação por decisão técnica, decisões guardadas','Simulador de critérios: ajuste global dos índices, entradas e saídas face aos critérios oficiais e comparação de todas as atividades']],
@@ -1468,7 +1469,7 @@ async function removeUpload(key){
 function dataMode(){ return CAP.db&&CAP.assets ? 'shared' : CAP.db ? 'reader' : 'local'; }
 function buildBackup(){
   const lists=[...S.uploads.values()].sort((a,b)=>a.year-b.year||a.g.localeCompare(b.g)||a.co-b.co);
-  const obj={format:'observatorio-natacao-pura', version:2, created:new Date().toISOString(), source:'Observatório Natação Pura · FPN · Direção Técnica Nacional', summary:{lists:lists.length, first:S.years[0], last:lastYear(), marks:S.n}, lists, standards:S.std, groups:S.groups, merges:{merges:S.merges, ignore:S.mergeIgnore}, targets:S.targets, relayRef:S.relayRef, qc:S.qc, eu:[...S.eu.values()], ciclo:S.ciclo, territorio:S.terr, convdec:S.convdec};
+  const obj={format:'observatorio-natacao-pura', version:2, created:new Date().toISOString(), source:'Observatório Natação Pura · FPN · Direção Técnica Nacional', summary:{lists:lists.length, first:S.years[0], last:lastYear(), marks:S.n}, lists, standards:S.std, groups:S.groups, merges:{merges:S.merges, ignore:S.mergeIgnore}, targets:S.targets, relayRef:S.relayRef, qc:S.qc, eu:[...S.eu.values()], ciclo:S.ciclo, territorio:S.terr, calprazo:S.calPrazo, convdec:S.convdec};
   const json=JSON.stringify(obj);
   const name=`Observatorio_NP_base_${S.years[0]}-${lastYear()}_${todayISO()}.json`;
   return {blob:new Blob([json],{type:'application/json'}), name, info:`${lists.length} listas · ${S.years.length} épocas · ${fN(S.n)} marcas · ${(json.length/1048576).toFixed(1).replace('.',',')} MB`};
@@ -1481,6 +1482,7 @@ async function restoreBackup(file, root, opts={}){
   if(src.find(p=>!p||!p.year||!p.cols||!Array.isArray(p.cols.tm)||!Array.isArray(p.sw))){ l0.innerHTML='<span class="pill bad">Erro</span> A cópia de segurança está incompleta ou danificada.'; return; }
   if(obj.merges&&Array.isArray(obj.merges.merges)){ S.merges=obj.merges.merges; S.mergeIgnore=obj.merges.ignore||[]; buildMergeMap(); S.sw=[]; S.swKey=new Map(); try{ await saveMerges(); logLine(msg,'<span><span class="pill good">Unificação</span> '+S.merges.length+' fusões restauradas</span>'); }catch(e){} }
   if(Array.isArray(obj.eu)&&obj.eu.length){ let ne=0; for(const p of obj.eu){ try{ if(p&&p.kind==='eu'&&p.ev){ await saveEu(p); ne++; } }catch(e){} } logLine(msg,'<span><span class="pill good">Europa</span> '+ne+' rankings europeus restaurados</span>'); }
+  if(obj.calprazo&&typeof obj.calprazo==='object'){ S.calPrazo=obj.calprazo; try{ await cfgSave('calprazo',{p:S.calPrazo}); }catch(e){} }
   if(obj.convdec&&typeof obj.convdec==='object'){ S.convdec=obj.convdec; try{ await saveConvDec(); }catch(e){} }
   if(obj.ciclo){ S.ciclo=obj.ciclo; try{ await cfgSave('ciclo',S.ciclo); }catch(e){} }
   if(obj.territorio){ S.terr=obj.territorio; try{ await cfgSave('territorio',S.terr); }catch(e){} }
@@ -5154,6 +5156,128 @@ HELP.unshift(
 <script>
 'use strict';
 /* ============================================================
+   Calendário anual das ações de seleção (PAR): realização, prazo do critério,
+   comunicado (6.ª feira seguinte ao prazo) e relatório (6.ª feira seguinte ao fim da ação)
+   ============================================================ */
+const CAL = {y:2027, sel:''};
+/* ações sem critério de tempos no PAR (seleção por ranking): prazo do critério definido aqui e guardado na plataforma */
+const CAL_EXTRA = [
+  {code:'E1_AS_INF', sel:'Infantis', name:'Estágio de Preparação e Avaliação de Inverno · Rio Maior (23–24 jan)', to:null, note:'Ranking Nacional do Nadador Completo'},
+  {code:'E2_AS_INF', sel:'Infantis', name:'Estágio de Preparação e Avaliação de Verão · Rio Maior (11–13 jun)', to:null, note:'Ranking Nacional de Fundo'},
+];
+S.calPrazo={};
+async function loadCalPrazo(){ try{ const d=await cfgLoad('calprazo'); if(d&&d.p) S.calPrazo=d.p; }catch(e){} }
+const CAL_MON = {jan:0,fev:1,mar:2,abr:3,mai:4,jun:5,jul:6,ago:7,set:8,out:9,nov:10,dez:11};
+const CAL_MONL = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const calD = (y,m,d) => new Date(Date.UTC(y,m,d));
+const calISO = s => { const [y,m,d]=s.split('-').map(Number); return calD(y,m-1,d); };
+const calF = d => String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0')+'/'+d.getUTCFullYear();
+const calS = d => d.getUTCDate()+' '+CAL_MONL[d.getUTCMonth()];
+/* 6.ª feira seguinte (estritamente depois) */
+function calNextFri(d){ const x=new Date(d); x.setUTCDate(x.getUTCDate()+1); while(x.getUTCDay()!==5) x.setUTCDate(x.getUTCDate()+1); return x; }
+/* datas de realização a partir do nome da ação: "(23–25 abr)", "(29 abr–2 mai)", "(24 jul–1 ago)", "(dezembro)" */
+function calParse(name, y){
+  const m=name.match(/\((\d{1,2})\s*([a-zç]{3})?\s*[–-]\s*(\d{1,2})\s*([a-zç]{3})\)\s*$/i);
+  if(m){ const m2=CAL_MON[m[4].toLowerCase()], m1=m[2]? CAL_MON[m[2].toLowerCase()] : m2; if(m1!=null&&m2!=null) return {a:calD(y,m1,+m[1]), b:calD(y,m2,+m[3]), tbc:false}; }
+  const s=name.match(/\((\d{1,2})\s*([a-zç]{3})\)\s*$/i); if(s&&CAL_MON[s[2].toLowerCase()]!=null){ const d=calD(y,CAL_MON[s[2].toLowerCase()],+s[1]); return {a:d, b:d, tbc:false}; }
+  const mm=name.match(/\((janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\)/i);
+  if(mm){ const k=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'].indexOf(mm[1].toLowerCase()); return {a:calD(y,k,1), b:calD(y,k+1,0), tbc:true}; }
+  return null;
+}
+const calShort=n=>{ const t=n.replace('Estágio de Preparação e Avaliação de Inverno','Estágio Prep. e Aval. de Inverno').replace('Estágio de Preparação e Avaliação de Verão','Estágio Prep. e Aval. de Verão').replace('Estágio de Preparação e Avaliação','Estágio Prep. e Avaliação').replace('Campeonato da Europa','Camp. da Europa').replace('Campeonato do Mundo','Camp. do Mundo').replace('Encontro Nacional das Seleções','Encontro Nac. Seleções').replace('International Swimming Trophy','Int. Swimming Trophy').replace('Challenge International de Genève','Challenge Int. Genève'); return t.length>44? t.slice(0,43)+'…' : t; };
+function calRows(){
+  const y=CAL.y; return [...PAR_ACTS, ...CAL_EXTRA].map(a=>{ const p=calParse(a.name,y); if(!p) return null; const to=S.calPrazo[a.code]||a.to; const crit=to? calISO(to) : null, com=crit? calNextFri(crit) : null, rel=calNextFri(p.b);
+    return {code:a.code, sel:a.sel, name:a.name.replace(/\s*\([^)]*\)\s*$/,''), a:p.a, b:p.b, tbc:p.tbc, crit, com, rel, edit:!a.to, ref:a.note}; }).filter(Boolean).filter(r=>CAL.sel===''||r.sel===CAL.sel).sort((p,q)=>p.a-q.a||p.sel.localeCompare(q.sel));
+}
+const CAL_SEL_ORDER = ['Infantis','Promessas Aquáticas','Jovem','Júnior','Sénior Sub23','Sénior'];
+const CAL_SEL_C = {'Infantis':'#E07B39','Promessas Aquáticas':'#16876A','Jovem':'#4C8ED6','Júnior':'#185FA5','Sénior Sub23':'#7A5BB5','Sénior':'#042C53'};
+function calSpec(rows, today){
+  const y=CAL.y, W=1500, lw=430, pw=110, rw=24, top=92, rh=48, H=top+rows.length*rh+70, xp=lw, x0=lw+pw, x1=W-rw, t0=calD(y,0,1), t1=calD(y+1,0,1), span=t1-t0, p0=calD(y-1,10,1);
+  /* coluna estreita à esquerda para as datas de novembro e dezembro do ano anterior (prazos e comunicados) */
+  const X=d=> d<t0? xp+6+(pw-12)*Math.max(0,Math.min(1,(d-p0)/(t0-p0))) : x0+(x1-x0)*Math.max(0,Math.min(1,(d-t0)/span)), out=d=>d<p0? -1 : d>=t1? 1 : 0;
+  return {kind:'svg', w:W, h:H, title:'Calendário das ações de seleção '+y, svg:(th,exp)=>{
+    const ink=th.ink||'#0E1B2B', mut=th.muted||'#56667A', line=th.grid||'#E3E8EF', surf=exp?'#fff':(th.surface||'#fff'), soft=exp?'#F4F7FB':(th.surface2||'#F4F7FB');
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${xs('Calendário das ações de seleção '+y)}" style="font-family:${xs(LIGHT.font)}">`;
+    if(exp) s+=`<rect width="${W}" height="${H}" fill="#fff"/>`;
+    // meses
+    for(let m=0;m<12;m++){ const a=X(calD(y,m,1)), b=X(calD(y,m+1,1)); if(m%2===0) s+=`<rect x="${a}" y="${top-8}" width="${b-a}" height="${rows.length*rh+8}" fill="${soft}" opacity=".7"/>`;
+      s+=`<text x="${(a+b)/2}" y="${top-34}" text-anchor="middle" font-size="15" font-weight="700" fill="${ink}">${CAL_MONL[m]}</text><line x1="${a}" x2="${a}" y1="${top-48}" y2="${top+rows.length*rh}" stroke="${mut}" stroke-opacity=".55"/>`; }
+    /* semanas: uma divisão por segunda-feira, com o dia do mês */
+    for(let d=calD(y,0,1); d<t1; d=calD(y,d.getUTCMonth(),d.getUTCDate()+1)){ if(d.getUTCDay()!==1) continue; const a=X(d), b=X(calD(y,d.getUTCMonth(),d.getUTCDate()+7));
+      s+=`<line x1="${a}" x2="${a}" y1="${top-24}" y2="${top+rows.length*rh}" stroke="${line}" stroke-dasharray="2 3"/><text x="${(a+Math.min(b,x1))/2}" y="${top-12}" text-anchor="middle" font-size="9.5" fill="${mut}"><title>${xs('Semana de '+calF(d))}</title>${d.getUTCDate()}</text>`; }
+    s+=`<line x1="${x0}" x2="${x1}" y1="${top-26}" y2="${top-26}" stroke="${line}"/>`;
+    s+=`<rect x="${xp}" y="${top-8}" width="${pw}" height="${rows.length*rh+8}" fill="${soft}"/><text x="${xp+pw/2}" y="${top-34}" text-anchor="middle" font-size="12" font-weight="700" fill="${mut}">nov–dez ${y-1}</text><line x1="${x0}" x2="${x0}" y1="${top-8}" y2="${top+rows.length*rh}" stroke="${mut}" stroke-dasharray="3 3"/>`;
+    s+=`<text x="12" y="${top-12}" font-size="13" font-weight="700" fill="${mut}">AÇÃO</text><text x="${x0-4}" y="${top-12}" text-anchor="end" font-size="9.5" fill="${mut}">semana de</text><text x="${x1}" y="22" text-anchor="end" font-size="16" font-weight="700" fill="${ink}">${y}</text>`;
+    let prevSel=null;
+    const dF=d=> d.getUTCFullYear()===y? calF(d).slice(0,5) : calF(d).slice(0,6)+String(d.getUTCFullYear()).slice(2);
+    rows.forEach((r,k)=>{ const rT=top+k*rh, yy=rT+17, yd=rT+37, c=CAL_SEL_C[r.sel]||'#185FA5';
+      if(k%2) s+=`<rect x="0" y="${rT}" width="${W}" height="${rh}" fill="${soft}" opacity=".35"/>`;
+      if(k) s+=`<line x1="0" x2="${W}" y1="${rT}" y2="${rT}" stroke="${line}" stroke-opacity=".6"/>`;
+      s+=`<rect x="6" y="${yy-8}" width="6" height="16" rx="2" fill="${c}"/><text x="18" y="${yy+5}" font-size="13.5" font-weight="600" fill="${ink}">${xs(calShort(r.name))}</text><text x="${xp-10}" y="${yy+5}" text-anchor="end" font-size="12" fill="${mut}">${xs(r.sel)}</text>`;
+      /* as 4 datas da ação, por baixo da linha, cada uma com a marca da legenda */
+      { let dx=20, n=0; const XS=[20,110,200,362]; const item=(mk,txt,tip,col,w)=>{ dx=XS[n++]; s+=mk(dx)+`<text x="${dx+12}" y="${yd+4}" font-size="11.5" font-weight="600" fill="${col}"><title>${xs(tip)}</title>${xs(txt)}</text>`; dx+=12+txt.length*6.4+w; };
+        item(x=>`<path d="M${x} ${yd-5} L${x+5} ${yd} L${x} ${yd+5} L${x-5} ${yd} Z" fill="#B3372F"/>`, r.crit? dF(r.crit) : 'a definir', r.crit? 'Prazo do critério: '+calF(r.crit) : 'Prazo do critério por definir', r.crit?'#B3372F':mut, 16);
+        item(x=>`<circle cx="${x}" cy="${yd}" r="4" fill="${surf}" stroke="#BA7517" stroke-width="2.2"/>`, r.com? dF(r.com) : '—', r.com? 'Comunicado: '+calF(r.com) : 'Comunicado: depende do prazo', '#8A5A12', 16);
+        item(x=>`<rect x="${x-6}" y="${yd-4}" width="12" height="8" rx="2" fill="${c}"${r.tbc?' opacity=".5"':''}/>`, dF(r.a)+(r.b-r.a? '–'+dF(r.b) : '')+(r.tbc?' (a conf.)':''), 'Realização: '+calF(r.a)+(r.b-r.a?' a '+calF(r.b):'')+(r.tbc?' (datas a confirmar)':''), ink, 16);
+        item(x=>`<rect x="${x-4}" y="${yd-4}" width="8" height="8" rx="1.5" fill="#1D7A4E"/>`, dF(r.rel), 'Relatório: '+calF(r.rel), '#1D7A4E', 0); }
+      // ligação prazo → comunicado → ação → relatório
+      const pts=[r.crit,r.com,r.a,r.b,r.rel].filter(Boolean).map(X); s+=`<line x1="${Math.min(...pts)}" x2="${Math.max(...pts)}" y1="${yy}" y2="${yy}" stroke="${line}" stroke-width="2"/>`;
+      // ação
+      const a=X(r.a), b=X(r.b); s+=`<rect x="${a}" y="${yy-8}" width="${Math.max(6,b-a)}" height="16" rx="4" fill="${c}"${r.tbc?' opacity=".45" stroke-dasharray="4 3" stroke="'+c+'"':''}><title>${xs(r.name+' · '+r.sel+': '+calF(r.a)+(r.b-r.a?' a '+calF(r.b):'')+(r.tbc?' (datas a confirmar)':''))}</title></rect>`;
+      // prazo do critério
+      if(!r.crit){ s+=`<text x="${X(r.a)-10}" y="${yy+5}" text-anchor="end" font-size="12" font-style="italic" fill="${mut}">prazo a definir</text>`; } else { const cx=X(r.crit), co=out(r.crit); s+= co? `<text x="${co<0?xp+4:x1-2}" y="${yy+5}" text-anchor="${co<0?'start':'end'}" font-size="12" font-weight="700" fill="#B3372F"><title>${xs('Prazo do critério: '+calF(r.crit))}</title>${co<0?'◂ ':''}prazo ${calS(r.crit)} ${r.crit.getUTCFullYear()}${co>0?' ▸':''}</text>`
+        : `<path d="M${cx} ${yy-8} L${cx+7} ${yy} L${cx} ${yy+8} L${cx-7} ${yy} Z" fill="#B3372F"><title>${xs('Prazo do critério: '+calF(r.crit))}</title></path>`;
+      // comunicado
+      }
+      if(r.com&&!out(r.com)){ const mx=X(r.com); s+=`<circle cx="${mx}" cy="${yy}" r="6" fill="${surf}" stroke="#BA7517" stroke-width="3"><title>${xs('Comunicado (6.ª feira seguinte ao prazo): '+calF(r.com))}</title></circle>`; }
+      // relatório
+      if(!out(r.rel)){ const rx=X(r.rel); s+=`<rect x="${rx-6}" y="${yy-6}" width="12" height="12" rx="2" fill="#1D7A4E"><title>${xs('Relatório (6.ª feira seguinte ao fim da ação): '+calF(r.rel))}</title></rect>`; }
+      prevSel=r.sel; });
+    // hoje
+    const hy=top+rows.length*rh, oT=out(today);
+    if(!oT){ const tx=X(today); s+=`<line x1="${tx}" x2="${tx}" y1="${top-62}" y2="${hy+6}" stroke="#D93A2B" stroke-width="2.5"/><rect x="${tx-44}" y="${top-80}" width="88" height="20" rx="10" fill="#D93A2B"/><text x="${tx}" y="${top-66}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">Hoje ${calS(today)}</text>`; }
+    else s+=`<text x="${oT<0?xp:x1}" y="${top-66}" text-anchor="${oT<0?'start':'end'}" font-size="13" font-weight="700" fill="#D93A2B">${oT<0?'◂ ':''}Hoje: ${calF(today)}${oT<0?' (antes do início do calendário)':' (depois do fim do calendário)'}${oT>0?' ▸':''}</text>`;
+    // legenda
+    const ly=hy+40, x0L=x0; { const x0=18; s+=`<path d="M${x0+4} ${ly-8} L${x0+11} ${ly} L${x0+4} ${ly+8} L${x0-3} ${ly} Z" fill="#B3372F"/><text x="${x0+18}" y="${ly+5}" font-size="13" fill="${mut}">Prazo para obtenção do critério</text>
+      <circle cx="${x0+250}" cy="${ly}" r="6" fill="${surf}" stroke="#BA7517" stroke-width="3"/><text x="${x0+262}" y="${ly+5}" font-size="13" fill="${mut}">Comunicado (6.ª feira seguinte ao prazo)</text>
+      <rect x="${x0+530}" y="${ly-8}" width="26" height="16" rx="4" fill="#185FA5"/><text x="${x0+562}" y="${ly+5}" font-size="13" fill="${mut}">Realização da ação</text>
+      <rect x="${x0+700}" y="${ly-6}" width="12" height="12" rx="2" fill="#1D7A4E"/><text x="${x0+718}" y="${ly+5}" font-size="13" fill="${mut}">Relatório (6.ª feira seguinte ao fim)</text>
+      <line x1="${x0+950}" x2="${x0+950}" y1="${ly-10}" y2="${ly+10}" stroke="#D93A2B" stroke-width="2.5"/><text x="${x0+958}" y="${ly+5}" font-size="13" fill="${mut}">Hoje (data do computador)</text>`; }
+    return s+'</svg>'; }};
+}
+let CALX=null, CAL_TIMER=null;
+function vCalendario(root){
+  const sels=CAL_SEL_ORDER.filter(x=>PAR_ACTS.some(a=>a.sel===x));
+  root.innerHTML=`<div class="view-head"><div><h2>Calendário das seleções ${CAL.y}</h2><div class="sub">Uma linha por ação de seleção do PAR: data de realização, prazo para obtenção do critério, comunicado (6.ª feira seguinte ao prazo) e relatório (6.ª feira seguinte ao fim da ação). A linha vermelha marca o dia de hoje (data do computador).</div></div>${expHTML('cal')}</div>
+    <div class="fbar">${segHTML('calSel',[['','Todas'],...sels.map(x=>[x,x])],CAL.sel,'Seleção')}</div><div id="calC" class="view"></div>`;
+  bindSeg(root,'calSel',v=>{ CAL.sel=v; calContent(); }); bindExp(root,'cal',calModel); calContent();
+  clearInterval(CAL_TIMER); CAL_TIMER=setInterval(()=>{ const el=$('#calC'); if(!el||!el.isConnected){ clearInterval(CAL_TIMER); return; } const d=calToday(); if(!CALX||+d!==+CALX.today) calContent(); },60000);
+}
+function calToday(){ const n=new Date(); return calD(n.getFullYear(), n.getMonth(), n.getDate()); }
+function calContent(){
+  const canW=dataMode()!=='reader', el=$('#calC'), rows=calRows(), today=calToday(), spec=calSpec(rows,today);
+  const nxt=k=>rows.map(r=>({r, d:r[k]})).filter(o=>o.d&&o.d>=today).sort((a,b)=>a.d-b.d)[0];
+  const nC=nxt('crit'), nM=nxt('com'), nA=nxt('a'), nR=nxt('rel'), dd=d=>Math.round((d-today)/864e5);
+  const ins=[nA? `Próxima ação: ${esc(nA.r.name)} (${esc(nA.r.sel)}), a ${calF(nA.d)} — faltam ${dd(nA.d)} dias.` : 'Sem ações por realizar neste calendário.',
+    nC? `Próximo prazo de critério: ${calF(nC.d)} (${esc(nC.r.name)}, ${esc(nC.r.sel)}) — faltam ${dd(nC.d)} dias.` : '',
+    nM? `Próximo comunicado: ${calF(nM.d)} (${esc(nM.r.name)}).` : '', nR? `Próximo relatório: ${calF(nR.d)} (${esc(nR.r.name)}).` : '',
+    rows.some(r=>!r.crit)? `<span class="muted">${rows.filter(r=>!r.crit).length} ação(ões) com prazo do critério por definir (seleção por ranking, sem prazo no PAR): defina-o em “Prazos a definir”, abaixo do calendário.</span>` : '',
+    rows.some(r=>r.tbc)? '<span class="muted">Ações com datas a confirmar aparecem com a barra tracejada (mês previsto).</span>' : ''].filter(Boolean);
+  el.innerHTML=insightHTML(ins)+`<div class="card"><div class="card-h"><div><h3>Calendário anual · ${CAL.y}</h3><p class="note">Por baixo de cada ação: ◆ prazo do critério · ○ comunicado · ▬ realização · ■ relatório. Passe o cursor sobre cada marca para ver a data completa. Prazos de critério anteriores a ${CAL.y} aparecem à esquerda com a data.</p></div></div><div id="calCh" class="tbl-wrap" style="border:0"></div></div>${canW&&rows.some(r=>r.edit)? `<div class="card" id="calE"><h3>Prazos a definir</h3><p class="note">Ações sem prazo do critério no PAR. A data introduzida passa a aparecer no calendário (losango vermelho e comunicado na 6.ª feira seguinte).</p><div class="fbar" style="flex-wrap:wrap;gap:14px;margin-top:8px">${rows.filter(r=>r.edit).map(r=>`<label class="small">${esc(calShort(r.name))} · ${esc(r.sel)} <input type="date" data-calp="${r.code}" value="${r.crit?r.crit.toISOString().slice(0,10):''}" title="${esc(r.ref||'')}"></label>`).join('')}</div></div>`:''}`;
+  draw('calCh',spec); const ch=$('#calCh svg'); if(ch) ch.style.minWidth='980px';
+  const ce=$('#calE'); if(ce) ce.addEventListener('change',async e=>{ const i=e.target.closest('[data-calp]'); if(!i) return; if(i.value) S.calPrazo[i.dataset.calp]=i.value; else delete S.calPrazo[i.dataset.calp]; try{ await cfgSave('calprazo',{p:S.calPrazo}); toast('Prazo guardado.'); }catch(err){ toast('Erro: '+(err.message||err)); } calContent(); });
+  CALX={rows, today, spec, ins};
+}
+/* exportação: o calendário é dividido em blocos de até 10 ações para caber legível em cada página A4 */
+function calChunks(rows){ const n=Math.ceil(rows.length/10)||1, k=Math.ceil(rows.length/n), o=[]; for(let i=0;i<rows.length;i+=k) o.push(rows.slice(i,i+k)); return o; }
+async function calModel(){ const x=CALX; return {title:'Calendário das seleções '+CAL.y, subtitle:(CAL.sel||'Todas as seleções')+' · hoje '+calF(x.today), filename:'Calendario_selecoes_'+CAL.y+(CAL.sel?'_'+slug(CAL.sel):''), orientation:'l', blocks:[{t:'p',text:'Leitura rápida\n'+insTxt(x.ins.map(stripTags))},...calChunks(x.rows).map((rs,i,a)=>({t:'chart',solo:true,full:true,title:'Calendário anual · '+CAL.y+(a.length>1?' ('+(i+1)+'/'+a.length+')':''),spec:calSpec(rs,x.today)})),{t:'src',text:'Ações e prazos do critério: PAR (Pré-convocatórias). Comunicado = 6.ª feira seguinte ao prazo do critério; relatório = 6.ª feira seguinte ao último dia da ação. Datas de realização lidas do nome de cada ação.'}]}; }
+HELP.push([/^Calendário anual/, 'Todas as ações de seleção do ano numa só vista, com os prazos associados.', 'Barra colorida = realização (cor da seleção); losango vermelho = prazo do critério; círculo dourado = comunicado; quadrado verde = relatório; linha vermelha vertical = hoje. Por baixo de cada ação estão as 4 datas com a mesma marca.', 'Prazos e comunicados próximos da linha de hoje são as próximas tarefas da Direção Técnica.']);
+HELP.push([/^Prazos a definir/, 'Datas de prazo do critério para ações que não o têm no PAR.', 'Introduza a data; o comunicado passa a ser a 6.ª feira seguinte.', 'Fica guardado na configuração da plataforma.']);
+
+</script>
+<script>
+'use strict';
+/* ============================================================
    Relatórios: relatório de época, novidades, relatório de acompanhamento
    ============================================================ */
 async function seasonReportBase(y){
@@ -6490,6 +6614,7 @@ const SHORTCUTS = {
   ],
   sel:[
     ['Pré-convocatórias','Candidatos por atividade do PAR, os 5 mais próximos e simulador de critérios.',goSec('convocatorias')],
+    ['Calendário das seleções','Ações do ano, prazos de critério, comunicados e relatórios, com a linha de hoje.',goSec('calendario')],
     ['Grupos AR','Seguimento da PO, BEO e outros grupos.',goSec('grupos')],
     ['Acesso a finais europeias','Portugueses perto das marcas de final e meia-final.',goSec('europa',()=>{ EU.sec='finais'; })],
     ['Trajetória até à final','Melhoria necessária e probabilidade até ao ano-alvo.',goSec('europa',()=>{ EU.sec='traj'; })],
@@ -6681,6 +6806,7 @@ const EXPL = [
   [/^Melhoria média por época/, null, 'Média (ou mediana) da melhoria anual de todos os pares de épocas consecutivas que terminam nessa época.'],
   // Análises
   [/^Preponderância por técnica e distância/, null, 'Preponderância(época, técnica, grupo) = marcas da entidade com posição ≤ N no ranking nacional absoluto das provas do grupo ÷ todas as marcas com posição ≤ N nessas provas × 100. Pódios = marcas da entidade com posição ≤ 3. Δ = última − primeira época fechada com marcas.'],
+  [/^Calendário anual|^Prazos a definir/, null, 'Realização = datas da ação (do nome da ação no PAR). Prazo do critério = fim da janela de validade da ação. Comunicado = primeira 6.ª feira depois do prazo. Relatório = primeira 6.ª feira depois do último dia da ação. Hoje = data do computador.'],
   [/^Análise sectorial por distância/, null, 'Nível(prova, N) = média, nas épocas fechadas do período, da média dos pontos dos N melhores (um valor por nadador, por época, piscina e género), com N = 50, 16 e 8. Profundidade = top‑8 − top‑50. Δ = última − primeira época fechada.'],
   [/^Evolução por distância/, null, 'Por época: média dos pontos dos N melhores de cada distância (50, 100 e 200 m) da técnica escolhida, um valor por nadador.'],
   [/^Perfil nacional por estilo|^Evolução por estilo/, null, 'Por nadador e época: melhor pontuação em cada estilo. Nível do estilo = média (todos, top‑8 ou top‑24). Tendência = declive da reta nas épocas fechadas.'],
@@ -6899,7 +7025,7 @@ async function saveFile(filename, data){
 function pairCharts(m){
   if(m.orientation!=='l') return m;
   const out=[]; const bl=m.blocks;
-  for(let k=0;k<bl.length;k++){ if(bl[k].t==='chart' && bl[k+1] && bl[k+1].t==='chart'){ out.push({t:'charts', items:[bl[k],bl[k+1]]}); k++; } else out.push(bl[k]); }
+  for(let k=0;k<bl.length;k++){ if(bl[k].t==='chart' && !bl[k].solo && bl[k+1] && bl[k+1].t==='chart' && !bl[k+1].solo){ out.push({t:'charts', items:[bl[k],bl[k+1]]}); k++; } else out.push(bl[k]); }
   return Object.assign({}, m, {blocks:out});
 }
 async function exportModel(m, fmt){
@@ -6997,7 +7123,7 @@ async function buildPDF(m, stamp){
       y=doc.lastAutoTable.finalY+5;
       if(b.note && !m.decl){ doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(110,120,135); doc.text(b.note, M, y-1.5); doc.setTextColor(20,27,43); y+=3; }
     } else if(b.t==='chart'){
-      const img=await chartPNG(b.spec, 1500, 620, 'jpeg'); const h=CW*img.h/img.w * (m.orientation==='l'?0.62:1), w=h*img.w/img.h;
+      const img=await chartPNG(b.spec, 1500, 620, 'jpeg'); const h=b.full? Math.min(CW*img.h/img.w, doc.internal.pageSize.getHeight()-46) : CW*img.h/img.w * (m.orientation==='l'?0.62:1), w=h*img.w/img.h;
       need(h+9); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(20,27,43); if(b.title) doc.text(b.title, M, y+3);
       doc.addImage(img.url,'JPEG', M, y+5, w, h, undefined, 'FAST'); y+=h+10;
     } else if(b.t==='charts'){
@@ -7096,7 +7222,7 @@ async function buildDOCX(m, stamp){
 /* ============================================================
    Arranque e encaminhamento
    ============================================================ */
-const VIEWS = {inicio:vInicio, estrategia:vEstrategia, europa:vEuropa, abandono:vAbandono, qualidade:vQualidade, painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, guia:vGuia, resumo:vResumo, quadrante:vQuadrante, declaracoes:vDeclaracoes, dados:vDados};
+const VIEWS = {inicio:vInicio, calendario:vCalendario, estrategia:vEstrategia, europa:vEuropa, abandono:vAbandono, qualidade:vQualidade, painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, guia:vGuia, resumo:vResumo, quadrante:vQuadrante, declaracoes:vDeclaracoes, dados:vDados};
 let READY=false, LOADING_UP=true;
 function go(v){ if(location.hash.slice(1)===v) route(); else location.hash=v; }
 function route(){
@@ -7128,7 +7254,7 @@ window.addEventListener('hashchange', route);
     await loadUploads();
     await loadStandards();
     await loadGroups();
-    await Promise.all([loadMerges(), loadTargets(), loadRelayRef(), loadViews(), loadRepSnap(), loadQC(), loadEu(), loadStrategy(), loadConvDec()]);
+    await Promise.all([loadMerges(), loadTargets(), loadRelayRef(), loadViews(), loadRepSnap(), loadQC(), loadEu(), loadStrategy(), loadConvDec(), loadCalPrazo()]);
     LOADING_UP=false;
     rebuildSwimmers(); refreshHeader();
     try{ await initSharing(); }catch(e){ console.warn('partilha',e); }
