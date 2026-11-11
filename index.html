@@ -1,8 +1,6 @@
 <!doctype html>
-<html lang="pt">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+</head><body>
 <title>Observatório Natação Pura</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -376,10 +374,11 @@ ul.xl.good li::marker{color:var(--good)} ul.xl.bad li::marker{color:var(--bad)}
 .ln-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:16px}.ln-leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
 @media (max-width:640px){.ln{grid-template-columns:1fr;gap:20px}.kpi .v{font-size:30px}}
 .op-m{width:min(900px,100%)}.op-pv{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.op-pv svg{display:block}
-</style>
-</head>
-<body>
+.ri-c{display:inline-block;min-width:48px;padding:1px 5px;border-radius:5px;font-variant-numeric:tabular-nums;font-size:12px;text-align:right}
+.ri-ok{background:var(--good-soft);color:var(--good);font-weight:700}.ri-n1{background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold);font-weight:600}.ri-n2{background:color-mix(in srgb,var(--gold) 9%,transparent);color:var(--ink)}.ri-far{color:var(--muted)}.ri-na{color:var(--muted);opacity:.45;text-decoration:line-through}
+.ri-fbar{flex-wrap:wrap}#riT td:nth-child(2){position:sticky;left:0;z-index:1;background:var(--surface);box-shadow:1px 0 0 var(--line2)}#riT th:nth-child(2){position:sticky;left:0;top:0;z-index:4;box-shadow:1px 0 0 var(--line2)}.ri-mt{display:inline-block;min-width:170px;max-width:240px;line-height:1.3}.ri-multi button{padding-left:9px;padding-right:9px}
 
+</style>
 
 <header class="hdr">
   <div class="hdr-in">
@@ -409,6 +408,7 @@ ul.xl.good li::marker{color:var(--good)} ul.xl.bad li::marker{color:var(--bad)}
       <button class="tab" role="tab" data-a="sel" data-v="grupos">Grupos AR</button>
       <button class="tab" role="tab" data-a="sel" data-v="convocatorias">Pré-convocatórias</button>
       <button class="tab" role="tab" data-a="sel" data-v="calendario">Calendário</button>
+      <button class="tab" role="tab" data-a="sel" data-v="indices">Ranking Índices</button>
       <button class="tab" role="tab" data-a="sel" data-v="estafetas">Estafetas</button>
       <button class="tab" role="tab" data-a="sel" data-v="minimos">Mínimos</button>
       <button class="tab" role="tab" data-a="dad" data-v="dados">Dados</button>
@@ -426,7 +426,7 @@ ul.xl.good li::marker{color:var(--good)} ul.xl.bad li::marker{color:var(--bad)}
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script>
+<script>/* core.js */
 'use strict';
 /* ============================================================
    Modelo de dados, formatação e utilitários base
@@ -666,7 +666,7 @@ const lastClosed = () => { const ys=S.years.filter(y=>!isPartial(y)); return ys.
 const pct1 = (a,b) => a!=null&&b ? (a-b)/Math.abs(b)*100 : null;
 
 </script>
-<script>
+<script>/* ui.js */
 'use strict';
 /* ============================================================
    Componentes de interface: gráficos, tabelas, controlos, leituras rápidas, mini-gráficos
@@ -973,7 +973,7 @@ const sg1 = v => (v>0?'+':v<0?'−':'±')+f1(Math.abs(v));
 const lst = a => a.length<=1? (a[0]||'') : a.slice(0,-1).join(', ')+' e '+a[a.length-1];
 
 </script>
-<script>
+<script>/* charts.js */
 'use strict';
 /* ============================================================
    Gráficos SVG exportáveis: fluxos (Sankey), mapa de associações, barras de distância, antes/depois
@@ -1062,7 +1062,7 @@ function dumbbellSpec(rows, la, lb, fmt, title, unit, lowerBetter, WW=1400){
 }
 
 </script>
-<script>
+<script>/* guia.js */
 'use strict';
 /* ============================================================
    Ajuda contextual (ícones ?), glossário e separador Guia de leitura
@@ -1197,7 +1197,7 @@ function vGuia(root){ GU.fi=null;
   <div class="card" id="guFi"><h3>Fiabilidade dos modelos</h3><div class="loading"><div>A testar as projeções com épocas passadas…</div><div class="bar"><i></i></div></div></div>
   <div class="card" id="guVer"></div>`;
   const tg=new DataTable('guT',[{k:0,l:'Termo',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Definição',cls:'wrap',x:r=>r[1]}], GLOSS, {page:60, nosortbar:true});
-  const TABS=[['Nacional › Início','Página inicial por perfil (Direção, Seleções, Treinador / clube) com atalhos, estado dos dados, próximos passos e visita guiada.'],['Ir para… (tecla / ou Ctrl+K)','Pesquisa global: nadadores, clubes, associações, rankings por prova, separadores e secções de análise.'],['Nacional › Resumo','Os 8 indicadores-chave numa página, com semáforo e tendência.'],['Nacional › Estratégia','Relatório estratégico anual, painel do ciclo, plano de sucessão, território, programas de apoio e cenários de investimento.'],['Nacional › Painel nacional','Leitura coletiva: participação, nível, idades, escalões, associações, dinâmica, picos e abandono.'],['Nacional › Evolução','Profundidade do ranking, curvas por idade e taxas de melhoria por prova.'],['Nacional › Análises','Perfil sectorial, funil de talento, densidade, géneros, clubes, território, idade relativa, carga competitiva, mobilidade entre clubes, entre outras.'],['Nacional › Rankings','Ranking por prova com filtros e ordenação múltipla.'],['Nacional › Europa','Portugal face aos 100 melhores europeus: posição, provas prioritárias, marcas de acesso futuras, trajetórias até à final, acesso a finais, evolução desde 2003, países; absolutos e juniores.'],['Nacional › Clubes e associações','Fichas de clube e de associação.'],['Nacional › Metas PAR','Metas por época e cumprimento.'],['Nadadores › Nadadores','Pesquisa e lista; a ficha individual reúne toda a análise do nadador (inclui ficha de uma página).'],['Nadadores › Comparar','Comparação lado a lado entre nadadores.'],['Nadadores › Talento','Índice de talento e probabilidade histórica de chegar ao top‑8/top‑3.'],['Nadadores › Quadrante','Nível face à idade vs evolução face ao esperado: investir, consolidar, em ascensão, monitorizar.'],['Nadadores › Alertas','Nadadores em evolução acima da média nacional.'],['Nadadores › Risco de abandono','Nadadores com perfil de risco de deixar a modalidade, com os fatores que pesam em cada caso.'],['Nadadores › Declarações','Declarações individuais.'],['Seleções › Grupos AR','Seguimento da PO, BEO e outros grupos.'],['Seleções › Calendário','Calendário anual das ações de seleção: realização, prazo do critério, comunicado e relatório, com a linha de hoje e a situação de cada ação.'],['Seleções › Pré-convocatórias','Candidatos às atividades do PAR 2027, os 5 mais próximos, retirar e convocar por decisão técnica, simulador de critérios.'],['Seleções › Estafetas','Melhores equipas possíveis (com tempos lap), por clube e potencial vs realizado.'],['Seleções › Mínimos','Tabelas de mínimos e índices editáveis e quem as cumpre.'],['Dados e guia › Dados','Carregamento, cópia de segurança, unificação de nadadores, novidades e estado da base partilhada.'],['Dados e guia › Qualidade dos dados','Marcas a verificar (melhorias anormais, tempos repetidos, datas, clubes): validar ou excluir das análises.'],['Dados e guia › Guia de leitura','Esta página.'],['Versão de consulta','Para clubes e associações: ficha da entidade, os seus nadadores, rankings, Europa e guia (gerada em Dados).'],['★ Vistas','Atalhos com filtros já escolhidos; guarde as suas próprias vistas.']];
+  const TABS=[['Nacional › Início','Página inicial por perfil (Direção, Seleções, Treinador / clube) com atalhos, estado dos dados, próximos passos e visita guiada.'],['Ir para… (tecla / ou Ctrl+K)','Pesquisa global: nadadores, clubes, associações, rankings por prova, separadores e secções de análise.'],['Nacional › Resumo','Os 8 indicadores-chave numa página, com semáforo e tendência.'],['Nacional › Estratégia','Relatório estratégico anual, painel do ciclo, plano de sucessão, território, programas de apoio e cenários de investimento.'],['Nacional › Painel nacional','Leitura coletiva: participação, nível, idades, escalões, associações, dinâmica, picos e abandono.'],['Nacional › Evolução','Profundidade do ranking, curvas por idade e taxas de melhoria por prova.'],['Nacional › Análises','Perfil sectorial, funil de talento, densidade, géneros, clubes, território, idade relativa, carga competitiva, mobilidade entre clubes, entre outras.'],['Nacional › Rankings','Ranking por prova com filtros e ordenação múltipla.'],['Nacional › Europa','Portugal face aos 100 melhores europeus: posição, provas prioritárias, marcas de acesso futuras, trajetórias até à final, acesso a finais, evolução desde 2003, países; absolutos e juniores.'],['Nacional › Clubes e associações','Fichas de clube e de associação.'],['Nacional › Metas PAR','Metas por época e cumprimento.'],['Nadadores › Nadadores','Pesquisa e lista; a ficha individual reúne toda a análise do nadador (inclui ficha de uma página).'],['Nadadores › Comparar','Comparação lado a lado entre nadadores.'],['Nadadores › Talento','Índice de talento e probabilidade histórica de chegar ao top‑8/top‑3.'],['Nadadores › Quadrante','Nível face à idade vs evolução face ao esperado: investir, consolidar, em ascensão, monitorizar.'],['Nadadores › Alertas','Nadadores em evolução acima da média nacional.'],['Nadadores › Risco de abandono','Nadadores com perfil de risco de deixar a modalidade, com os fatores que pesam em cada caso.'],['Nadadores › Declarações','Declarações individuais.'],['Seleções › Grupos AR','Seguimento da PO, BEO e outros grupos.'],['Seleções › Ranking Índices','Todos os nadadores com índice PAR, por prova e piscina, com a distância a cada índice (abaixo ou acima), índice mais alto, próximo índice e filtros múltiplos.'],['Seleções › Calendário','Calendário anual das ações de seleção: realização, prazo do critério, comunicado e relatório, com a linha de hoje e a situação de cada ação.'],['Seleções › Pré-convocatórias','Candidatos às atividades do PAR 2027, os 5 mais próximos, retirar e convocar por decisão técnica, simulador de critérios.'],['Seleções › Estafetas','Melhores equipas possíveis (com tempos lap), por clube e potencial vs realizado.'],['Seleções › Mínimos','Tabelas de mínimos e índices editáveis e quem as cumpre.'],['Dados e guia › Dados','Carregamento, cópia de segurança, unificação de nadadores, novidades e estado da base partilhada.'],['Dados e guia › Qualidade dos dados','Marcas a verificar (melhorias anormais, tempos repetidos, datas, clubes): validar ou excluir das análises.'],['Dados e guia › Guia de leitura','Esta página.'],['Versão de consulta','Para clubes e associações: ficha da entidade, os seus nadadores, rankings, Europa e guia (gerada em Dados).'],['★ Vistas','Atalhos com filtros já escolhidos; guarde as suas próprias vistas.']];
   const ts=new DataTable('guS',[{k:0,l:'Separador',f:r=>`<b>${esc(r[0])}</b>`,x:r=>r[0]},{k:1,l:'Para que serve',cls:'wrap',x:r=>r[1]}], TABS, {page:30, nosortbar:true});
   bindExp(root,'gu',async()=>({title:'Guia de leitura', subtitle:'Código de cores, símbolos e glossário', filename:'Guia_de_leitura', orientation:'p', blocks:[{t:'h',text:'Código de cores'},{t:'table',sheet:'Cores',head:['Cor','Significado'],rows:[['Azul','Masculinos · nadador em análise · série principal'],['Laranja','Femininos · segunda série'],['Verde','Evolução · cumpre · acima da referência'],['Cinzento','Estagnação · referência · sem dados'],['Vermelho','Regressão · abaixo da referência'],['Dourado','Perto de um objetivo · próxima referência'],['Linha tracejada','Referência nacional ou mínimo'],['Sombreado','Época em curso (provisório)'],['Linha vertical 2020','Pandemia: competições suspensas']],align:['l','l']},{t:'h',text:'Glossário'},Object.assign({t:'table',sheet:'Glossário'},tg.exportRows()),{t:'h',text:'Separadores'},Object.assign({t:'table',sheet:'Separadores'},ts.exportRows()), ...(GU.fi?GU.fi():[]), ...GU.ver()]}));
   GU.ver=guVersions();
@@ -1220,8 +1220,9 @@ function guReliability(){
   return ()=>[{t:'h',text:'Fiabilidade dos modelos'},{t:'p',text:'Leitura rápida\n'+insTxt(ins)},{t:'chart',title:'Projeção de marca: probabilidade prevista vs frequência observada',spec},Object.assign({t:'table',sheet:'Fiabilidade projeção'},t.exportRows()), ...more.flatMap(f=>f())];
 }
 /* ---------- registo de versões ---------- */
-const APP_VERSION='2.7';
+const APP_VERSION='2.8';
 const CHANGELOG=[
+  ['2.8','novembro 2026',['Seleções › Ranking Índices: todos os nadadores com índice PAR, uma linha por prova e piscina com marca, pontos, data e competição, índice mais alto, próximo índice e distância (abaixo ou acima, em %, segundos ou pontos) a cada um dos restantes índices; filtros múltiplos (período e datas, género, piscina, técnicas, distâncias, prova, grupo e nível de índice, idades, nacionalidade, associação, clube, nadador, provas por nadador, perto de um índice, idade de acesso)','Calendário das seleções: as 4 datas por baixo de cada ação e PDF A3 numa só folha']],
   ['2.7','outubro 2026',['Seleções › Calendário: ações de seleção do ano numa linha cada, com realização, prazo do critério, comunicado (6.ª feira seguinte ao prazo), relatório (6.ª feira seguinte ao fim) e linha do dia de hoje','Clubes e associações: preponderância por técnica e grupo de distâncias (50–100, 100–200, 200–400, 800–1500 m) ao longo das épocas — % do top‑8/16/24 nacional, marcas no top‑N e pódios, por género e piscina','Análises › Perfil sectorial: nova análise por distância (50, 100 e 200 m de cada técnica) com o nível dos 50, 16 e 8 melhores, variação no período, profundidade e evolução por época','Ficha resumo: prova mais pontuada no gráfico, projeção das 3 provas mais pontuadas em piscina longa e em piscina curta, resultado ideal e intervalo de resultados, distância à final europeia em cada prova']],
   ['2.6','outubro 2026',['Auditoria dos cálculos: verificação independente (68 testes, todos iguais) e correção de 40 pontos de lógica identificados na revisão (probabilidades europeias, projeção a partir de L−1, território Minho/Norte, funil de talento, épocas parciais, entre outros)','Explicação ao passar o rato em todos os quadros, gráficos e indicadores: o que mostra, como ler e a fórmula de cálculo','Gráficos redesenhados: área suave, valor no fim de cada linha, linha de referência ao passar o rato; corda de raia no cabeçalho e “Ciclo olímpico em raias” no Início','Nova ficha resumo do nadador: uma página só com gráficos e conclusões-chave (nível para a idade, posição nacional e de sempre, Europa, distância às referências, projeção), com pré-visualização, PDF e Word']],
   ['2.5','outubro 2026',['Início por perfil: atalhos para Direção, Seleções e Treinador / clube, com o estado dos dados e os próximos passos (europeus por carregar, metas do ciclo, qualidade dos dados, relatório em atraso)','Ir para…: pesquisa global de nadadores, clubes, associações, rankings por prova e secções de análise, no cabeçalho ou com a tecla / (ou Ctrl+K)','Visita guiada de 10 passos pelas partes mais importantes da plataforma, proposta na primeira utilização e disponível no Início']],
@@ -1254,12 +1255,12 @@ HELP.push([/^Carga competitiva e evolução|^Percentagem que melhorou|^Detalhe p
 HELP.push([/^Projeção para a próxima época/, 'Intervalo provável da melhor marca na próxima época, com base em nadadores semelhantes (mesma idade, prova e marca parecida).', 'Barra = metade central dos casos; traço = mediana; à direita, probabilidade histórica de cumprir o próximo mínimo.', 'Probabilidades acima de 50% sugerem um mínimo ao alcance; abaixo de 25%, um objetivo exigente.']);
 
 </script>
-<script>
+<script>/* stddata.js */
 /* Índices PAR 2025–2028 (Plano de Atividades 2027, v. 17/09/2026) e mínimos do Mundial de Budapeste 2027 — tempos em centésimas */
 const STD_RAW={"plEv":["50L","100L","200L","400L","800L","1500L","50C","100C","200C","50B","100B","200B","50M","100M","200M","200E","400E"],"pcEv":["50L","100L","200L","400L","800L","1500L","50C","100C","200C","50B","100B","200B","50M","100M","200M","100E","200E","400E"],"pl":{"13":{"M":[2285,5038,11151,23707,49175,93745,2586,5575,12227,2834,6250,13615,2415,5376,12088,12396,26501],"F":[2589,5647,12268,26010,53472,102317,2899,6272,13609,3216,6957,15133,2706,6060,13536,13678,29292]},"20":{"M":[2360,5198,11513,24441,50747,96646,2672,5750,12623,2926,6456,14046,2492,5547,12484,12807,27361],"F":[2674,5830,12666,26899,55267,105823,2989,6479,14067,3323,7178,15635,2797,6266,13999,14116,30294]},"27":{"M":[2444,5381,11928,25277,52541,99943,2769,5948,13076,3031,6693,14539,2579,5743,12937,13278,28344],"F":[2771,6039,13122,27924,57331,109866,3092,6716,14593,3447,7429,16211,2903,6504,14533,14616,31449]},"21":{"M":[2371,5223,11569,24554,50988,97091,2685,5776,12684,2940,6488,14113,2504,5574,12545,12870,27493],"F":[2687,5858,12728,27036,55544,106365,3003,6511,14137,3340,7212,15713,2812,6298,14071,14183,30449]},"23":{"M":[2394,5273,11684,24786,51485,98005,2712,5831,12810,2969,6553,14249,2528,5628,12670,13001,27765],"F":[2714,5916,12854,27320,56115,107482,3031,6576,14283,3374,7281,15872,2841,6364,14218,14322,30768]},"25":{"M":[2419,5326,11803,25026,52002,98955,2740,5889,12940,2999,6622,14391,2553,5684,12801,13137,28049],"F":[2742,5976,12985,27615,56710,108648,3061,6644,14435,3409,7354,16038,2871,6432,14372,14466,31101]},"15":{"M":[2306,5082,11250,23907,49604,94538,2610,5623,12335,2859,6306,13733,2436,5423,12196,12508,26735],"F":[2612,5697,12377,26252,53961,103272,2923,6329,13734,3245,7017,15270,2731,6116,13662,13798,29565]},"17":{"M":[2327,5127,11353,24115,50049,95359,2634,5672,12447,2885,6364,13855,2458,5471,12308,12624,26979],"F":[2636,5748,12489,26503,54469,104263,2949,6387,13863,3275,7080,15412,2757,6174,13793,13922,29848]},"19":{"M":[2348,5174,11459,24331,50510,96209,2659,5723,12563,2912,6425,13981,2480,5521,12424,12745,27231],"F":[2661,5802,12606,26765,54996,105293,2975,6448,13998,3307,7144,15559,2784,6235,13929,14050,30142]},"7":{"M":[2229,4915,10874,23142,47971,91515,2521,5441,11924,2764,6092,13284,2357,5244,11786,12083,25843],"F":[2524,5507,11963,25334,52104,99652,2829,6115,13260,3134,6788,14751,2636,5902,13183,13343,28530]},"9":{"M":[2247,4955,10963,23324,48359,92235,2542,5484,12021,2786,6143,13390,2376,5287,11884,12184,26055],"F":[2545,5552,12061,25552,52544,100509,2852,6165,13373,3160,6843,14874,2658,5953,13297,13451,28775]},"11":{"M":[2266,4996,11056,23512,48760,92978,2564,5529,12122,2810,6195,13501,2395,5330,11984,12288,26274],"F":[2567,5599,12163,25777,53000,101397,2875,6218,13489,3187,6899,15001,2682,6005,13414,13563,29029]},"4":{"M":[2202,4858,10745,22879,47411,90477,2491,5379,11783,2731,6019,13130,2330,5183,11646,11937,25538],"F":[2494,5442,11822,25021,51470,98419,2797,6041,13099,3096,6709,14573,2604,5830,13020,13187,28177]},"6":{"M":[2220,4896,10831,23053,47782,91164,2511,5420,11876,2753,6068,13231,2348,5224,11739,12034,25740],"F":[2514,5485,11915,25228,51889,99234,2818,6090,13206,3121,6761,14690,2625,5878,13128,13290,28410]},"8":{"M":[2238,4935,10918,23232,48164,91872,2532,5463,11972,2775,6117,13337,2366,5265,11835,12133,25948],"F":[2534,5529,12012,25442,52322,100077,2840,6140,13316,3147,6815,14812,2647,5927,13240,13396,28651]}},"pc":{"4":{"M":[2118,4695,10433,22201,46381,88934,2360,5088,11212,2641,5873,12539,2260,5040,11390,5306,11436,24829],"F":[2425,5256,11539,24640,50321,97156,2684,5742,12618,3034,6585,14081,2564,5579,12783,5882,12876,27188]},"6":{"M":[2135,4732,10516,22373,46748,89632,2379,5128,11304,2662,5920,12637,2278,5081,11484,5351,11525,25028],"F":[2445,5297,11630,24844,50729,97962,2706,5788,12724,3059,6638,14196,2586,5624,12890,5928,12980,27410]},"7":{"M":[2144,4751,10559,22461,46936,89989,2389,5149,11351,2673,5945,12688,2287,5101,11531,5374,11571,25129],"F":[2455,5319,11677,24949,50938,98375,2717,5812,12779,3072,6665,14254,2598,5647,12945,5952,13033,27524]},"8":{"M":[2153,4770,10603,22550,47127,90351,2399,5170,11399,2684,5970,12739,2297,5122,11580,5398,11618,25233],"F":[2465,5340,11725,25056,51151,98796,2729,5837,12834,3085,6692,14314,2609,5670,13000,5976,13087,27639]},"9":{"M":[2163,4789,10647,22641,47321,90720,2410,5192,11448,2696,5995,12790,2306,5144,11630,5422,11665,25338],"F":[2475,5362,11774,25164,51367,99223,2740,5861,12891,3098,6720,14375,2621,5694,13057,6000,13142,27757]},"10":{"M":[2172,4808,10692,22734,47518,91095,2420,5214,11498,2707,6021,12843,2316,5165,11680,5446,11714,25445],"F":[2486,5384,11823,25275,51587,99658,2752,5887,12948,3112,6748,14436,2633,5718,13114,6025,13197,27877]},"11":{"M":[2181,4828,10738,22828,47718,91476,2431,5236,11548,2719,6047,12897,2326,5187,11731,5471,11763,25554],"F":[2497,5407,11873,25387,51810,100101,2764,5912,13007,3126,6777,14499,2645,5742,13173,6050,13254,27998]},"13":{"M":[2201,4869,10832,23020,48130,92258,2453,5282,11652,2743,6100,13007,2347,5233,11837,5521,11863,25778],"F":[2519,5454,11976,25618,52269,101011,2789,5965,13127,3154,6836,14628,2670,5793,13293,6102,13370,28249]},"14":{"M":[2211,4890,10880,23119,48341,92659,2464,5305,11706,2755,6128,13063,2357,5256,11891,5548,11915,25892],"F":[2530,5478,12029,25737,52505,101478,2801,5992,13189,3169,6866,14694,2682,5819,13355,6129,13430,28377]},"15":{"M":[2221,4912,10929,23219,48556,93067,2475,5329,11760,2767,6156,13120,2368,5280,11946,5574,11967,26009],"F":[2542,5502,12083,25858,52745,101954,2814,6019,13252,3183,6897,14762,2695,5845,13418,6156,13491,28508]},"16":{"M":[2231,4933,10979,23321,48775,93482,2487,5353,11816,2780,6185,13179,2379,5304,12002,5601,12021,26128],"F":[2554,5527,12138,25981,52990,102440,2827,6047,13316,3199,6928,14830,2709,5872,13482,6183,13553,28641]},"17":{"M":[2242,4955,11030,23425,48997,93905,2499,5378,11872,2793,6214,13238,2390,5328,12059,5629,12075,26249],"F":[2566,5552,12194,26107,53239,102934,2841,6076,13382,3214,6960,14900,2722,5899,13548,6211,13616,28777]},"18":{"M":[2253,4978,11082,23531,49224,94336,2511,5403,11930,2806,6244,13299,2401,5353,12118,5657,12131,26372],"F":[2578,5578,12251,26235,53493,103439,2854,6105,13449,3230,6993,14971,2736,5927,13614,6240,13680,28915]},"19":{"M":[2264,5001,11135,23639,49456,94775,2524,5429,11988,2820,6274,13360,2413,5379,12177,5686,12187,26498],"F":[2591,5604,12309,26366,53751,103953,2868,6135,13517,3246,7026,15044,2750,5955,13683,6269,13746,29056]},"20":{"M":[2275,5024,11189,23749,49691,95222,2536,5455,12048,2833,6305,13423,2425,5405,12238,5715,12245,26626],"F":[2603,5630,12368,26499,54015,104478,2882,6165,13586,3262,7060,15118,2765,5984,13752,6299,13812,29200]},"21":{"M":[2287,5048,11244,23861,49931,95677,2549,5482,12109,2847,6336,13487,2437,5431,12300,5745,12303,26757],"F":[2616,5658,12428,26635,54284,105014,2897,6196,13657,3279,7094,15194,2780,6014,13823,6329,13881,29347]},"23":{"M":[2310,5097,11358,24091,50426,96615,2576,5536,12235,2876,6401,13619,2461,5486,12428,5808,12424,27026],"F":[2643,5713,12552,26916,54839,106119,2927,6259,13804,3313,7165,15350,2810,6074,13969,6391,14021,29650]},"25":{"M":[2335,5148,11476,24331,50941,97591,2603,5594,12367,2906,6469,13756,2487,5543,12561,5872,12549,27307],"F":[2671,5772,12681,27209,55417,107272,2958,6326,13957,3349,7239,15512,2842,6138,14122,6456,14167,29965]},"27":{"M":[2360,5201,11599,24580,51477,98607,2632,5653,12504,2937,6539,13898,2514,5602,12700,5940,12680,27599],"F":[2700,5832,12816,27515,56020,108477,2990,6395,14118,3387,7316,15682,2875,6203,14282,6523,14320,30295]}},"wa":{"A":{"M":[2191,4833,10667,22757,46866,90189,2489,5378,11710,2720,5975,13032,2328,5158,11635,11905,25691],"F":[2486,5425,11823,25023,51462,98456,2797,6046,13035,3075,6687,14591,2597,5831,12921,13229,28306]},"FPN":{"M":[2201,4857,10720,22870,47100,90639,2501,5404,11768,2733,6004,13097,2339,5183,11693,11964,25819],"F":[2498,5452,11882,25148,51719,98948,2810,6076,13100,3090,6720,14663,2609,5860,12985,13295,28447]}}};
 
 </script>
-<script>
+<script>/* standards.js */
 'use strict';
 /* ============================================================
    Tabelas de mínimos e índices: idades, tempos de referência, seleção
@@ -1336,7 +1337,7 @@ function trendTable(rowsLab, years, vals, thr, head){
 }
 
 </script>
-<script>
+<script>/* store.js */
 'use strict';
 /* ============================================================
    Persistência: carregamento e leitura dos rankings, armazenamento partilhado/local, configuração, unificação de nadadores, cópia de segurança
@@ -1558,7 +1559,7 @@ function serSnap(s){ return {at:new Date().toISOString(), y:s.y, n:s.n, years:s.
 function desSnap(o){ if(!o) return null; return {y:o.y, n:o.n, years:o.years, at:o.at, alerts:new Map(o.alerts.map(k=>[k,1])), mins:new Map(o.mins.map(k=>[k,1])), gp:new Map(o.gp.map(([k,v])=>[k,{pts:v.pts, pb:new Map(v.pb)}]))}; }
 
 </script>
-<script>
+<script>/* metrics.js */
 'use strict';
 /* ============================================================
    Cálculos partilhados: agregações, melhores marcas, progressão, picos, alertas, talento, indicadores
@@ -1999,7 +2000,7 @@ function swProjection(id){
 }
 
 </script>
-<script>
+<script>/* nacional.js */
 'use strict';
 /* ============================================================
    Área Nacional: Resumo executivo, Painel, Evolução, Rankings, Clubes e associações, Metas PAR
@@ -2635,7 +2636,7 @@ function rxModelDetails(m){ const X=RX10; if(!X) return; const src=m.blocks.pop(
 HELP.push([/^Preponderância por técnica e distância/, 'Peso do clube ou associação no topo do ranking nacional, por técnica (mariposa, costas, bruços, livres, estilos) e grupo de distâncias (50–100, 100–200, 200–400, 800–1500 m), ao longo das épocas.', 'Escolha o indicador: preponderância (% das marcas do top‑N nacional), número de marcas no top‑N ou pódios (top‑3). Tom mais escuro = valor mais alto; a última coluna mostra a variação no período.', 'Linhas a escurecer mostram onde a entidade está a ganhar peso; Δ negativos mostram técnicas ou distâncias em perda.']);
 
 </script>
-<script>
+<script>/* analises.js */
 'use strict';
 /* ============================================================
    Área Nacional: Análises (todas as secções, esquemas e leituras rápidas)
@@ -3208,7 +3209,7 @@ HELP.push([/^Análise sectorial por distância/, 'Nível nacional nas provas de 
 HELP.push([/^Evolução por distância/, 'Evolução, época a época, das três distâncias de uma técnica, para o ranking escolhido (top‑50, top‑16 ou top‑8).', 'Escolha a técnica e o ranking nos botões; uma linha por distância.', 'Distâncias que se afastam umas das outras mostram especialização ou perda de nível numa delas.']);
 
 </script>
-<script>
+<script>/* nadadores.js */
 'use strict';
 /* ============================================================
    Área Nadadores: lista, Comparar, Talento, Quadrante, Alertas, Declarações
@@ -3633,7 +3634,7 @@ function qdContent(){
 async function qdModel(){ const x=QDX; return {title:`Quadrante de decisão — ${G_L[+QD.g]} ${QD.a0}–${QD.a1} anos · ${x.y}`, subtitle:`Nível alto a partir do percentil ${QD.thr} · ${QD.nat==='POR'?'nacionalidade portuguesa':'todas as nacionalidades'}`, filename:`Quadrante_${x.y}_${+QD.g?'F':'M'}`, orientation:'l', blocks:[{t:'p',text:'Leitura rápida\n'+insTxt(x.ins)},{t:'chart',title:'Quadrante de decisão',spec:x.spec},Object.assign({t:'table',sheet:'Nadadores',small:true},x.t.exportRows()),{t:'src',text:'Nível: percentil da melhor pontuação da época entre os nadadores ranqueados da mesma idade e género. Evolução face ao esperado: variação da melhor pontuação face à época anterior menos a mediana nacional dessa variação na mesma idade e género. Zonas: Investir (nível alto, evolução acima), Consolidar (nível alto, evolução abaixo), Em ascensão (nível abaixo do limiar, evolução acima), Monitorizar (ambos abaixo).'}]}; }
 
 </script>
-<script>
+<script>/* abandono.js */
 'use strict';
 /* ============================================================
    Risco individual de abandono: modelo logístico treinado nas épocas passadas
@@ -3763,7 +3764,7 @@ RELIAB.push(el=>{ const M=abModel(); if(!M||!M.val) return ()=>[]; const v=M.val
   return ()=>[{t:'p',text:txt},{t:'chart',title:'Risco de abandono: previsto vs observado',spec}]; });
 
 </script>
-<script>
+<script>/* mobilidade.js */
 'use strict';
 /* ============================================================
    Mobilidade entre clubes e associações (secção de Análises)
@@ -3836,7 +3837,7 @@ HELP.push([/^Clubes: entradas, saídas e retenção/, 'Por clube: quantos saem, 
 HELP.push([/^Talentos que mudaram de clube/, 'Nadadores de nível alto para a idade que mudaram de clube.', 'Pontuação antes e depois da mudança.', 'Mudanças seguidas de descida podem justificar acompanhamento.']);
 
 </script>
-<script>
+<script>/* ficha.js */
 'use strict';
 /* ============================================================
    Ficha do nadador e ficha resumo (uma página)
@@ -4490,7 +4491,7 @@ HELP.unshift(
   [/^Resumo do nadador/, 'Síntese da ficha em linguagem simples.', 'Pontos fortes = os 2 estilos com melhor pontuação nas 3 últimas épocas; a melhorar = os 2 mais fracos (sem repetir os fortes); objetivos = referências por cumprir mais próximas em piscina longa. “Sem melhor marca pessoal há N épocas” conta até à última época fechada, incluindo épocas sem competir.', 'Use como base para a conversa com o treinador e o atleta.']);
 
 </script>
-<script>
+<script>/* ficharesumo.js */
 'use strict';
 /* ============================================================
    Ficha resumo do nadador (uma página): infografia com o essencial para situar o nadador
@@ -4650,7 +4651,7 @@ function onePosterPreview(id){ if($('#opModal')) return; const bg=document.creat
   document.addEventListener('keydown',function k(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',k); } }); }
 
 </script>
-<script>
+<script>/* selecoes.js */
 'use strict';
 /* ============================================================
    Área Seleções: Grupos AR, Pré-convocatórias, Estafetas, Mínimos
@@ -5153,7 +5154,7 @@ HELP.unshift(
   [/^Melhor equipa por clube/, 'Melhor estafeta possível de cada clube.', 'Mesmo cálculo da equipa A, usando só as marcas individuais e lap obtidas ao serviço desse clube.', 'Compare com o tempo real em “Potencial vs realizado”.']);
 
 </script>
-<script>
+<script>/* calendario.js */
 'use strict';
 /* ============================================================
    Calendário anual das ações de seleção (PAR): realização, prazo do critério,
@@ -5277,7 +5278,168 @@ HELP.push([/^Calendário anual/, 'Todas as ações de seleção do ano numa só 
 HELP.push([/^Prazos a definir/, 'Datas de prazo do critério para ações que não o têm no PAR.', 'Introduza a data; o comunicado passa a ser a 6.ª feira seguinte.', 'Fica guardado na configuração da plataforma.']);
 
 </script>
-<script>
+<script>/* indices.js */
+'use strict';
+/* ============================================================
+   Seleções › Ranking de índices: todos os nadadores com índice PAR, com a distância
+   (abaixo ou acima) a cada um dos restantes índices, por prova e piscina
+   ============================================================ */
+const RI = {y0:null, y1:null, d0:'', d1:'', g:'', co:'', stk:[], dist:[], ev:'', grp:'', lvl:'', a0:'', a1:'', nat:'POR', reg:'', club:'', q:'', per:'all', inc:'idx', near:'0', age:'1', unit:'pct', cols:'all'};
+const RI_GRP = [['SEN','Sénior',[4,6,8]],['SUB23','Sénior Sub23',[7,9,11]],['JUN','Júnior',[15,17,19]],['JOV','Jovem',[21,23,25]],['PA','Promessas Aquáticas',[13,20,27]]];
+const RI_DIST = [50,100,200,400,800,1500];
+let RIX=null;
+/* níveis de índice existentes (tabelas do PAR com n.º de índice), do mais exigente para o menos exigente */
+function riLevels(){ const s=new Set(); S.std.forEach(t=>{ if(t.idx!=null&&IDX_NAME[t.idx]) s.add(t.idx); }); return [...s].sort((a,b)=>a-b); }
+function riTab(co, ix){ return S.std.find(t=>t.idx===ix&&t.co===co) || null; }
+const riLab = ix => IDX_NAME[ix] || ('Índice '+ix);
+const riGrpOf = ix => (RI_GRP.find(g=>g[2].includes(ix))||[null,'Outros'])[1];
+function riDay(s){ if(!s) return null; const [y,m,d]=s.split('-').map(Number); return Math.round(Date.UTC(y,m-1,d)/864e5); }
+
+/* melhor marca por nadador, prova e piscina no período; distância a cada índice */
+function riCompute(){
+  const R=S.R, lv=riLevels(), d0=riDay(RI.d0), d1=riDay(RI.d1), y0=+RI.y0, y1=+RI.y1;
+  const toDay = dt => Math.round(dayToDate(dt).getTime()/864e5);
+  const best=new Map();
+  for(let i=0;i<R.n;i++){ const y=R.yr[i]; if(y<y0||y>y1) continue; if(d0!=null||d1!=null){ const dd=toDay(R.dt[i]); if(d0!=null&&dd<d0) continue; if(d1!=null&&dd>d1) continue; }
+    const k=R.sw[i]*128+R.ev[i]*2+R.co[i], b=best.get(k); if(b===undefined||R.tm[i]<R.tm[b]||(R.tm[i]===R.tm[b]&&R.dt[i]<R.dt[b])) best.set(k,i); }
+  const grpLv = RI.grp? (RI_GRP.find(g=>g[0]===RI.grp)||[0,0,lv])[2] : lv;
+  const near=+RI.near||0, useAge=RI.age==='1';
+  const rows=[];
+  for(const i of best.values()){ const sw=S.sw[R.sw[i]], gk=D.G[i]?'F':'M', age=D.AGE[i], co=R.co[i], tm=R.tm[i];
+    const gaps={}; let top=null, nxt=null, any=false, nearOK=false;
+    for(const ix of lv){ const tb=riTab(co,ix); const st=stdTime(tb,gk,R.ev[i]); if(!st) continue; const ok=!useAge||stdAgeOK(tb,age); const d=tm-st;
+      const bt=baseTime(R.ev[i],co,D.G[i]), pi=bt? 1000*Math.pow(bt/st,3) : null, pm=bt? 1000*Math.pow(bt/tm,3) : null;
+      gaps[ix]={st, d, p:d/st*100, ok, tb, pi, dp: pi!=null? pm-pi : null};
+      if(!grpLv.includes(ix)) continue;
+      if(d<=0&&ok){ any=true; if(top==null) top=ix; }
+      if(ok&&d>0&&d/st*100<=near) nearOK=true; }
+    // próximo índice = o nível imediatamente mais exigente do que o mais alto cumprido (dentro da idade), ou o menos exigente ainda por cumprir
+    if(top!=null){ nxt=null; for(const ix of lv){ if(ix>=top) break; const o=gaps[ix]; if(o&&o.ok&&grpLv.includes(ix)) nxt=ix; } }
+    else { nxt=null; for(const ix of [...lv].reverse()){ const o=gaps[ix]; if(o&&o.ok&&grpLv.includes(ix)&&o.d>0){ nxt=ix; break; } } }
+    rows.push({i, sw:R.sw[i], g:D.G[i], age, co, ev:R.ev[i], tm, pt:R.pt[i], dt:R.dt[i], cl:R.cl[i], mt:R.mt[i], gaps, top, nxt, any, near:nearOK, name:niceName(sw.name), nat:sw.nat}); }
+  return rows;
+}
+function riFilter(rows){
+  const R=S.R, q=norm(RI.q||'').split(/\s+/).filter(Boolean), a0=RI.a0===''?null:+RI.a0, a1=RI.a1===''?null:+RI.a1, lvlMax=RI.lvl===''?null:+RI.lvl;
+  let out=rows.filter(r=>{ if(RI.g!==''&&r.g!==+RI.g) return false; if(RI.co!==''&&r.co!==+RI.co) return false;
+    if(RI.ev!==''&&r.ev!==+RI.ev) return false; if(RI.stk.length&&!RI.stk.includes(evStroke(r.ev))) return false; if(RI.dist.length&&!RI.dist.includes(evDist(r.ev))) return false;
+    if(a0!=null&&r.age<a0) return false; if(a1!=null&&r.age>a1) return false; if(RI.nat==='POR'&&r.nat!=='POR') return false; if(RI.nat==='EST'&&r.nat==='POR') return false;
+    const c=S.cl[r.cl]; if(RI.reg&&c.reg!==RI.reg) return false; if(RI.club&&c.code!==RI.club) return false;
+    if(q.length){ const nn=S.sw[r.sw].nn; if(!q.every(w=>nn.includes(w))) return false; }
+    return true; });
+  // nadadores com índice (ou perto de um índice, se a margem estiver definida) em pelo menos uma prova que passa nos filtros
+  const qual=r=> (r.any&&(lvlMax==null||r.top<=lvlMax)) || (lvlMax==null&&r.near);
+  const swOK=new Set(out.filter(qual).map(r=>r.sw));
+  out = RI.inc==='idx'? out.filter(qual) : out.filter(r=>swOK.has(r.sw));
+  // provas por nadador
+  if(RI.per!=='all'){ const n=+RI.per, by=new Map(); out.sort((a,b)=>(a.top??99)-(b.top??99)||b.pt-a.pt); out=out.filter(r=>{ const c=by.get(r.sw)||0; if(c>=n) return false; by.set(r.sw,c+1); return true; }); }
+  return out;
+}
+/* distância na unidade escolhida: % e segundos = marca − índice (negativo = cumpre); pontos = pontos da marca − pontos do índice (positivo = cumpre) */
+const riFmtD=(o,unit)=> unit==='s'? fDiffT(o.d) : unit==='pts'? (o.dp==null?'—':sg(o.dp)+' pts') : fPct(o.p);
+const riValD=(o,unit)=> unit==='s'? +(o.d/100).toFixed(2) : unit==='pts'? (o.dp==null?'':Math.round(o.dp)) : +o.p.toFixed(2);
+function riCell(o, unit){ if(!o) return '<span class="muted">·</span>';
+  const v= unit==='s'? fDiffT(o.d).replace(' s','') : unit==='pts'? (o.dp==null?'—':sg(o.dp)) : fPct(o.p); const meet=o.d<=0;
+  const tip=`${o.tb.name}: ${fT(o.st)}${o.pi!=null?' ('+fN(Math.round(o.pi))+' pts)':''} · ${meet?'abaixo do índice':'acima do índice'} ${fDiffT(o.d)} (${fPct(o.p)}${o.dp!=null?'; '+sg(o.dp)+' pts':''})${o.ok?'':' · fora da idade de acesso ('+stdAgeLabel(o.tb)+')'}`;
+  const cls= !o.ok? 'ri-na' : meet? 'ri-ok' : o.p<=1? 'ri-n1' : o.p<=2? 'ri-n2' : 'ri-far';
+  return `<span class="ri-c ${cls}" title="${esc(tip)}">${v}</span>`; }
+
+function vIndices(root){
+  if(!hasData()){ root.innerHTML='<div class="card empty">Carregue rankings em Dados.</div>'; return; }
+  perNorm(RI,'last');
+  const lv=riLevels(), stk=['L','C','B','M','E'];
+  const tg=(id,opts,vals)=>`<div class="seg ri-multi" id="${id}" role="group">${opts.map(([v,l])=>`<button type="button" data-v="${esc(v)}" aria-pressed="${vals.map(String).includes(String(v))}">${esc(l)}</button>`).join('')}</div>`;
+  root.innerHTML=`<div class="view-head"><div><h2>Ranking de índices</h2><div class="sub">Todos os nadadores com índice PAR numa prova, com a melhor marca do período (tempo, pontos, data, competição e piscina) e a distância — abaixo ou acima — a cada um dos restantes índices. Uma linha por nadador e prova; pode ver todas as provas de cada nadador.</div></div>${expHTML('ri')}</div>
+  <div class="fbar ri-fbar">
+    ${perHTML('ri',RI)}
+    <label class="fld"><span>Datas das marcas (opcional)</span><div class="row" style="gap:4px"><input type="date" id="riD0" value="${esc(RI.d0)}" aria-label="Desde"><input type="date" id="riD1" value="${esc(RI.d1)}" aria-label="Até"><button type="button" class="btn ghost small" id="riM12" title="Marcas dos últimos 12 meses (janela habitual dos critérios do PAR)">12 meses</button></div></label>
+    ${segHTML('riG',gOpts,RI.g,'Género')}${segHTML('riCo',coOpts,RI.co,'Piscina')}
+    <div class="fld"><span>Técnica</span>${tg('riStk',stk.map(s=>[s,STROKE[s]]),RI.stk)}</div>
+    <div class="fld"><span>Distância</span>${tg('riDist',RI_DIST.map(d=>[d,d+' m']),RI.dist)}</div>
+    ${selHTML('riEv',evOpts('Todas as provas'),RI.ev,'Prova')}
+    ${selHTML('riGrp',[['','Todos os grupos'],...RI_GRP.map(g=>[g[0],g[1]])],RI.grp,'Grupo de índices')}
+    ${selHTML('riLvl',[['','Qualquer índice'],...lv.map(ix=>[ix,'Pelo menos '+riLab(ix)+' (índice '+ix+')'])],RI.lvl,'Nível cumprido')}
+    <label class="fld"><span>Idades</span><div class="row" style="gap:4px"><input type="number" id="riA0" style="width:62px" placeholder="de" value="${esc(RI.a0)}"><input type="number" id="riA1" style="width:62px" placeholder="até" value="${esc(RI.a1)}"></div></label>
+    ${selHTML('riNat',natOpts,RI.nat,'Nacionalidade')}${selHTML('riReg',regOpts(),RI.reg,'Associação')}${selHTML('riClub',clubOptsC(),RI.club,'Clube')}
+    <label class="fld"><span>Nadador</span><input type="search" id="riQ" placeholder="nome ou apelido" value="${esc(RI.q)}" style="width:170px"></label>
+    ${selHTML('riPer',[['all','Todas as provas'],['1','Só a melhor prova'],['2','Até 2 provas'],['3','Até 3 provas']],RI.per,'Provas por nadador')}
+    ${selHTML('riInc',[['idx','Só provas com índice'],['all','Todas as provas desses nadadores']],RI.inc,'Linhas')}
+    ${selHTML('riNear',[['0','Só com índice'],['0.5','Incluir a ≤ 0,5% de um índice'],['1','Incluir a ≤ 1%'],['2','Incluir a ≤ 2%'],['3','Incluir a ≤ 3%']],RI.near,'Perto de um índice')}
+    ${selHTML('riAge',[['1','Respeitar idades de acesso'],['0','Ignorar idades de acesso']],RI.age,'Idade de acesso')}
+    ${segHTML('riUnit',[['pct','%'],['s','segundos'],['pts','pontos']],RI.unit,'Distância em')}
+    ${selHTML('riCols',[['all','Todos os índices'],['grp','Só os do grupo escolhido'],['age','Só os da idade (oculta “·”)']],RI.cols,'Colunas de índices')}
+    <button class="btn ghost small" id="riReset" style="align-self:end">Limpar filtros</button>
+  </div><div id="riC" class="view"><div class="loading"><div>A calcular…</div><div class="bar"><i></i></div></div></div>`;
+  const u=()=>{ clearTimeout(RI._t); RI._t=setTimeout(riContent,30); };
+  bindPer(root,'ri',RI,u);
+  [['riG','g'],['riCo','co'],['riUnit','unit']].forEach(([id,k])=>bindSeg(root,id,v=>{ RI[k]=v; u(); }));
+  [['riStk','stk',String],['riDist','dist',Number]].forEach(([id,k,cv])=>{ const el=$('#'+id,root); el.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const v=cv(b.dataset.v); const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',String(on)); RI[k]=on? [...RI[k],v] : RI[k].filter(x=>x!==v); u(); }); });
+  [['riEv','ev'],['riGrp','grp'],['riLvl','lvl'],['riNat','nat'],['riReg','reg'],['riClub','club'],['riPer','per'],['riInc','inc'],['riNear','near'],['riAge','age'],['riCols','cols'],['riD0','d0'],['riD1','d1'],['riA0','a0'],['riA1','a1']].forEach(([id,k])=>{ const el=$('#'+id,root); if(el) el.onchange=e=>{ RI[k]=e.target.value; u(); }; });
+  $('#riM12',root).onclick=()=>{ const n=new Date(), a=new Date(Date.UTC(n.getFullYear()-1,n.getMonth(),n.getDate())); RI.d0=a.toISOString().slice(0,10); RI.d1=''; RI.y0=Math.max(S.years[0],a.getUTCFullYear()); RI.y1=lastYear(); vIndices(root); };
+  $('#riQ',root).oninput=e=>{ RI.q=e.target.value; clearTimeout(RI._q); RI._q=setTimeout(riContent,250); };
+  $('#riReset',root).onclick=()=>{ Object.assign(RI,{d0:'',d1:'',g:'',co:'',stk:[],dist:[],ev:'',grp:'',lvl:'',a0:'',a1:'',nat:'POR',reg:'',club:'',q:'',per:'all',inc:'idx',near:'0',age:'1',cols:'all'}); RI.y0=RI.y1=lastYear(); vIndices(root); };
+  bindExp(root,'ri',riModel); setTimeout(()=>{ if($('#riC')) riContent(); },20);
+}
+function riContent(){
+  const el=$('#riC'); if(!el) return; const R=S.R, lv=riLevels();
+  const ck='ri|'+[RI.y0,RI.y1,RI.d0,RI.d1,RI.grp,RI.near,RI.age].join('|'); let all=D.cache.get(ck); if(!all){ all=riCompute(); D.cache.set(ck,all); }
+  const rows=riFilter(all), unit=RI.unit;
+  const grpLv = RI.grp? (RI_GRP.find(g=>g[0]===RI.grp)||[0,0,lv])[2] : lv;
+  let cols=RI.cols==='grp'? grpLv : lv;
+  if(RI.cols==='age') cols=lv.filter(ix=>rows.some(r=>r.gaps[ix]&&r.gaps[ix].ok));
+  const sws=new Set(rows.map(r=>r.sw)), withIdx=new Set(rows.filter(r=>r.any).map(r=>r.sw));
+  // nadadores por índice mais alto (melhor nível entre as provas mostradas)
+  const topBy=new Map(); rows.forEach(r=>{ if(r.top==null) return; const c=topBy.get(r.sw); if(c==null||r.top<c.top) topBy.set(r.sw,{top:r.top,g:r.g}); });
+  const cntLv=lv.map(ix=>[0,1].map(g=>[...topBy.values()].filter(o=>o.top===ix&&o.g===g).length));
+  const byGrp=RI_GRP.map(g=>[g[1], new Set(rows.filter(r=>r.any&&r.top!=null&&Object.entries(r.gaps).some(([ix,o])=>g[2].includes(+ix)&&o.ok&&o.d<=0)).map(r=>r.sw)).size]).filter(x=>x[1]);
+  const close=rows.filter(r=>r.nxt!=null&&r.gaps[r.nxt]).sort((a,b)=>a.gaps[a.nxt].p-b.gaps[b.nxt].p).slice(0,3);
+  const multi=[...sws].map(s=>[s,rows.filter(r=>r.sw===s&&r.any).length]).sort((a,b)=>b[1]-a[1]).slice(0,3).filter(x=>x[1]>1);
+  const ins=[`${fN(withIdx.size)} nadadores com índice${+RI.near>0?` (e ${fN(sws.size-withIdx.size)} a ≤ ${f1(+RI.near)}% de um índice)`:''} em ${fN(rows.filter(r=>r.any).length)} provas — ${esc(perLabel(RI))}${RI.d0||RI.d1?`, marcas ${RI.d0?'desde '+RI.d0.split('-').reverse().join('/'):''}${RI.d1?' até '+RI.d1.split('-').reverse().join('/'):''}`:''}.`,
+    byGrp.length? 'Por grupo: '+byGrp.map(([l,n])=>`${l} ${fN(n)}`).join(' · ')+'.' : '',
+    close.length? 'Mais perto do índice seguinte: '+close.map(r=>`${esc(r.name)} (${evLabel(r.ev)} ${r.co?'PC':'PL'}, ${riLab(r.nxt)} a ${fPct(r.gaps[r.nxt].p)})`).join('; ')+'.' : '',
+    multi.length? 'Mais provas com índice: '+multi.map(([s,n])=>`${esc(niceName(S.sw[s].name))} (${n})`).join('; ')+'.' : '',
+    `<span class="muted">${RI.unit==='pts'?'Distância em pontos = pontos da marca − pontos do índice: positivo (verde) = cumpre; negativo = pontos que faltam.':'Distância = marca − índice: negativo (verde) = abaixo do índice, cumpre; positivo = acima, falta melhorar.'} Células a cinzento = índice fora da idade de acesso${RI.age==='0'?' (ignorado no critério)':''}.</span>`].filter(Boolean);
+  const head=[
+    {k:'top',l:'Índice',f:r=>r.top!=null?`<span class="pill good" title="${esc(riTab(r.co,r.top)?.name||'')}">${esc(riLab(r.top))}</span>`:'<span class="pill gold">perto</span>',x:r=>r.top!=null?riLab(r.top):'perto',sv:r=>r.top??99,dir0:'asc',title:'Índice mais exigente cumprido nesta prova (dentro da idade de acesso)'},
+    {k:'name',l:'Nadador',f:r=>swLink(r.sw,r.name),x:r=>r.name,sv:r=>S.sw[r.sw].nn,dir0:'asc'},
+    {k:'g',l:'G',f:r=>r.g?'F':'M',sv:r=>r.g,dir0:'asc'},{k:'by',l:'Ano',num:1,f:r=>S.sw[r.sw].by,sv:r=>S.sw[r.sw].by,title:'Ano de nascimento'},{k:'age',l:'Id.',num:1,title:'Idade na época da marca (a 31 de dezembro)'},
+    {k:'cl',l:'Clube',f:r=>`<span title="${esc(S.cl[r.cl].name)}">${esc(S.cl[r.cl].code)}</span>`,x:r=>S.cl[r.cl].code,dir0:'asc'},
+    {k:'ev',l:'Prova',f:r=>evLabel(r.ev),sv:r=>evDist(r.ev)*10+'LCBME'.indexOf(evStroke(r.ev)),dir0:'asc'},
+    {k:'co',l:'Pisc.',f:r=>r.co?'PC 25':'PL 50',sv:r=>r.co,dir0:'asc'},
+    {k:'tm',l:'Marca',num:1,f:r=>`<span class="time">${fT(r.tm)}</span>`,x:r=>fT(r.tm),sv:r=>r.tm,dir0:'asc'},
+    {k:'pt',l:'Pts',num:1},
+    {k:'dt',l:'Data',f:r=>fD(r.dt),sv:r=>r.dt},
+    {k:'nx',l:'Próximo índice',f:r=>r.nxt!=null&&r.gaps[r.nxt]?`<b>${esc(riLab(r.nxt))}</b> <span class="small muted">${riFmtD(r.gaps[r.nxt],unit)}</span>`:'<span class="muted">—</span>',x:r=>r.nxt!=null&&r.gaps[r.nxt]?riLab(r.nxt)+' '+riFmtD(r.gaps[r.nxt],unit):'',sv:r=>r.nxt!=null&&r.gaps[r.nxt]?r.gaps[r.nxt].p:null,dir0:'asc',title:'Índice imediatamente mais exigente dentro da idade de acesso e o que falta para o cumprir'},
+    ...cols.map(ix=>({k:'i'+ix,l:riLab(ix),num:1,title:`Índice ${ix} (${riGrpOf(ix)}): ${unit==='pts'?'pontos da marca − pontos do índice. Positivo = cumpre.':'marca − índice, em '+(unit==='s'?'segundos':'%')+'. Negativo = cumpre.'}`,
+      f:r=>riCell(r.gaps[ix],unit), x:r=>{ const o=r.gaps[ix]; return o? riValD(o,unit) : ''; }, sv:r=>{ const o=r.gaps[ix]; return o? o.p : null; }, dir0:'asc'})),
+    {k:'mt',l:'Competição',cls:'wrap',f:r=>{ const m=S.mt[r.mt]; return m? `<span class="small ri-mt">${esc(m.name)}${m.city?' · '+esc(m.city):''}</span>` : '—'; },x:r=>{ const m=S.mt[r.mt]; return m? m.name+(m.city?' · '+m.city:'') : ''; },dir0:'asc'},
+    {k:'reg',l:'Assoc.',f:r=>esc(S.cl[r.cl].reg||'—'),x:r=>S.cl[r.cl].reg||'',dir0:'asc'}];
+  el.innerHTML=insightHTML(ins)+`<div class="kpis" style="margin-bottom:14px">
+      <div class="kpi"><div class="k">Nadadores com índice</div><div class="v">${fN(withIdx.size)}</div><div class="d">${fN([...withIdx].filter(s=>S.sw[s].g==='F').length)} F · ${fN([...withIdx].filter(s=>S.sw[s].g!=='F').length)} M</div></div>
+      <div class="kpi"><div class="k">Provas com índice</div><div class="v">${fN(rows.filter(r=>r.any).length)}</div><div class="d">${fN(rows.length)} linhas na tabela</div></div>
+      <div class="kpi"><div class="k">Índice mais exigente</div><div class="v" style="font-size:22px">${(()=>{ const t=Math.min(...[...topBy.values()].map(o=>o.top)); return isFinite(t)? esc(riLab(t)) : '—'; })()}</div><div class="d">${(()=>{ const t=Math.min(...[...topBy.values()].map(o=>o.top)); return isFinite(t)? fN([...topBy.values()].filter(o=>o.top===t).length)+' nadador(es)' : ''; })()}</div></div>
+      <div class="kpi"><div class="k">Com índice em 2 ou mais provas</div><div class="v">${fN([...withIdx].filter(sw=>rows.filter(r=>r.sw===sw&&r.any).length>1).length)}</div><div class="d">nadadores</div></div></div>
+    <div class="card"><div class="card-h"><div><h3>Ranking de índices</h3><p class="note">Uma linha por nadador, prova e piscina (melhor marca do período). Colunas de índice: ${unit==='pts'?'diferença em pontos (pontos da marca − pontos do índice; positivo = cumpre)':unit==='s'?'diferença em segundos entre a marca e o índice (negativo = cumpre)':'diferença em % entre a marca e o índice (negativo = cumpre)'} — <span class="ri-c ri-ok">verde</span> cumpre, <span class="ri-c ri-n1">≤ 1%</span>, <span class="ri-c ri-n2">≤ 2%</span>, <span class="ri-c ri-far">&gt; 2%</span>, <span class="ri-c ri-na">cinzento</span> fora da idade de acesso. Passe o cursor numa célula para ver o tempo do índice. Shift+clique num cabeçalho acrescenta critérios de ordenação.</p></div></div><div id="riT"></div></div>
+    <div class="card"><div class="card-h"><div><h3>Nadadores por índice mais alto</h3><p class="note">Cada nadador contado uma vez, no índice mais exigente que cumpre nas provas mostradas.</p></div></div><div class="chart" id="riCh"></div></div>`;
+  const t=new DataTable('riT',head,rows,{page:50,scroll:true,sorts:[{k:'top',dir:'asc'},{k:'pt',dir:'desc'}],empty:'Nenhum nadador com índice para estes filtros.'});
+  const lvU=lv.filter((ix,k)=>cntLv[k][0]+cntLv[k][1]>0), kk=lvU.map(ix=>lv.indexOf(ix));
+  const spec={type:'bar',labels:lvU.map(riLab),series:[{label:'Masculinos',data:kk.map(k=>cntLv[k][0]),color:'s1'},{label:'Femininos',data:kk.map(k=>cntLv[k][1]),color:'s2'}],legend:true,zero:true,yFmt:fN,tipFmt:v=>fN(v)+' nadadores',xTitle:'Índice mais exigente cumprido'};
+  draw('riCh',spec);
+  RIX={t, ins:ins.filter(Boolean), spec, n:withIdx.size, rows};
+}
+/* tabela exportada com as mesmas cores das células de índice */
+function riExpTable(x){ const e=x.t.exportRows(), cols=x.t.cols.filter(c=>!c.noexp), rows=x.t.sorted();
+  e.fills=rows.map(r=>cols.map(c=>{ if(!/^i\d+$/.test(c.k)) return null; const o=r.gaps[+c.k.slice(1)]; if(!o) return null; return !o.ok? '#EEF0F3' : o.d<=0? '#D7EEDF' : o.p<=1? '#F6E3C2' : o.p<=2? '#FBF1DF' : null; }));
+  return Object.assign({t:'table',sheet:'Ranking de índices',small:true},e); }
+async function riModel(){ const x=RIX;
+  const f=[perLabel(RI), RI.g===''?'Ambos os géneros':G_L[+RI.g], RI.co===''?'PL e PC':RI.co==='0'?'PL 50':'PC 25', RI.grp?(RI_GRP.find(g=>g[0]===RI.grp)||[])[1]:'', RI.stk.length?RI.stk.map(s=>STROKE[s]).join('/'):'', RI.dist.length?RI.dist.join('/')+' m':'', RI.ev!==''?evLabel(+RI.ev):'', RI.lvl?'pelo menos '+riLab(+RI.lvl):'', RI.a0||RI.a1?`${RI.a0||'…'}–${RI.a1||'…'} anos`:'', RI.club||RI.reg||''].filter(Boolean).join(' · ');
+  return {title:'Ranking de índices', subtitle:f, filename:'Ranking_indices_'+RI.y1, orientation:'l', format:'a3', blocks:[{t:'p',text:'Leitura rápida\n'+insTxt(x.ins.map(stripTags))}, riExpTable(x), {t:'chart',title:'Nadadores por índice mais alto',spec:x.spec},
+    {t:'src',text:`Índices PAR 2025–2028 (Plano de Atividades 2027) do separador Mínimos, com as idades de acesso de cada tabela (idade = ano da época − ano de nascimento). Melhor marca por nadador, prova e piscina no período. Colunas de índice = ${RI.unit==='pts'?'pontos da marca − pontos do índice (pontos WA do tempo do índice, calculados com o tempo de base de cada prova): positivo = cumpre; negativo = pontos que faltam':'marca − índice ('+(RI.unit==='s'?'segundos':'% do tempo do índice')+'): negativo = cumpre; positivo = falta melhorar'}. Pontos dos rankings nacionais. Cores: verde = cumpre; laranja = falta ≤ 1%; bege = falta ≤ 2%; cinzento = índice fora da idade de acesso.`}]}; }
+HELP.push([/^Ranking de índices/, 'Todos os nadadores com índice PAR, uma linha por prova, com a distância a cada índice.', 'Índice = o mais exigente cumprido; Próximo índice = o seguinte dentro da idade e quanto falta. Nas colunas de índice: negativo/verde = cumpre; positivo = falta; cinzento = fora da idade de acesso.', 'Ordene pelo próximo índice para ver quem está à beira de subir de nível; use “Provas por nadador” para ver só a melhor prova ou todas.']);
+HELP.push([/^Nadadores por índice mais alto/, 'Distribuição dos nadadores pelo índice mais exigente que cumprem.', 'Uma barra por índice, separada por género.', 'Compare com épocas anteriores mudando o período.']);
+
+</script>
+<script>/* relatorios.js */
 'use strict';
 /* ============================================================
    Relatórios: relatório de época, novidades, relatório de acompanhamento
@@ -5496,7 +5658,7 @@ let REP_LAST=null; /* o mesmo relatório pode ser exportado em PDF e Word durant
 function bindReportBar(root){ $$('[data-rep2]',root).forEach(b=>b.onclick=async()=>{ const tx=b.textContent; b.disabled=true; b.textContent='A gerar…'; try{ const fresh=REP_LAST&&Date.now()-REP_LAST.at<15*60*1000; const m=fresh?REP_LAST.m:reportModel(); await exportModel(m,b.dataset.rep2); if(!fresh){ REP_LAST={m,at:Date.now()}; await markReport(); } toast('Relatório gerado e registado como último relatório.'); $$('.repbar').forEach(x=>{ x.outerHTML=reportBarHTML(); }); bindReportBar(document); }catch(e){ console.error(e); toast('Erro: '+(e.message||e)); } finally{ b.disabled=false; b.textContent=tx; } }); }
 
 </script>
-<script>
+<script>/* qualidade.js */
 'use strict';
 /* ============================================================
    Qualidade dos dados: sinais de marcas a verificar, validação e exclusão
@@ -5591,7 +5753,7 @@ async function qcModel(){ const x=QCX; return {title:'Qualidade dos dados — '+
 HELP.push([/^Sinais por rever|^Sinais validados|^Marcas excluídas das análises/, 'Lista de marcas com sinais de possível erro. Validar = a marca está correta; Excluir = deixa de contar nas análises (pode ser reposta).', 'Comece pelos sinais de prioridade alta. Confirme no resultado oficial da competição antes de excluir.']);
 
 </script>
-<script>
+<script>/* dados.js */
 'use strict';
 /* ============================================================
    Área Dados: carregamentos, unificação de nadadores (interface), estado da base
@@ -5751,7 +5913,7 @@ function renderMerges(root){
 }
 
 </script>
-<script>
+<script>/* partilha.js */
 'use strict';
 /* ============================================================
    Base partilhada: quem carregou o quê, aviso de dados novos de outros utilizadores
@@ -5835,7 +5997,7 @@ async function bindShareCard(root){ const b=$('#shBase',root); if(b) b.onclick=(
 HELP.push([/^Base partilhada|^Base de dados deste navegador/, 'Onde estão guardados os rankings e quem os atualizou por último.', 'Na plataforma, a base é comum a todos os utilizadores com acesso; noutras versões, fica no navegador e pode ser publicada como base.json.', 'Aviso no topo da página = outro utilizador carregou dados; clique em “Atualizar agora”.']);
 
 </script>
-<script>
+<script>/* eurodados.js */
 'use strict';
 /* ============================================================
    Rankings europeus (swimrankings.net · "Ranking Melhores 100"): leitura dos PDF,
@@ -5942,7 +6104,7 @@ function bindEuCard(root){
 HELP.push([/^Rankings europeus$/, 'PDF dos 100 melhores europeus de cada prova (swimrankings.net), por época, género, piscina e escalão.', 'Cada linha é uma época: “Absolutos” e “Juniores” recebem os 4 PDF dessa época de uma só vez. Uma célula carrega ou substitui um ficheiro.', 'Épocas em falta (n/4) e o intervalo de datas de cada lista; “parcial” = a lista termina antes do fim habitual da época (PL 15 set., PC 31 jul.) e não entra na tendência das marcas de acesso.']);
 
 </script>
-<script>
+<script>/* europa.js */
 'use strict';
 /* ============================================================
    Europa: Portugal face ao nível europeu (rankings swimrankings "Melhores 100")
@@ -6228,7 +6390,7 @@ HELP.push([/^Marcas de acesso: histórico e projeção|^Marcas de acesso projeta
 HELP.push([/^Probabilidade de estar ao nível|^Trajetórias até à/, 'Para cada candidato, a melhoria necessária até ao ano-alvo e a probabilidade de, na época-alvo, a melhor marca ficar ao nível da marca de acesso projetada (“até” = em alguma época até lá).', 'Realista ≥ 50%, exigente 20–50%, improvável < 20%.', 'Melhoria necessária muito acima da habitual: objetivo a rever ou a adiar.']);
 
 </script>
-<script>
+<script>/* consulta.js */
 'use strict';
 /* ============================================================
    Versão de consulta para clubes e associações: a plataforma fica limitada à ficha da entidade,
@@ -6277,7 +6439,7 @@ function bindConsultCard(root){
 HELP.push([/^Versões de consulta para clubes e associações/, 'Base de dados limitada a um clube ou associação, para partilhar fora da Direção Técnica.', 'Escolha o clube ou a associação e gere o ficheiro; publique-o como base.json ao lado do index.html.', 'A versão de consulta só mostra a ficha da entidade, os seus nadadores, os rankings, a Europa e o guia.']);
 
 </script>
-<script>
+<script>/* estrategia.js */
 'use strict';
 /* ============================================================
    Estratégia: painel do ciclo olímpico, plano de sucessão por prova e território (talento por habitante)
@@ -6591,7 +6753,7 @@ function bindStReport(root){ $$('[data-strep]',root).forEach(b=>b.onclick=async(
 HELP.push([/^Relatório estratégico anual/, 'Documento único para a Direção com todas as análises estratégicas e recomendações geradas a partir dos dados.', 'Gera PDF ou Word; demora alguns segundos.', 'As recomendações são pontos de partida para discussão, não decisões automáticas.']);
 
 </script>
-<script>
+<script>/* inicio.js */
 'use strict';
 /* ============================================================
    Início por perfil, pesquisa global ("Ir para…") e visita guiada
@@ -6617,6 +6779,7 @@ const SHORTCUTS = {
   sel:[
     ['Pré-convocatórias','Candidatos por atividade do PAR, os 5 mais próximos e simulador de critérios.',goSec('convocatorias')],
     ['Calendário das seleções','Ações do ano, prazos de critério, comunicados e relatórios, com a linha de hoje.',goSec('calendario')],
+    ['Ranking de índices','Todos os nadadores com índice PAR e a distância a cada índice, por prova.',goSec('indices')],
     ['Grupos AR','Seguimento da PO, BEO e outros grupos.',goSec('grupos')],
     ['Acesso a finais europeias','Portugueses perto das marcas de final e meia-final.',goSec('europa',()=>{ EU.sec='finais'; })],
     ['Trajetória até à final','Melhoria necessária e probabilidade até ao ano-alvo.',goSec('europa',()=>{ EU.sec='traj'; })],
@@ -6758,7 +6921,7 @@ function tourPlace(){
 document.addEventListener('keydown',e=>{ if(TOURI<0) return; if(e.key==='Escape') tourEnd(); else if(e.key==='ArrowRight'){ TOURI++; tourShow(); } else if(e.key==='ArrowLeft'&&TOURI>0){ TOURI--; tourShow(); } });
 
 </script>
-<script>
+<script>/* explica.js */
 'use strict';
 /* ============================================================
    Explicações ao passar o rato: o que mostra, como ler e fórmula de cálculo
@@ -6808,6 +6971,8 @@ const EXPL = [
   [/^Melhoria média por época/, null, 'Média (ou mediana) da melhoria anual de todos os pares de épocas consecutivas que terminam nessa época.'],
   // Análises
   [/^Preponderância por técnica e distância/, null, 'Preponderância(época, técnica, grupo) = marcas da entidade com posição ≤ N no ranking nacional absoluto das provas do grupo ÷ todas as marcas com posição ≤ N nessas provas × 100. Pódios = marcas da entidade com posição ≤ 3. Δ = última − primeira época fechada com marcas.'],
+  [/^Ranking de índices/, null, 'Distância = marca − tempo do índice (em segundos, ou ÷ tempo do índice × 100 em %; negativo = cumpre), ou pontos WA da marca − pontos WA do tempo do índice (pts = 1000 × (tempo de base ÷ tempo)³; positivo = cumpre). Cumpre um índice se marca ≤ índice e idade (ano da época − ano de nascimento) dentro da idade de acesso da tabela. Índice = o mais exigente cumprido; próximo = o imediatamente mais exigente dentro da idade. Melhor marca por nadador, prova e piscina no período.'],
+  [/^Nadadores por índice mais alto/, null, 'N.º de nadadores distintos cujo índice mais exigente cumprido (nas provas filtradas) é esse índice.'],
   [/^Calendário anual|^Prazos a definir/, null, 'Realização = datas da ação (do nome da ação no PAR). Prazo do critério = fim da janela de validade da ação. Comunicado = primeira 6.ª feira depois do prazo. Relatório = primeira 6.ª feira depois do último dia da ação. Hoje = data do computador.'],
   [/^Análise sectorial por distância/, null, 'Nível(prova, N) = média, nas épocas fechadas do período, da média dos pontos dos N melhores (um valor por nadador, por época, piscina e género), com N = 50, 16 e 8. Profundidade = top‑8 − top‑50. Δ = última − primeira época fechada.'],
   [/^Evolução por distância/, null, 'Por época: média dos pontos dos N melhores de cada distância (50, 100 e 200 m) da técnica escolhida, um valor por nadador.'],
@@ -6962,7 +7127,7 @@ function decorateExpl(){
   window.addEventListener('scroll',()=>{ if(TIP) TIP.style.display='none'; },{passive:true}); })();
 
 </script>
-<script>
+<script>/* shell.js */
 'use strict';
 /* ============================================================
    Navegação: vistas guardadas e menu de áreas
@@ -7008,7 +7173,7 @@ function syncAreas(){ const tabs=$('#tabs'); if(!tabs) return; if(S.scope){ tabs
 })();
 
 </script>
-<script>
+<script>/* export.js */
 'use strict';
 /* ============================================================
    Exportação: Excel, PDF e Word
@@ -7219,12 +7384,12 @@ async function buildDOCX(m, stamp){
 }
 
 </script>
-<script>
+<script>/* main.js */
 'use strict';
 /* ============================================================
    Arranque e encaminhamento
    ============================================================ */
-const VIEWS = {inicio:vInicio, calendario:vCalendario, estrategia:vEstrategia, europa:vEuropa, abandono:vAbandono, qualidade:vQualidade, painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, guia:vGuia, resumo:vResumo, quadrante:vQuadrante, declaracoes:vDeclaracoes, dados:vDados};
+const VIEWS = {inicio:vInicio, calendario:vCalendario, indices:vIndices, estrategia:vEstrategia, europa:vEuropa, abandono:vAbandono, qualidade:vQualidade, painel:vPainel, evolucao:vEvolucao, rankings:vRankings, nadadores:vNadadores, comparar:vComparar, analises:vAnalises, alertas:vAlertas, minimos:vMinimos, grupos:vGrupos, convocatorias:vConvocatorias, estafetas:vEstafetas, talento:vTalento, entidades:vEntidades, metas:vMetas, guia:vGuia, resumo:vResumo, quadrante:vQuadrante, declaracoes:vDeclaracoes, dados:vDados};
 let READY=false, LOADING_UP=true;
 function go(v){ if(location.hash.slice(1)===v) route(); else location.hash=v; }
 function route(){
@@ -7269,5 +7434,4 @@ window.addEventListener('hashchange', route);
 
 </script>
 
-</body>
-</html>
+</body></html>
